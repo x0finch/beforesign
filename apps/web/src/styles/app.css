@@ -1,0 +1,146 @@
+@import "tailwindcss" source("../");
+
+@layer base {
+  :root {
+    --background: #fafafa;
+    --foreground: #171717;
+    --muted: #737373;
+    --border: #e5e5e5;
+    --card: #ffffff;
+    --primary: #171717;
+    --primary-fg: #fafafa;
+    --destructive: #fef2f2;
+    --destructive-fg: #991b1b;
+    --warning: #fffbeb;
+    --warning-fg: #92400e;
+    --info: #eff6ff;
+    --info-fg: #1e40af;
+  }
+
+  .dark {
+    --background: #0a0a0a;
+    --foreground: #fafafa;
+    --muted: #a3a3a3;
+    --border: #262626;
+    --card: #171717;
+    --primary: #fafafa;
+    --primary-fg: #171717;
+    --destructive: #450a0a;
+    --destructive-fg: #fecaca;
+    --warning: #422006;
+    --warning-fg: #fde68a;
+    --info: #172554;
+    --info-fg: #bfdbfe;
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+  }
+}
+
+@layer components {
+  .bg-background {
+    background: var(--background);
+  }
+  .text-foreground {
+    color: var(--foreground);
+  }
+  .text-muted {
+    color: var(--muted);
+  }
+  .border-border {
+    border-color: var(--border);
+  }
+  .card {
+    @apply rounded-xl border p-5;
+    background: var(--card);
+    border-color: var(--border);
+  }
+  .input-area {
+    @apply w-full rounded-lg border px-3 py-2 outline-none focus:ring-2 focus:ring-neutral-400;
+    background: var(--background);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+  .select {
+    @apply rounded-lg border px-3 py-2 text-sm;
+    background: var(--card);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+  .btn-primary {
+    @apply rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50;
+    background: var(--primary);
+    color: var(--primary-fg);
+  }
+  .btn-ghost {
+    @apply rounded-lg px-3 py-2 text-sm;
+    color: var(--muted);
+  }
+  .btn-ghost:hover {
+    color: var(--foreground);
+  }
+  .badge {
+    @apply inline-flex rounded-md px-2 py-0.5 text-xs font-medium;
+    background: var(--primary);
+    color: var(--primary-fg);
+  }
+  .badge-muted {
+    @apply inline-flex rounded-md px-2 py-0.5 text-xs;
+    background: var(--border);
+    color: var(--foreground);
+  }
+  .alert-destructive {
+    @apply rounded-lg border px-3 py-2 text-sm;
+    background: var(--destructive);
+    color: var(--destructive-fg);
+    border-color: var(--destructive-fg);
+  }
+  .alert-warning {
+    @apply rounded-lg border px-3 py-2 text-sm;
+    background: var(--warning);
+    color: var(--warning-fg);
+  }
+  .alert-info {
+    @apply rounded-lg border px-3 py-2 text-sm;
+    background: var(--info);
+    color: var(--info-fg);
+  }
+  .tab {
+    @apply px-3 py-1.5 text-sm rounded-md;
+    color: var(--muted);
+  }
+  .tab-active {
+    @apply px-3 py-1.5 text-sm rounded-md font-medium;
+    background: var(--border);
+    color: var(--foreground);
+  }
+  .code-block {
+    @apply overflow-auto rounded-lg p-3 text-xs font-mono;
+    background: var(--background);
+    border: 1px solid var(--border);
+  }
+  .text-link {
+    @apply underline text-sm;
+    color: var(--info-fg);
+  }
+  .animate-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
