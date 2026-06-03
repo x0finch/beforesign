@@ -1,25 +1,61 @@
 import type { InputKind } from "@beforesign/core";
+import type {
+  Hash,
+  Hex,
+  ParseTransactionReturnType,
+  TypedDataDefinition,
+} from "viem";
+import { isHash, isHex } from "viem";
+import { normalizeTypedDataFromJson } from "./normalize_typed_data.ts";
+import {
+  normalizeTxFromJson,
+  transactionHasSignature,
+  tryNormalizeTxFromHex,
+} from "./normalize_tx.ts";
 
-const HASH_RE = /^0x[a-fA-F0-9]{64}$/;
+export type TypedDataMatch =
+  | { matched: false }
+  | { matched: true; normalized: TypedDataDefinition };
 
-export type DetectResult = {
+export type UnsignedTxNormalized = ParseTransactionReturnType;
+export type UnsignedTxMatch =
+  | { matched: false }
+  | { matched: true; normalized: UnsignedTxNormalized };
+
+export type SignedTxNormalized = ParseTransactionReturnType;
+export type SignedTxMatch =
+  | { matched: false }
+  | { matched: true; normalized: SignedTxNormalized };
+
+export type TxHashMatch =
+  | { matched: false }
+  | { matched: true; normalized: Hash };
+
+export type CalldataMatch =
+  | { matched: false }
+  | { matched: true; normalized: Hex };
+
+export type DetectorMatch =
+  | TxHashMatch
+  | TypedDataMatch
+  | SignedTxMatch
+  | UnsignedTxMatch
+  | CalldataMatch;
+
+export type DetectResult =
+  | { kind: "txHash"; normalized: Hash }
+  | { kind: "typedData"; normalized: TypedDataDefinition }
+  | { kind: "signedTx"; normalized: SignedTxNormalized }
+  | { kind: "unsignedTx"; normalized: UnsignedTxNormalized }
+  | { kind: "calldata"; normalized: Hex }
+  | { kind: "unknown"; normalized: string };
+
+type Detector = {
   kind: InputKind;
-  normalized: string;
-  confidence?: string;
+  test: (input: string) => DetectorMatch;
 };
 
-function isTypedDataJson(obj: Record<string, unknown>): boolean {
-  return (
-    typeof obj.domain === "object" &&
-    obj.domain !== null &&
-    typeof obj.types === "object" &&
-    obj.types !== null &&
-    typeof obj.message === "object" &&
-    obj.message !== null
-  );
-}
-
-function isTxJson(obj: Record<string, unknown>): boolean {
+function isTxJsonCandidate(obj: Record<string, unknown>): boolean {
   const keys = ["from", "to", "data", "chainId", "nonce", "gas", "value"];
   return keys.some((k) => k in obj);
 }
@@ -32,52 +68,110 @@ function hasSignatureFields(obj: Record<string, unknown>): boolean {
   );
 }
 
-function isTxHash(value: string): boolean {
-  return HASH_RE.test(value);
+export function isTxHash(value: string): TxHashMatch {
+  const trimmed = value.trim().toLowerCase();
+  if (!isHash(trimmed)) {
+    return { matched: false };
+  }
+  return { matched: true, normalized: trimmed as Hash };
 }
 
-function tryClassifyTxHex(raw: string): "signedTx" | "unsignedTx" | null {
-  const trimmed = raw.trim();
-  if (!trimmed.startsWith("0x") || trimmed.length <= 66) return null;
-  const isRlpTx =
-    trimmed.startsWith("0x02f") ||
-    trimmed.startsWith("0xf8") ||
-    trimmed.startsWith("0x01f") ||
-    (trimmed.startsWith("0x02") && trimmed.length > 120);
-  if (!isRlpTx) return null;
-  return trimmed.length > 220 ? "signedTx" : "unsignedTx";
+export function isTypedDataInput(value: string): TypedDataMatch {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return { matched: false };
+  }
+  try {
+    return { matched: true, normalized: normalizeTypedDataFromJson(trimmed) };
+  } catch {
+    return { matched: false };
+  }
 }
+
+export function isSignedTxJson(value: string): SignedTxMatch {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return { matched: false };
+  }
+  try {
+    const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+    if (!isTxJsonCandidate(parsed) || !hasSignatureFields(parsed)) {
+      return { matched: false };
+    }
+    const normalized = normalizeTxFromJson(trimmed);
+    if (!transactionHasSignature(normalized)) {
+      return { matched: false };
+    }
+    return { matched: true, normalized };
+  } catch {
+    return { matched: false };
+  }
+}
+
+export function isUnsignedTxJson(value: string): UnsignedTxMatch {
+  const trimmed = value.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return { matched: false };
+  }
+  try {
+    const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+    if (!isTxJsonCandidate(parsed) || hasSignatureFields(parsed)) {
+      return { matched: false };
+    }
+    const normalized = normalizeTxFromJson(trimmed);
+    if (transactionHasSignature(normalized)) {
+      return { matched: false };
+    }
+    return { matched: true, normalized };
+  } catch {
+    return { matched: false };
+  }
+}
+
+export function isSignedTxHex(value: string): SignedTxMatch {
+  const tx = tryNormalizeTxFromHex(value.trim());
+  if (tx === null || !transactionHasSignature(tx)) {
+    return { matched: false };
+  }
+  return { matched: true, normalized: tx };
+}
+
+export function isUnsignedTxHex(value: string): UnsignedTxMatch {
+  const tx = tryNormalizeTxFromHex(value.trim());
+  if (tx === null || transactionHasSignature(tx)) {
+    return { matched: false };
+  }
+  return { matched: true, normalized: tx };
+}
+
+export function isCalldata(value: string): CalldataMatch {
+  const trimmed = value.trim().toLowerCase();
+  if (!isHex(trimmed) || trimmed.length < 10 || isHash(trimmed)) {
+    return { matched: false };
+  }
+  return { matched: true, normalized: trimmed as Hex };
+}
+
+const DETECTORS: readonly Detector[] = [
+  { kind: "txHash", test: isTxHash },
+  { kind: "typedData", test: isTypedDataInput },
+  { kind: "signedTx", test: isSignedTxJson },
+  { kind: "unsignedTx", test: isUnsignedTxJson },
+  { kind: "signedTx", test: isSignedTxHex },
+  { kind: "unsignedTx", test: isUnsignedTxHex },
+  { kind: "calldata", test: isCalldata },
+] as const;
 
 export function detectInputType(raw: string): DetectResult {
-  const normalized = raw.trim();
-
-  if (isTxHash(normalized)) {
-    return { kind: "txHash", normalized, confidence: "hash" };
-  }
-
-  if (normalized.startsWith("{") || normalized.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(normalized) as Record<string, unknown>;
-      if (isTypedDataJson(parsed)) {
-        return { kind: "typedData", normalized, confidence: "eip712" };
-      }
-      if (isTxJson(parsed)) {
-        const kind = hasSignatureFields(parsed) ? "signedTx" : "unsignedTx";
-        return { kind, normalized, confidence: "json_tx" };
-      }
-    } catch {
-      /* fall through */
+  const trimmed = raw.trim();
+  for (const d of DETECTORS) {
+    const match = d.test(trimmed);
+    if (match.matched) {
+      return {
+        kind: d.kind,
+        normalized: match.normalized,
+      } as DetectResult;
     }
   }
-
-  const txKind = tryClassifyTxHex(normalized);
-  if (txKind) {
-    return { kind: txKind, normalized, confidence: "rlp" };
-  }
-
-  if (normalized.startsWith("0x") && normalized.length >= 10) {
-    return { kind: "calldata", normalized, confidence: "calldata" };
-  }
-
-  return { kind: "unknown", normalized };
+  return { kind: "unknown", normalized: trimmed };
 }

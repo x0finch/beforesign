@@ -1,6 +1,10 @@
-/** Minimal valid EIP-1559 signed tx RLP (example from viem docs style) */
+/** EIP-1559 unsigned tx RLP (viem serializeTransaction, hardhat account #0) */
+export const UNSIGNED_TX_HEX =
+  "0x02e80180843b9aca008504a817c80082520894c02aaa39b223fe8d0a0e5c4f27ead9083c756cc28080c0";
+
+/** EIP-1559 signed tx RLP (viem signTransaction, hardhat account #0) */
 export const SIGNED_TX_HEX =
-  "0x02f87382012c8509184e72a00082520894b0897686c54517fcfcc93c46ebd279999c315ace880de0b6b3a764000080c080a820f4f5a071c2f1e2e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4";
+  "0x02f86b0180843b9aca008504a817c80082520894c02aaa39b223fe8d0a0e5c4f27ead9083c756cc28080c001a06f6605bebe23e5810ee1781153631f9c2d0f775056fa832d2ab6b5ce804cf12ca0790803f8d8030469fb929b5e9acdb1c58f310f708ef765d756b4d5778ddf0e53";
 
 /** Known-good short calldata: transfer(address,uint256) with dummy args */
 export const CALLDATA_HEX =
@@ -88,3 +92,18 @@ export const ETHERSCAN_TX_RESPONSE = {
     yParity: "0x0",
   },
 };
+
+/** MetaMask-style signed tx JSON mapped from ETHERSCAN_TX_RESPONSE.result */
+export const SIGNED_TX_JSON = JSON.stringify({
+  from: ETHERSCAN_TX_RESPONSE.result.from,
+  to: ETHERSCAN_TX_RESPONSE.result.to,
+  data: ETHERSCAN_TX_RESPONSE.result.input,
+  value: ETHERSCAN_TX_RESPONSE.result.value,
+  chainId: ETHERSCAN_TX_RESPONSE.result.chainId,
+  nonce: ETHERSCAN_TX_RESPONSE.result.nonce,
+  gas: ETHERSCAN_TX_RESPONSE.result.gas,
+  type: ETHERSCAN_TX_RESPONSE.result.type,
+  v: ETHERSCAN_TX_RESPONSE.result.v,
+  r: ETHERSCAN_TX_RESPONSE.result.r,
+  s: ETHERSCAN_TX_RESPONSE.result.s,
+});

@@ -140,6 +140,9 @@ importers:
       '@beforesign/core':
         specifier: workspace:*
         version: link:../core
+      viem:
+        specifier: 'catalog:'
+        version: 2.52.0(typescript@5.9.3)(zod@4.4.3)
     devDependencies:
       '@beforesign/test-fixtures':
         specifier: workspace:*

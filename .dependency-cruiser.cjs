@@ -17,12 +17,6 @@ module.exports = {
       },
     },
     {
-      name: "detect-no-viem",
-      severity: "error",
-      from: { path: "^packages/detect" },
-      to: { path: "^packages/parse|^node_modules/viem" },
-    },
-    {
       name: "clients-no-parse",
       severity: "error",
       from: { path: "^packages/clients" },
