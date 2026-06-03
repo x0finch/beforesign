@@ -1,11 +1,11 @@
 import { decodeFunctionData, slice } from "viem";
-import type { calldata_decode } from "@beforesign/core";
+import type { CalldataDecode } from "@beforesign/core";
 import type { Abi } from "viem";
 
-export function parse_calldata(
+export function parseCalldata(
   data: string,
-  opts?: { abi?: Abi; contract_address?: string },
-): calldata_decode {
+  opts?: { abi?: Abi; contractAddress?: string },
+): CalldataDecode {
   const raw = data.trim();
   const selector = slice(raw as `0x${string}`, 0, 4);
 
@@ -19,7 +19,7 @@ export function parse_calldata(
       }));
       return {
         selector,
-        function_name: decoded.functionName,
+        functionName: decoded.functionName,
         args,
         raw,
         summary: `调用 ${decoded.functionName}`,

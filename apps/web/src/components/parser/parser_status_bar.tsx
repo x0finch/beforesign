@@ -1,27 +1,26 @@
-import type { parse_result } from "@beforesign/core";
-import { get_chain_by_id } from "@beforesign/core";
-import type { locale } from "~/lib/i18n.ts";
-import { display_summary, kind_label } from "~/lib/format_display.ts";
+import type { ParseResult } from "@beforesign/core";
+import { getChainById } from "@beforesign/core";
+import type { Locale } from "~/lib/i18n.ts";
+import { displaySummary, kindLabel } from "~/lib/format_display.ts";
 
 export function ParserStatusBar({
   locale,
   result,
 }: {
-  locale: locale;
-  result: parse_result;
+  locale: Locale;
+  result: ParseResult;
 }) {
-  const chain_id = result.tx?.chain_id ?? result.onchain?.chain_id ?? result.discovery?.resolved_chain_id;
-  const chain = chain_id ? get_chain_by_id(chain_id) : undefined;
+  const chainId =
+    result.tx?.chainId ?? result.onchain?.chainId ?? result.discovery?.resolvedChainId;
+  const chain = chainId ? getChainById(chainId) : undefined;
 
   return (
     <div className="flex flex-wrap items-center gap-2 py-3">
-      <span className="badge">{kind_label(locale, result.kind)}</span>
+      <span className="badge">{kindLabel(locale, result.kind)}</span>
       {chain && (
-        <span className="badge-muted">
-          {locale === "zh" ? chain.name : chain.name_en}
-        </span>
+        <span className="badge-muted">{locale === "zh" ? chain.name : chain.nameEn}</span>
       )}
-      <p className="text-sm w-full">{display_summary(result, locale)}</p>
+      <p className="text-sm w-full">{displaySummary(result, locale)}</p>
     </div>
   );
 }

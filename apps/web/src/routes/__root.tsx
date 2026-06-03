@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import * as React from "react";
-import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
-import { NotFound } from "~/components/NotFound";
+import { DefaultCatchBoundary } from "~/components/default_catch_boundary.tsx";
+import { NotFound } from "~/components/not_found.tsx";
 import { ThemeProvider } from "~/components/layout/theme_provider.tsx";
 import appCss from "~/styles/app.css?url";
 
-const theme_init_script = `(function(){try{var t=localStorage.getItem('beforesign-theme');var d=document.documentElement;if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))d.classList.add('dark');else d.classList.remove('dark');}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('beforesign-theme');var d=document.documentElement;if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))d.classList.add('dark');else d.classList.remove('dark');}catch(e){}})();`;
 
 export const Route = createRootRoute({
   head: () => ({
@@ -30,14 +30,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: theme_init_script }} />
+        {/* eslint-disable-next-line @typescript-eslint/naming-convention -- React DOM API */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
       <body className="bg-background text-foreground antialiased">
         <ThemeProvider>
-          <div className="mx-auto max-w-3xl min-h-screen px-4 pb-16">
-            {children}
-          </div>
+          <div className="mx-auto max-w-3xl min-h-screen px-4 pb-16">{children}</div>
         </ThemeProvider>
         <Scripts />
       </body>

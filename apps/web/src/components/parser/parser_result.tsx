@@ -1,6 +1,6 @@
-import type { parse_result } from "@beforesign/core";
+import type { ParseResult } from "@beforesign/core";
 import * as React from "react";
-import type { locale } from "~/lib/i18n.ts";
+import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 import { ParserStatusBar } from "./parser_status_bar.tsx";
 import { ParserRiskStrip } from "./parser_risk_strip.tsx";
@@ -9,18 +9,18 @@ export function ParserResult({
   locale,
   result,
 }: {
-  locale: locale;
-  result: parse_result;
+  locale: Locale;
+  result: ParseResult;
 }) {
-  const [tab, set_tab] = React.useState("summary");
+  const [tab, setTab] = React.useState("summary");
 
   const tabs = [
-    { id: "summary", label: t(locale, "tab_summary") },
-    { id: "tx", label: t(locale, "tab_tx") },
-    { id: "calldata", label: t(locale, "tab_calldata") },
-    { id: "typed", label: t(locale, "tab_typed") },
-    { id: "onchain", label: t(locale, "tab_onchain") },
-    { id: "raw", label: t(locale, "tab_raw") },
+    { id: "summary", label: t(locale, "tabSummary") },
+    { id: "tx", label: t(locale, "tabTx") },
+    { id: "calldata", label: t(locale, "tabCalldata") },
+    { id: "typed", label: t(locale, "tabTyped") },
+    { id: "onchain", label: t(locale, "tabOnchain") },
+    { id: "raw", label: t(locale, "tabRaw") },
   ];
 
   return (
@@ -33,7 +33,7 @@ export function ParserResult({
             key={tb.id}
             type="button"
             className={tab === tb.id ? "tab-active" : "tab"}
-            onClick={() => set_tab(tb.id)}
+            onClick={() => setTab(tb.id)}
           >
             {tb.label}
           </button>
@@ -43,10 +43,8 @@ export function ParserResult({
         {tab === "summary" && (
           <div className="space-y-2">
             <p>{result.explanation ?? result.summary}</p>
-            {result.missing_fields && result.missing_fields.length > 0 && (
-              <p className="text-muted">
-                Missing: {result.missing_fields.join(", ")}
-              </p>
+            {result.missingFields && result.missingFields.length > 0 && (
+              <p className="text-muted">Missing: {result.missingFields.join(", ")}</p>
             )}
           </div>
         )}
@@ -56,14 +54,19 @@ export function ParserResult({
         {tab === "calldata" && result.calldata && (
           <pre className="code-block">{JSON.stringify(result.calldata, null, 2)}</pre>
         )}
-        {tab === "typed" && result.typed_data && (
-          <pre className="code-block">{JSON.stringify(result.typed_data, null, 2)}</pre>
+        {tab === "typed" && result.typedData && (
+          <pre className="code-block">{JSON.stringify(result.typedData, null, 2)}</pre>
         )}
         {tab === "onchain" && result.onchain && (
           <div className="space-y-2">
             <pre className="code-block">{JSON.stringify(result.onchain, null, 2)}</pre>
-            {result.onchain.explorer_url && (
-              <a className="text-link" href={result.onchain.explorer_url} target="_blank" rel="noreferrer">
+            {result.onchain.explorerUrl && (
+              <a
+                className="text-link"
+                href={result.onchain.explorerUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Explorer
               </a>
             )}

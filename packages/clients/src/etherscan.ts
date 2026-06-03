@@ -1,84 +1,87 @@
-import { explorer_tx_url } from "@beforesign/core";
-import type { normalized_tx, onchain_tx_meta } from "@beforesign/core";
+import { explorerTxUrl } from "@beforesign/core";
+import type { NormalizedTx, OnchainTxMeta } from "@beforesign/core";
 
 const ETHERSCAN_V2 = "https://api.etherscan.io/v2/api";
 
-export type etherscan_client = {
-  get_transaction: (chain_id: number, hash: string) => Promise<{
-    tx: normalized_tx;
-    onchain: onchain_tx_meta;
+export type EtherscanClient = {
+  getTransaction: (
+    chainId: number,
+    hash: string,
+  ) => Promise<{
+    tx: NormalizedTx;
+    onchain: OnchainTxMeta;
   }>;
 };
 
-function hex_to_num(hex?: string): number | undefined {
+function hexToNum(hex?: string): number | undefined {
   if (!hex) return undefined;
   return Number.parseInt(hex, 16);
 }
 
-export function create_etherscan_client(opts: {
-  api_key: string;
-  fetch_fn?: typeof fetch;
-}): etherscan_client {
-  const fetch_fn = opts.fetch_fn ?? fetch;
+export function createEtherscanClient(opts: {
+  apiKey: string;
+  fetchFn?: typeof fetch;
+}): EtherscanClient {
+  const fetchFn = opts.fetchFn ?? fetch;
 
-  async function proxy_call(
-    chain_id: number,
+  async function proxyCall(
+    chainId: number,
     action: string,
     params: Record<string, string>,
   ): Promise<unknown> {
     const url = new URL(ETHERSCAN_V2);
-    url.searchParams.set("chainid", String(chain_id));
+    url.searchParams.set("chainid", String(chainId));
     url.searchParams.set("module", "proxy");
     url.searchParams.set("action", action);
-    url.searchParams.set("apikey", opts.api_key);
+    url.searchParams.set("apikey", opts.apiKey);
     for (const [k, v] of Object.entries(params)) {
       url.searchParams.set(k, v);
     }
-    const res = await fetch_fn(url.toString());
+    const res = await fetchFn(url.toString());
     if (!res.ok) throw new Error(`Etherscan HTTP ${res.status}`);
     const json = (await res.json()) as { result?: unknown };
     return json.result;
   }
 
   return {
-    async get_transaction(chain_id: number, hash: string) {
-      const [tx_raw, receipt_raw] = await Promise.all([
-        proxy_call(chain_id, "eth_getTransactionByHash", { txhash: hash }),
-        proxy_call(chain_id, "eth_getTransactionReceipt", { txhash: hash }),
+    async getTransaction(chainId: number, hash: string) {
+      const [txRaw, receiptRaw] = await Promise.all([
+        proxyCall(chainId, "eth_getTransactionByHash", { txhash: hash }),
+        proxyCall(chainId, "eth_getTransactionReceipt", { txhash: hash }),
       ]);
 
-      if (!tx_raw) {
+      if (!txRaw) {
         throw new Error("Transaction not found on chain");
       }
 
-      const tx_obj = tx_raw as Record<string, string>;
-      const receipt = receipt_raw as { status?: string; gasUsed?: string } | null;
+      const txObj = txRaw as Record<string, string>;
+      const receipt = receiptRaw as { status?: string; gasUsed?: string } | null;
 
-      const tx: normalized_tx = {
-        chain_id: hex_to_num(tx_obj.chainId) ?? chain_id,
-        from: tx_obj.from,
-        to: tx_obj.to,
-        value: tx_obj.value ? BigInt(tx_obj.value).toString() : undefined,
-        data: tx_obj.input,
-        nonce: hex_to_num(tx_obj.nonce),
-        gas_limit: tx_obj.gas,
-        max_fee_per_gas: tx_obj.maxFeePerGas,
-        max_priority_fee_per_gas: tx_obj.maxPriorityFeePerGas,
-        gas_price: tx_obj.gasPrice,
-        type: hex_to_num(tx_obj.type),
-        hash: tx_obj.hash ?? hash,
-        v: tx_obj.v,
-        r: tx_obj.r,
-        s: tx_obj.s,
+      const tx: NormalizedTx = {
+        chainId: hexToNum(txObj.chainId) ?? chainId,
+        from: txObj.from,
+        to: txObj.to,
+        value: txObj.value ? BigInt(txObj.value).toString() : undefined,
+        data: txObj.input,
+        nonce: hexToNum(txObj.nonce),
+        gasLimit: txObj.gas,
+        maxFeePerGas: txObj.maxFeePerGas,
+        maxPriorityFeePerGas: txObj.maxPriorityFeePerGas,
+        gasPrice: txObj.gasPrice,
+        type: hexToNum(txObj.type),
+        hash: txObj.hash ?? hash,
+        v: txObj.v,
+        r: txObj.r,
+        s: txObj.s,
       };
 
-      const status_hex = receipt?.status;
-      const onchain: onchain_tx_meta = {
-        chain_id,
-        block_number: tx_obj.blockNumber,
-        status: status_hex === "0x1" ? "success" : status_hex === "0x0" ? "fail" : "pending",
-        gas_used: receipt?.gasUsed,
-        explorer_url: explorer_tx_url(chain_id, hash),
+      const statusHex = receipt?.status;
+      const onchain: OnchainTxMeta = {
+        chainId,
+        blockNumber: txObj.blockNumber,
+        status: statusHex === "0x1" ? "success" : statusHex === "0x0" ? "fail" : "pending",
+        gasUsed: receipt?.gasUsed,
+        explorerUrl: explorerTxUrl(chainId, hash),
       };
 
       return { tx, onchain };

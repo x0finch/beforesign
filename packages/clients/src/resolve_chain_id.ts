@@ -1,23 +1,23 @@
-import type { discovery_result } from "@beforesign/core";
+import type { DiscoveryResult } from "@beforesign/core";
 
-export function resolve_chain_id(
-  discovery: discovery_result,
-  user_chain_id?: number,
-  selected_hit_id?: string,
+export function resolveChainId(
+  discovery: DiscoveryResult,
+  userChainId?: number,
+  selectedHitId?: string,
 ): number | undefined {
-  if (user_chain_id) return user_chain_id;
+  if (userChainId) return userChainId;
 
-  if (discovery.status === "resolved" && discovery.resolved_chain_id) {
-    return discovery.resolved_chain_id;
+  if (discovery.status === "resolved" && discovery.resolvedChainId) {
+    return discovery.resolvedChainId;
   }
 
-  if (selected_hit_id) {
-    const hit = discovery.hits.find((h) => h.id === selected_hit_id);
-    if (hit) return hit.chain_id;
+  if (selectedHitId) {
+    const hit = discovery.hits.find((h) => h.id === selectedHitId);
+    if (hit) return hit.chainId;
   }
 
   if (discovery.hits.length === 1) {
-    return discovery.hits[0]?.chain_id;
+    return discovery.hits[0]?.chainId;
   }
 
   return undefined;

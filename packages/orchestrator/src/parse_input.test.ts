@@ -1,44 +1,44 @@
 import { describe, expect, it, vi } from "vitest";
-import { metamask_unsigned_json, tx_hash } from "@beforesign/test-fixtures";
-import { parse_input } from "./parse_input.ts";
+import { METAMASK_UNSIGNED_JSON, TX_HASH } from "@beforesign/test-fixtures";
+import { parseInput } from "./parse_input.ts";
 
-describe("parse_input", () => {
+describe("parseInput", () => {
   it("parses unsigned tx without debank when disabled", async () => {
-    const result = await parse_input(
-      { raw: metamask_unsigned_json },
+    const result = await parseInput(
+      { raw: METAMASK_UNSIGNED_JSON },
       {
-        blockscout: { search_quick: vi.fn() },
-        etherscan: { get_transaction: vi.fn() },
-        debank: { pre_exec_tx: vi.fn(), explain_tx: vi.fn() },
-        debank_enabled: false,
-        blockscout_enabled: false,
+        blockscout: { searchQuick: vi.fn() },
+        etherscan: { getTransaction: vi.fn() },
+        debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
+        debankEnabled: false,
+        blockscoutEnabled: false,
       },
     );
-    expect(result.kind).toBe("unsigned_tx");
+    expect(result.kind).toBe("unsignedTx");
     expect(result.tx?.from).toBeTruthy();
   });
 
   it("resolves tx hash via blockscout and etherscan", async () => {
-    const result = await parse_input(
-      { raw: tx_hash },
+    const result = await parseInput(
+      { raw: TX_HASH },
       {
         blockscout: {
-          search_quick: vi.fn().mockResolvedValue({
+          searchQuick: vi.fn().mockResolvedValue({
             status: "resolved",
-            hits: [{ id: "1", chain_id: 1, chain_name: "Ethereum" }],
-            resolved_chain_id: 1,
+            hits: [{ id: "1", chainId: 1, chainName: "Ethereum" }],
+            resolvedChainId: 1,
           }),
         },
         etherscan: {
-          get_transaction: vi.fn().mockResolvedValue({
-            tx: { from: "0xabc", hash: tx_hash, chain_id: 1 },
-            onchain: { chain_id: 1, status: "success" },
+          getTransaction: vi.fn().mockResolvedValue({
+            tx: { from: "0xabc", hash: TX_HASH, chainId: 1 },
+            onchain: { chainId: 1, status: "success" },
           }),
         },
-        debank: { pre_exec_tx: vi.fn(), explain_tx: vi.fn() },
+        debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
       },
     );
-    expect(result.tx?.hash).toBe(tx_hash);
+    expect(result.tx?.hash).toBe(TX_HASH);
     expect(result.onchain?.status).toBe("success");
   });
 });

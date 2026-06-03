@@ -1,60 +1,55 @@
-import type { discovery_hit, discovery_result } from "@beforesign/core";
+import type { DiscoveryHit, DiscoveryResult } from "@beforesign/core";
 
 const MULTICHAIN_BASE =
   "https://api.blockscout.com/multichain/api/v1/clusters/multichain";
 
-export type blockscout_client = {
-  search_quick: (query: string) => Promise<discovery_result>;
+export type BlockscoutClient = {
+  searchQuick: (query: string) => Promise<DiscoveryResult>;
 };
 
-export function create_blockscout_client(opts: {
-  api_key: string;
-  fetch_fn?: typeof fetch;
-}): blockscout_client {
-  const fetch_fn = opts.fetch_fn ?? fetch;
+export function createBlockscoutClient(opts: {
+  apiKey: string;
+  fetchFn?: typeof fetch;
+}): BlockscoutClient {
+  const fetchFn = opts.fetchFn ?? fetch;
 
   return {
-    async search_quick(query: string): Promise<discovery_result> {
+    async searchQuick(query: string): Promise<DiscoveryResult> {
       const url = new URL(`${MULTICHAIN_BASE}/search:quick`);
       url.searchParams.set("q", query.trim());
-      url.searchParams.set("apikey", opts.api_key);
+      url.searchParams.set("apikey", opts.apiKey);
 
-      const res = await fetch_fn(url.toString());
+      const res = await fetchFn(url.toString());
       if (!res.ok) {
         throw new Error(`Blockscout error: ${res.status}`);
       }
 
       const data = (await res.json()) as {
-        transactions?: Array<{
-          chain_id?: number;
-          chain_name?: string;
-          hash?: string;
-          from?: string;
-          to?: string;
-          block_number?: number;
-          timestamp?: string;
-        }>;
+        transactions?: Array<Record<string, unknown>>;
       };
 
-      const hits: discovery_hit[] = (data.transactions ?? []).map((t, i) => ({
-        id: `${t.chain_id ?? "unknown"}-${t.hash ?? i}`,
-        chain_id: Number(t.chain_id ?? 0),
-        chain_name: t.chain_name ?? `Chain ${t.chain_id}`,
-        block_number: t.block_number,
-        from: t.from,
-        to: t.to,
-        timestamp: t.timestamp,
-      }));
+      const hits: DiscoveryHit[] = (data.transactions ?? []).map((t, i) => {
+        const chainId = Number(t.chain_id ?? 0);
+        return {
+          id: `${String(t.chain_id ?? "unknown")}-${String(t.hash ?? i)}`,
+          chainId,
+          chainName: String(t.chain_name ?? `Chain ${t.chain_id}`),
+          blockNumber: t.block_number as number | undefined,
+          from: t.from as string | undefined,
+          to: t.to as string | undefined,
+          timestamp: t.timestamp as string | undefined,
+        };
+      });
 
       if (hits.length === 0) {
-        return { status: "not_found", hits: [] };
+        return { status: "notFound", hits: [] };
       }
 
       if (hits.length === 1) {
         return {
           status: "resolved",
           hits,
-          resolved_chain_id: hits[0]?.chain_id,
+          resolvedChainId: hits[0]?.chainId,
         };
       }
 

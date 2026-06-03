@@ -1,5 +1,6 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
+import unicorn from "eslint-plugin-unicorn";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -10,36 +11,67 @@ export default tseslint.config(
       "**/.output/**",
       "**/node_modules/**",
       "apps/web/.vinxi/**",
-      "apps/web/src/components/DefaultCatchBoundary.tsx",
-      "apps/web/src/components/NotFound.tsx",
+      "**/routeTree.gen.ts",
+      "**/*.gen.ts",
     ],
+  },
+  {
+    plugins: { unicorn },
+    rules: {
+      "unicorn/filename-case": [
+        "error",
+        {
+          case: "snakeCase",
+          ignore: [
+            String.raw`^__root\.tsx$`,
+            String.raw`^routeTree\.gen\.ts$`,
+            String.raw`^vite\.config\.ts$`,
+            String.raw`^vitest\.config\.ts$`,
+            String.raw`^vitest\.workspace\.ts$`,
+          ],
+        },
+      ],
+    },
   },
   {
     files: ["**/*.{ts,tsx}"],
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",
+        { selector: "import", format: null },
         {
           selector: "default",
-          format: ["snake_case"],
+          format: ["camelCase"],
           leadingUnderscore: "allow",
         },
         {
-          selector: "typeLike",
-          format: ["snake_case"],
+          selector: "variable",
+          modifiers: ["const"],
+          format: ["camelCase", "UPPER_CASE"],
         },
         {
           selector: "variable",
           modifiers: ["const", "global"],
-          format: ["snake_case", "UPPER_CASE"],
+          format: ["UPPER_CASE", "camelCase"],
+        },
+        { selector: "function", format: ["camelCase"] },
+        { selector: "parameter", format: ["camelCase"] },
+        { selector: "typeLike", format: ["PascalCase"] },
+        { selector: "enumMember", format: ["PascalCase", "UPPER_CASE"] },
+        { selector: "typeProperty", format: ["camelCase"] },
+        {
+          selector: "objectLiteralProperty",
+          format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          filter: {
+            regex:
+              "^(Route|charSet|__html|_html|Content-Type|AccessKey|defaultPreload|defaultErrorComponent|defaultNotFoundComponent|scrollRestoration|routeTree|errorComponent|notFoundComponent|shellComponent|head|component|loader|beforeLoad|server|handlers|GET|POST|children|data-testid)$",
+            match: false,
+          },
         },
         {
-          selector: "function",
-          format: ["snake_case"],
-        },
-        {
-          selector: "import",
-          format: null,
+          selector: "variable",
+          filter: { regex: "^Route$", match: true },
+          format: ["PascalCase"],
         },
       ],
     },
@@ -49,24 +81,45 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",
+        { selector: "import", format: null },
         {
           selector: "default",
-          format: ["snake_case"],
+          format: ["camelCase"],
           leadingUnderscore: "allow",
+        },
+        {
+          selector: "variable",
+          modifiers: ["const"],
+          format: ["camelCase", "UPPER_CASE"],
         },
         {
           selector: "function",
           modifiers: ["exported"],
-          format: ["PascalCase", "snake_case"],
+          format: ["PascalCase", "camelCase"],
         },
         {
           selector: "variable",
           modifiers: ["exported"],
-          format: ["PascalCase", "snake_case"],
+          format: ["PascalCase", "camelCase", "UPPER_CASE"],
+        },
+        { selector: "function", format: ["camelCase", "PascalCase"] },
+        { selector: "parameter", format: ["camelCase"] },
+        { selector: "typeLike", format: ["PascalCase"] },
+        { selector: "typeProperty", format: ["camelCase"] },
+        {
+          selector: "objectLiteralProperty",
+          format: ["camelCase", "PascalCase", "UPPER_CASE"],
+          leadingUnderscore: "allow",
+          filter: {
+            regex:
+              "^(Route|charSet|Content-Type|AccessKey|defaultPreload|defaultErrorComponent|defaultNotFoundComponent|scrollRestoration|routeTree|errorComponent|notFoundComponent|shellComponent|head|component|loader|beforeLoad|server|handlers|GET|POST|children|data-testid|className|suppressHydrationWarning|lang|rel|href|name|content|title|meta|links|dangerouslySetInnerHTML|type|onClick|activeProps|params|to)$",
+            match: false,
+          },
         },
         {
-          selector: "typeLike",
-          format: ["snake_case", "PascalCase"],
+          selector: "variable",
+          filter: { regex: "^Route$", match: true },
+          format: ["PascalCase"],
         },
       ],
     },

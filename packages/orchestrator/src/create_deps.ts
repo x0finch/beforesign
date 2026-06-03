@@ -1,29 +1,29 @@
 import {
-  create_blockscout_client,
-  create_debank_client,
-  create_etherscan_client,
+  createBlockscoutClient,
+  createDebankClient,
+  createEtherscanClient,
 } from "@beforesign/clients";
-import type { parse_input_deps } from "./parse_input.ts";
+import type { ParseInputDeps } from "./parse_input.ts";
 
-export type api_keys = {
-  etherscan_api_key: string;
-  debank_access_key: string;
-  blockscout_api_key: string;
+export type ApiKeys = {
+  etherscanApiKey: string;
+  debankAccessKey: string;
+  blockscoutApiKey: string;
 };
 
-export function create_deps_from_keys(keys: api_keys): parse_input_deps {
+export function createDepsFromKeys(keys: ApiKeys): ParseInputDeps {
   return {
-    blockscout: create_blockscout_client({
-      api_key: keys.blockscout_api_key || "missing",
+    blockscout: createBlockscoutClient({
+      apiKey: keys.blockscoutApiKey || "missing",
     }),
-    etherscan: create_etherscan_client({
-      api_key: keys.etherscan_api_key || "missing",
+    etherscan: createEtherscanClient({
+      apiKey: keys.etherscanApiKey || "missing",
     }),
-    debank: create_debank_client({
-      access_key: keys.debank_access_key || "missing",
+    debank: createDebankClient({
+      accessKey: keys.debankAccessKey || "missing",
     }),
-    blockscout_enabled: Boolean(keys.blockscout_api_key),
-    etherscan_enabled: Boolean(keys.etherscan_api_key),
-    debank_enabled: Boolean(keys.debank_access_key),
+    blockscoutEnabled: Boolean(keys.blockscoutApiKey),
+    etherscanEnabled: Boolean(keys.etherscanApiKey),
+    debankEnabled: Boolean(keys.debankAccessKey),
   };
 }

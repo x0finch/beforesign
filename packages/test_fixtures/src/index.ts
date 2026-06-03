@@ -1,15 +1,15 @@
 /** Minimal valid EIP-1559 signed tx RLP (example from viem docs style) */
-export const signed_tx_hex =
+export const SIGNED_TX_HEX =
   "0x02f87382012c8509184e72a00082520894b0897686c54517fcfcc93c46ebd279999c315ace880de0b6b3a764000080c080a820f4f5a071c2f1e2e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4e4";
 
 /** Known-good short calldata: transfer(address,uint256) with dummy args */
-export const calldata_hex =
+export const CALLDATA_HEX =
   "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000001";
 
-export const tx_hash =
+export const TX_HASH =
   "0xbc78ab8a9e9a0bca7d0321a27b2c03addeae08ba81ea98b03cd3dd237eabed44";
 
-export const metamask_unsigned_json = JSON.stringify({
+export const METAMASK_UNSIGNED_JSON = JSON.stringify({
   from: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
   to: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
   data: "0x",
@@ -22,7 +22,7 @@ export const metamask_unsigned_json = JSON.stringify({
   type: "0x2",
 });
 
-export const typed_data_json = JSON.stringify({
+export const TYPED_DATA_JSON = JSON.stringify({
   types: {
     EIP712Domain: [
       { name: "name", type: "string" },
@@ -54,19 +54,19 @@ export const typed_data_json = JSON.stringify({
   },
 });
 
-export const blockscout_single_hit = {
+export const BLOCKSCOUT_SINGLE_HIT = {
   transactions: [
     {
       chain_id: 1,
       chain_name: "Ethereum",
-      hash: tx_hash,
+      hash: TX_HASH,
       from: "0x00192fb10df37c9fb26829eb2cc623cd1bf599e8",
       to: "0xc67f4e626ee4d3f272c2fb31bad60761ab55ed9f",
     },
   ],
 };
 
-export const etherscan_tx_response = {
+export const ETHERSCAN_TX_RESPONSE = {
   jsonrpc: "2.0",
   id: 1,
   result: {
@@ -74,7 +74,7 @@ export const etherscan_tx_response = {
     blockNumber: "0xcf2420",
     from: "0x00192fb10df37c9fb26829eb2cc623cd1bf599e8",
     gas: "0x5208",
-    hash: tx_hash,
+    hash: TX_HASH,
     input: "0x",
     nonce: "0x33b79d",
     to: "0xc67f4e626ee4d3f272c2fb31bad60761ab55ed9f",

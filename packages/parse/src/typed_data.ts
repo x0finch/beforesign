@@ -1,7 +1,7 @@
 import { hashTypedData } from "viem";
-import type { json_value, typed_data_view } from "@beforesign/core";
+import type { JsonValue, TypedDataView } from "@beforesign/core";
 
-export function parse_typed_data(raw: string): typed_data_view {
+export function parseTypedData(raw: string): TypedDataView {
   const parsed = JSON.parse(raw) as {
     domain: Record<string, unknown>;
     types: Record<string, Array<{ name: string; type: string }>>;
@@ -9,7 +9,7 @@ export function parse_typed_data(raw: string): typed_data_view {
     message: Record<string, unknown>;
   };
 
-  const signable_hash = hashTypedData({
+  const signableHash = hashTypedData({
     domain: parsed.domain as Parameters<typeof hashTypedData>[0]["domain"],
     types: parsed.types,
     primaryType: parsed.primaryType,
@@ -22,10 +22,10 @@ export function parse_typed_data(raw: string): typed_data_view {
   }
 
   return {
-    domain: parsed.domain as { [key: string]: json_value },
-    primary_type: parsed.primaryType,
-    message: parsed.message as { [key: string]: json_value },
-    signable_hash,
+    domain: parsed.domain as { [key: string]: JsonValue },
+    primaryType: parsed.primaryType,
+    message: parsed.message as { [key: string]: JsonValue },
+    signableHash,
     summary,
   };
 }

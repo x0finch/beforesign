@@ -1,7 +1,7 @@
-export function get_api_keys() {
+export function getApiKeys() {
   return {
-    etherscan_api_key: process.env.ETHERSCAN_API_KEY ?? "",
-    debank_access_key: process.env.DEBANK_ACCESS_KEY ?? "",
-    blockscout_api_key: process.env.BLOCKSCOUT_API_KEY ?? "",
+    etherscanApiKey: process.env.ETHERSCAN_API_KEY ?? "",
+    debankAccessKey: process.env.DEBANK_ACCESS_KEY ?? "",
+    blockscoutApiKey: process.env.BLOCKSCOUT_API_KEY ?? "",
   };
 }

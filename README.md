@@ -6,6 +6,7 @@
 
 - pnpm workspace monorepo
 - TypeScript (strict)，模块内导入使用 `.ts` 扩展名
+- 命名：文件名 `snake_case`；函数/变量 `camelCase`；常量 `UPPER_SNAKE_CASE`；类型 `PascalCase`；领域字段 `camelCase`（ESLint 强制）
 - TanStack Start + Tailwind (`apps/web`)
 - viem (`@beforesign/parse`)
 - Vitest (TDD)

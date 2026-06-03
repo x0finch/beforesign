@@ -4,44 +4,44 @@ import {
   serializeTransaction,
   type TransactionSerializable,
 } from "viem";
-import type { normalized_tx } from "@beforesign/core";
+import type { NormalizedTx } from "@beforesign/core";
 
-function bigint_to_string(v: bigint | undefined): string | undefined {
+function bigintToString(v: bigint | undefined): string | undefined {
   return v === undefined ? undefined : v.toString();
 }
 
-function tx_type_to_number(
-  tx_type: TransactionSerializable["type"] | number | undefined,
+function txTypeToNumber(
+  txType: TransactionSerializable["type"] | number | undefined,
 ): number | undefined {
-  if (typeof tx_type === "number") return tx_type;
-  if (tx_type === "eip1559") return 2;
-  if (tx_type === "eip2930") return 1;
-  if (tx_type === "legacy") return 0;
+  if (typeof txType === "number") return txType;
+  if (txType === "eip1559") return 2;
+  if (txType === "eip2930") return 1;
+  if (txType === "legacy") return 0;
   return undefined;
 }
 
-export function parse_tx_hex(raw: string): normalized_tx {
+export function parseTxHex(raw: string): NormalizedTx {
   const serialized = raw.trim() as `0x${string}`;
   const tx = parseTransaction(serialized);
   const hash = keccak256(serialized);
-  const tx_rec = tx as TransactionSerializable & { from?: `0x${string}` };
+  const txRec = tx as TransactionSerializable & { from?: `0x${string}` };
 
-  const normalized: normalized_tx = {
-    chain_id: tx.chainId,
-    from: tx_rec.from,
+  const normalized: NormalizedTx = {
+    chainId: tx.chainId,
+    from: txRec.from,
     to: tx.to ?? undefined,
-    value: bigint_to_string(tx.value),
+    value: bigintToString(tx.value),
     data: tx.data,
     nonce: tx.nonce,
-    gas_limit: bigint_to_string("gas" in tx ? tx.gas : undefined),
-    max_fee_per_gas: bigint_to_string("maxFeePerGas" in tx ? tx.maxFeePerGas : undefined),
-    max_priority_fee_per_gas: bigint_to_string(
+    gasLimit: bigintToString("gas" in tx ? tx.gas : undefined),
+    maxFeePerGas: bigintToString("maxFeePerGas" in tx ? tx.maxFeePerGas : undefined),
+    maxPriorityFeePerGas: bigintToString(
       "maxPriorityFeePerGas" in tx ? tx.maxPriorityFeePerGas : undefined,
     ),
-    gas_price: bigint_to_string("gasPrice" in tx ? tx.gasPrice : undefined),
-    type: tx_type_to_number(tx.type),
+    gasPrice: bigintToString("gasPrice" in tx ? tx.gasPrice : undefined),
+    type: txTypeToNumber(tx.type),
     hash,
-    signed_hex: "v" in tx && tx.v !== undefined ? serialized : undefined,
+    signedHex: "v" in tx && tx.v !== undefined ? serialized : undefined,
     v: "v" in tx && tx.v !== undefined ? `0x${tx.v.toString(16)}` : undefined,
     r: "r" in tx && tx.r ? tx.r : undefined,
     s: "s" in tx && tx.s ? tx.s : undefined,
@@ -50,19 +50,19 @@ export function parse_tx_hex(raw: string): normalized_tx {
   return normalized;
 }
 
-export function build_unsigned_tx_hash(tx: normalized_tx): string | undefined {
-  if (!tx.chain_id || !tx.from || tx.nonce === undefined) return undefined;
+export function buildUnsignedTxHash(tx: NormalizedTx): string | undefined {
+  if (!tx.chainId || !tx.from || tx.nonce === undefined) return undefined;
   try {
     const serializable = {
-      chainId: tx.chain_id,
+      chainId: tx.chainId,
       to: tx.to as `0x${string}` | undefined,
       value: tx.value ? BigInt(tx.value) : undefined,
       data: tx.data as `0x${string}` | undefined,
       nonce: tx.nonce,
-      gas: tx.gas_limit ? BigInt(tx.gas_limit) : undefined,
-      maxFeePerGas: tx.max_fee_per_gas ? BigInt(tx.max_fee_per_gas) : undefined,
-      maxPriorityFeePerGas: tx.max_priority_fee_per_gas
-        ? BigInt(tx.max_priority_fee_per_gas)
+      gas: tx.gasLimit ? BigInt(tx.gasLimit) : undefined,
+      maxFeePerGas: tx.maxFeePerGas ? BigInt(tx.maxFeePerGas) : undefined,
+      maxPriorityFeePerGas: tx.maxPriorityFeePerGas
+        ? BigInt(tx.maxPriorityFeePerGas)
         : undefined,
       type:
         tx.type === 2

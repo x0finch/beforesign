@@ -1,21 +1,17 @@
-import type { input_kind, json_value, parse_result } from "@beforesign/core";
-import { parse_calldata } from "./calldata.ts";
-import { normalize_tx_json } from "./normalize_tx_json.ts";
-import { parse_typed_data } from "./typed_data.ts";
-import { build_unsigned_tx_hash, parse_tx_hex } from "./transaction.ts";
-import {
-  can_simulate_debank,
-  merge_missing,
-  missing_fields_for_simulate,
-} from "./simulate.ts";
+import type { InputKind, JsonValue, ParseResult } from "@beforesign/core";
+import { parseCalldata } from "./calldata.ts";
+import { normalizeTxJson } from "./normalize_tx_json.ts";
+import { parseTypedData } from "./typed_data.ts";
+import { buildUnsignedTxHash, parseTxHex } from "./transaction.ts";
+import { canSimulateDebank, mergeMissing, missingFieldsForSimulate } from "./simulate.ts";
 import type { Abi } from "viem";
 
-export type parse_local_opts = {
+export type ParseLocalOpts = {
   abi?: string;
-  contract_address?: string;
+  contractAddress?: string;
 };
 
-function parse_abi(raw?: string): Abi | undefined {
+function parseAbi(raw?: string): Abi | undefined {
   if (!raw?.trim()) return undefined;
   try {
     return JSON.parse(raw) as Abi;
@@ -24,98 +20,94 @@ function parse_abi(raw?: string): Abi | undefined {
   }
 }
 
-function base_result(kind: input_kind, summary: string, summary_en: string): parse_result {
+function baseResult(kind: InputKind, summary: string, summaryEn: string): ParseResult {
   return {
     kind,
     summary,
-    summary_en,
+    summaryEn,
     warnings: [],
-    raw: null as json_value,
+    raw: null as JsonValue,
   };
 }
 
-export function parse_locally(
-  kind: input_kind,
+export function parseLocally(
+  kind: InputKind,
   raw: string,
-  opts?: parse_local_opts,
-): parse_result {
-  const abi = parse_abi(opts?.abi);
+  opts?: ParseLocalOpts,
+): ParseResult {
+  const abi = parseAbi(opts?.abi);
 
   if (kind === "unknown") {
-    return base_result(
-      kind,
-      "无法识别输入格式",
-      "Unrecognized input format",
-    );
+    return baseResult(kind, "无法识别输入格式", "Unrecognized input format");
   }
 
-  if (kind === "typed_data") {
-    const typed_data = parse_typed_data(raw);
+  if (kind === "typedData") {
+    const typedData = parseTypedData(raw);
     return {
-      ...base_result(kind, typed_data.summary ?? "EIP-712 结构化数据", "EIP-712 typed data"),
-      typed_data,
-      raw: JSON.parse(raw) as json_value,
+      ...baseResult(kind, typedData.summary ?? "EIP-712 结构化数据", "EIP-712 typed data"),
+      typedData,
+      raw: JSON.parse(raw) as JsonValue,
     };
   }
 
   if (kind === "calldata") {
-    const calldata = parse_calldata(raw, { abi, contract_address: opts?.contract_address });
+    const calldata = parseCalldata(raw, { abi, contractAddress: opts?.contractAddress });
     return {
-      ...base_result(kind, calldata.summary ?? "合约 calldata", "Contract calldata"),
+      ...baseResult(kind, calldata.summary ?? "合约 calldata", "Contract calldata"),
       calldata,
       raw: raw,
     };
   }
 
-  if (kind === "tx_hash") {
-    return base_result(kind, "交易哈希（待查询链上数据）", "Transaction hash (pending lookup)");
+  if (kind === "txHash") {
+    return baseResult(kind, "交易哈希（待查询链上数据）", "Transaction hash (pending lookup)");
   }
 
-  if (kind === "signed_tx" || kind === "unsigned_tx") {
+  if (kind === "signedTx" || kind === "unsignedTx") {
     let tx;
-    let missing_fields: string[] = [];
+    let missingFields: string[] = [];
     const trimmed = raw.trim();
 
     if (trimmed.startsWith("{")) {
-      const normalized = normalize_tx_json(trimmed);
+      const normalized = normalizeTxJson(trimmed);
       tx = normalized.tx;
-      missing_fields = normalized.missing_fields;
+      missingFields = normalized.missingFields;
     } else {
       try {
-        tx = parse_tx_hex(trimmed);
+        tx = parseTxHex(trimmed);
       } catch {
-        return base_result(kind, "无法解析交易 hex", "Failed to parse transaction hex");
+        return baseResult(kind, "无法解析交易 hex", "Failed to parse transaction hex");
       }
     }
 
-    if (kind === "unsigned_tx" && !tx.hash) {
-      tx = { ...tx, hash: build_unsigned_tx_hash(tx) };
+    if (kind === "unsignedTx" && !tx.hash) {
+      tx = { ...tx, hash: buildUnsignedTxHash(tx) };
     }
 
-    let result: parse_result = {
-      ...base_result(
+    let result: ParseResult = {
+      ...baseResult(
         kind,
-        kind === "signed_tx" ? "已签名交易" : "未签名交易",
-        kind === "signed_tx" ? "Signed transaction" : "Unsigned transaction",
+        kind === "signedTx" ? "已签名交易" : "未签名交易",
+        kind === "signedTx" ? "Signed transaction" : "Unsigned transaction",
       ),
       tx,
-      missing_fields,
+      missingFields,
     };
 
     if (tx.data) {
-      result.calldata = parse_calldata(tx.data, { abi, contract_address: tx.to });
+      result.calldata = parseCalldata(tx.data, { abi, contractAddress: tx.to });
     }
 
-    if (kind === "unsigned_tx") {
-      result = merge_missing(result, missing_fields_for_simulate(tx));
-      if (!can_simulate_debank(tx)) {
+    if (kind === "unsignedTx") {
+      result = mergeMissing(result, missingFieldsForSimulate(tx));
+      if (!canSimulateDebank(tx)) {
         result.summary = "未签名交易（信息不足，无法模拟）";
-        result.summary_en = "Unsigned transaction (insufficient fields to simulate)";
+        result.summaryEn = "Unsigned transaction (insufficient fields to simulate)";
       }
     }
 
     return result;
   }
 
-  return base_result(kind, "未知类型", "Unknown");
+  return baseResult(kind, "未知类型", "Unknown");
 }

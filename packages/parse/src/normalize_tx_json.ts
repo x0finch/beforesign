@@ -1,13 +1,13 @@
-import type { normalized_tx } from "@beforesign/core";
+import type { NormalizedTx } from "@beforesign/core";
 
-function hex_to_string(value: unknown): string | undefined {
+function hexToString(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   if (typeof value === "bigint") return value.toString();
   if (typeof value === "number") return value.toString();
   return String(value);
 }
 
-function parse_chain_id(value: unknown): number | undefined {
+function parseChainId(value: unknown): number | undefined {
   if (value === undefined || value === null) return undefined;
   if (typeof value === "number") return value;
   const s = String(value);
@@ -15,27 +15,27 @@ function parse_chain_id(value: unknown): number | undefined {
   return Number.parseInt(s, 10);
 }
 
-export type normalize_result = {
-  tx: normalized_tx;
-  missing_fields: string[];
+export type NormalizeResult = {
+  tx: NormalizedTx;
+  missingFields: string[];
 };
 
-export function normalize_tx_json(raw: string): normalize_result {
+export function normalizeTxJson(raw: string): NormalizeResult {
   const obj = JSON.parse(raw) as Record<string, unknown>;
-  const missing_fields: string[] = [];
+  const missingFields: string[] = [];
 
-  const chain_id = parse_chain_id(obj.chainId ?? obj.chain_id);
-  if (chain_id === undefined) missing_fields.push("chain_id");
+  const chainId = parseChainId(obj.chainId ?? obj.chain_id);
+  if (chainId === undefined) missingFields.push("chainId");
 
   const from = typeof obj.from === "string" ? obj.from : undefined;
-  if (!from) missing_fields.push("from");
+  if (!from) missingFields.push("from");
 
-  const tx: normalized_tx = {
-    chain_id,
+  const tx: NormalizedTx = {
+    chainId,
     from,
     to: typeof obj.to === "string" ? obj.to : undefined,
     data: typeof obj.data === "string" ? obj.data : undefined,
-    value: hex_to_string(obj.value),
+    value: hexToString(obj.value),
     nonce:
       obj.nonce !== undefined && obj.nonce !== null
         ? Number.parseInt(
@@ -43,21 +43,21 @@ export function normalize_tx_json(raw: string): normalize_result {
             String(obj.nonce).startsWith("0x") ? 16 : 10,
           )
         : undefined,
-    gas_limit: hex_to_string(obj.gas ?? obj.gasLimit),
-    max_fee_per_gas: hex_to_string(obj.maxFeePerGas),
-    max_priority_fee_per_gas: hex_to_string(obj.maxPriorityFeePerGas),
-    gas_price: hex_to_string(obj.gasPrice),
+    gasLimit: hexToString(obj.gas ?? obj.gasLimit),
+    maxFeePerGas: hexToString(obj.maxFeePerGas),
+    maxPriorityFeePerGas: hexToString(obj.maxPriorityFeePerGas),
+    gasPrice: hexToString(obj.gasPrice),
     type:
       obj.type !== undefined
         ? Number.parseInt(String(obj.type).replace(/^0x/, ""), 16)
         : undefined,
-    v: hex_to_string(obj.v),
-    r: hex_to_string(obj.r),
-    s: hex_to_string(obj.s),
+    v: hexToString(obj.v),
+    r: hexToString(obj.r),
+    s: hexToString(obj.s),
   };
 
-  if (!tx.to && !tx.data) missing_fields.push("to_or_data");
-  if (tx.nonce === undefined) missing_fields.push("nonce");
+  if (!tx.to && !tx.data) missingFields.push("toOrData");
+  if (tx.nonce === undefined) missingFields.push("nonce");
 
-  return { tx, missing_fields };
+  return { tx, missingFields };
 }

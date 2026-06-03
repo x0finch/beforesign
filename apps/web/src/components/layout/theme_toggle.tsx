@@ -1,13 +1,13 @@
 import { useTheme } from "next-themes";
 import * as React from "react";
-import type { locale } from "~/lib/i18n.ts";
+import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 
-export function ThemeToggle({ locale }: { locale: locale }) {
+export function ThemeToggle({ locale }: { locale: Locale }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, set_mounted] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
 
-  React.useEffect(() => set_mounted(true), []);
+  React.useEffect(() => setMounted(true), []);
 
   if (!mounted) {
     return (
@@ -26,10 +26,10 @@ export function ThemeToggle({ locale }: { locale: locale }) {
 
   const label =
     theme === "light"
-      ? t(locale, "theme_light")
+      ? t(locale, "themeLight")
       : theme === "dark"
-        ? t(locale, "theme_dark")
-        : t(locale, "theme_system");
+        ? t(locale, "themeDark")
+        : t(locale, "themeSystem");
 
   return (
     <button

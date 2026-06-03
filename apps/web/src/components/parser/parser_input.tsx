@@ -1,37 +1,37 @@
 import * as React from "react";
 import { CHAINS } from "@beforesign/core";
-import type { locale } from "~/lib/i18n.ts";
+import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 
 export function ParserInput({
   locale,
   raw,
-  on_raw_change,
-  chain_id,
-  on_chain_change,
+  onRawChange,
+  chainId,
+  onChainChange,
   abi,
-  on_abi_change,
-  chain_required,
+  onAbiChange,
+  chainRequired,
   loading,
-  on_parse,
-  on_clear,
+  onParse,
+  onClear,
 }: {
-  locale: locale;
+  locale: Locale;
   raw: string;
-  on_raw_change: (v: string) => void;
-  chain_id?: number;
-  on_chain_change: (id: number | undefined) => void;
+  onRawChange: (v: string) => void;
+  chainId?: number;
+  onChainChange: (id: number | undefined) => void;
   abi: string;
-  on_abi_change: (v: string) => void;
-  chain_required?: boolean;
+  onAbiChange: (v: string) => void;
+  chainRequired?: boolean;
   loading: boolean;
-  on_parse: () => void;
-  on_clear: () => void;
+  onParse: () => void;
+  onClear: () => void;
 }) {
-  const handle_key = (e: React.KeyboardEvent) => {
+  const handleKey = (e: React.KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
-      on_parse();
+      onParse();
     }
   };
 
@@ -41,8 +41,8 @@ export function ParserInput({
         <textarea
           className="input-area font-mono text-sm min-h-[140px]"
           value={raw}
-          onChange={(e) => on_raw_change(e.target.value)}
-          onKeyDown={handle_key}
+          onChange={(e) => onRawChange(e.target.value)}
+          onKeyDown={handleKey}
           placeholder={t(locale, "placeholder")}
           aria-label="raw input"
         />
@@ -50,34 +50,39 @@ export function ParserInput({
       <div className="flex flex-wrap items-center gap-3">
         <select
           className="select min-h-10"
-          value={chain_id ?? ""}
+          value={chainId ?? ""}
           onChange={(e) =>
-            on_chain_change(e.target.value ? Number(e.target.value) : undefined)
+            onChainChange(e.target.value ? Number(e.target.value) : undefined)
           }
-          aria-required={chain_required}
+          aria-required={chainRequired}
         >
           <option value="">
-            {chain_required ? t(locale, "chain_required") : t(locale, "chain_optional")}
+            {chainRequired ? t(locale, "chainRequired") : t(locale, "chainOptional")}
           </option>
           {CHAINS.map((c) => (
-            <option key={c.chain_id} value={c.chain_id}>
-              {locale === "zh" ? c.name : c.name_en}
+            <option key={c.chainId} value={c.chainId}>
+              {locale === "zh" ? c.name : c.nameEn}
             </option>
           ))}
         </select>
-        <button type="button" className="btn-primary min-h-10" disabled={loading || !raw.trim()} onClick={on_parse}>
+        <button
+          type="button"
+          className="btn-primary min-h-10"
+          disabled={loading || !raw.trim()}
+          onClick={onParse}
+        >
           {loading ? t(locale, "parsing") : t(locale, "parse")}
         </button>
-        <button type="button" className="btn-ghost min-h-10" onClick={on_clear}>
+        <button type="button" className="btn-ghost min-h-10" onClick={onClear}>
           {t(locale, "clear")}
         </button>
       </div>
       <details className="text-sm">
-        <summary className="cursor-pointer text-muted">{t(locale, "advanced_abi")}</summary>
+        <summary className="cursor-pointer text-muted">{t(locale, "advancedAbi")}</summary>
         <textarea
           className="input-area font-mono text-xs mt-2 min-h-[80px]"
           value={abi}
-          onChange={(e) => on_abi_change(e.target.value)}
+          onChange={(e) => onAbiChange(e.target.value)}
         />
       </details>
     </section>

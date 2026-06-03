@@ -1,30 +1,30 @@
 import { describe, expect, it } from "vitest";
 import {
-  calldata_hex,
-  metamask_unsigned_json,
-  tx_hash,
-  typed_data_json,
+  CALLDATA_HEX,
+  METAMASK_UNSIGNED_JSON,
+  TX_HASH,
+  TYPED_DATA_JSON,
 } from "@beforesign/test-fixtures";
-import { detect_input_type } from "./input_type.ts";
+import { detectInputType } from "./input_type.ts";
 
-describe("detect_input_type", () => {
+describe("detectInputType", () => {
   it("classifies tx hash", () => {
-    expect(detect_input_type(tx_hash).kind).toBe("tx_hash");
+    expect(detectInputType(TX_HASH).kind).toBe("txHash");
   });
 
   it("classifies typed data json", () => {
-    expect(detect_input_type(typed_data_json).kind).toBe("typed_data");
+    expect(detectInputType(TYPED_DATA_JSON).kind).toBe("typedData");
   });
 
   it("classifies unsigned tx json", () => {
-    expect(detect_input_type(metamask_unsigned_json).kind).toBe("unsigned_tx");
+    expect(detectInputType(METAMASK_UNSIGNED_JSON).kind).toBe("unsignedTx");
   });
 
   it("classifies calldata hex", () => {
-    expect(detect_input_type(calldata_hex).kind).toBe("calldata");
+    expect(detectInputType(CALLDATA_HEX).kind).toBe("calldata");
   });
 
   it("classifies unknown input", () => {
-    expect(detect_input_type("hello").kind).toBe("unknown");
+    expect(detectInputType("hello").kind).toBe("unknown");
   });
 });

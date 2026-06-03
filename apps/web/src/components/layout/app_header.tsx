@@ -1,13 +1,13 @@
-import type { locale } from "~/lib/i18n.ts";
+import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 import { ThemeToggle } from "./theme_toggle.tsx";
 
 export function AppHeader({
   locale,
-  on_locale_change,
+  onLocaleChange,
 }: {
-  locale: locale;
-  on_locale_change: (l: locale) => void;
+  locale: Locale;
+  onLocaleChange: (l: Locale) => void;
 }) {
   return (
     <header className="flex items-center justify-between gap-4 py-4 border-b border-border">
@@ -19,7 +19,7 @@ export function AppHeader({
         <button
           type="button"
           className="btn-ghost text-sm min-h-10"
-          onClick={() => on_locale_change(locale === "zh" ? "en" : "zh")}
+          onClick={() => onLocaleChange(locale === "zh" ? "en" : "zh")}
         >
           {locale === "zh" ? "EN" : "中文"}
         </button>

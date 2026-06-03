@@ -4,8 +4,8 @@ import { AppHeader } from "~/components/layout/app_header.tsx";
 import { ParserDiscovery } from "~/components/parser/parser_discovery.tsx";
 import { ParserInput } from "~/components/parser/parser_input.tsx";
 import { ParserResult } from "~/components/parser/parser_result.tsx";
-import { use_parse } from "~/hooks/use_parse.ts";
-import type { locale } from "~/lib/i18n.ts";
+import { useParse } from "~/hooks/use_parse.ts";
+import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 
 export const Route = createFileRoute("/")({
@@ -13,52 +13,52 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const [locale, set_locale] = React.useState<locale>("zh");
-  const [raw, set_raw] = React.useState("");
-  const [chain_id, set_chain_id] = React.useState<number | undefined>();
-  const [abi, set_abi] = React.useState("");
-  const [selected_hit, set_selected_hit] = React.useState<string | undefined>();
-  const { loading, error, result, parse, clear } = use_parse();
+  const [locale, setLocale] = React.useState<Locale>("zh");
+  const [raw, setRaw] = React.useState("");
+  const [chainId, setChainId] = React.useState<number | undefined>();
+  const [abi, setAbi] = React.useState("");
+  const [selectedHit, setSelectedHit] = React.useState<string | undefined>();
+  const { loading, error, result, parse, clear } = useParse();
 
-  const chain_required =
-    result?.discovery?.status === "not_found" || result?.discovery?.status === "ambiguous";
+  const chainRequired =
+    result?.discovery?.status === "notFound" || result?.discovery?.status === "ambiguous";
 
-  const handle_parse = () => {
+  const handleParse = () => {
     void parse({
       raw: raw.trim(),
-      chain_id,
+      chainId,
       abi: abi.trim() || undefined,
-      selected_discovery_hit: selected_hit,
+      selectedDiscoveryHit: selectedHit,
       locale,
     });
   };
 
   return (
     <div className="space-y-6">
-      <AppHeader locale={locale} on_locale_change={set_locale} />
+      <AppHeader locale={locale} onLocaleChange={setLocale} />
 
       <ParserInput
         locale={locale}
         raw={raw}
-        on_raw_change={set_raw}
-        chain_id={chain_id}
-        on_chain_change={set_chain_id}
+        onRawChange={setRaw}
+        chainId={chainId}
+        onChainChange={setChainId}
         abi={abi}
-        on_abi_change={set_abi}
-        chain_required={chain_required}
+        onAbiChange={setAbi}
+        chainRequired={chainRequired}
         loading={loading}
-        on_parse={handle_parse}
-        on_clear={() => {
+        onParse={handleParse}
+        onClear={() => {
           clear();
-          set_raw("");
-          set_selected_hit(undefined);
+          setRaw("");
+          setSelectedHit(undefined);
         }}
       />
 
       {!result && !loading && !error && (
         <div className="card text-center py-12 text-muted">
-          <p className="font-medium text-foreground">{t(locale, "empty_title")}</p>
-          <p className="text-sm mt-2">{t(locale, "empty_desc")}</p>
+          <p className="font-medium text-foreground">{t(locale, "emptyTitle")}</p>
+          <p className="text-sm mt-2">{t(locale, "emptyDesc")}</p>
         </div>
       )}
 
@@ -72,9 +72,9 @@ function HomePage() {
         <ParserDiscovery
           locale={locale}
           hits={result.discovery.hits}
-          selected_id={selected_hit}
-          on_select={set_selected_hit}
-          on_continue={handle_parse}
+          selectedId={selectedHit}
+          onSelect={setSelectedHit}
+          onContinue={handleParse}
         />
       )}
 

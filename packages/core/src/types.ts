@@ -1,109 +1,109 @@
-export type input_kind =
-  | "tx_hash"
-  | "signed_tx"
-  | "unsigned_tx"
+export type InputKind =
+  | "txHash"
+  | "signedTx"
+  | "unsignedTx"
   | "calldata"
-  | "typed_data"
+  | "typedData"
   | "unknown";
 
-export type json_value =
+export type JsonValue =
   | string
   | number
   | boolean
   | null
-  | json_value[]
-  | { [key: string]: json_value };
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 
-export type warning_severity = "info" | "warning" | "destructive";
+export type WarningSeverity = "info" | "warning" | "destructive";
 
-export type warning_item = {
+export type WarningItem = {
   code: string;
-  severity: warning_severity;
+  severity: WarningSeverity;
   message: string;
-  message_en?: string;
+  messageEn?: string;
 };
 
-export type discovery_status = "resolved" | "not_found" | "ambiguous" | "pending";
+export type DiscoveryStatus = "resolved" | "notFound" | "ambiguous" | "pending";
 
-export type discovery_hit = {
+export type DiscoveryHit = {
   id: string;
-  chain_id: number;
-  chain_name: string;
-  block_number?: number;
+  chainId: number;
+  chainName: string;
+  blockNumber?: number;
   from?: string;
   to?: string;
   timestamp?: string;
 };
 
-export type discovery_result = {
-  status: discovery_status;
-  hits: discovery_hit[];
-  resolved_chain_id?: number;
+export type DiscoveryResult = {
+  status: DiscoveryStatus;
+  hits: DiscoveryHit[];
+  resolvedChainId?: number;
 };
 
-export type normalized_tx = {
-  chain_id?: number;
+export type NormalizedTx = {
+  chainId?: number;
   from?: string;
   to?: string;
   value?: string;
   data?: string;
   nonce?: number;
-  gas_limit?: string;
-  max_fee_per_gas?: string;
-  max_priority_fee_per_gas?: string;
-  gas_price?: string;
+  gasLimit?: string;
+  maxFeePerGas?: string;
+  maxPriorityFeePerGas?: string;
+  gasPrice?: string;
   type?: number;
   hash?: string;
-  signed_hex?: string;
+  signedHex?: string;
   v?: string;
   r?: string;
   s?: string;
 };
 
-export type calldata_decode = {
+export type CalldataDecode = {
   selector: string;
-  function_name?: string;
+  functionName?: string;
   args: Array<{ name: string; type: string; value: string }>;
   raw: string;
   summary?: string;
 };
 
-export type typed_data_view = {
-  domain: { [key: string]: json_value };
-  primary_type: string;
-  message: { [key: string]: json_value };
-  signable_hash?: string;
+export type TypedDataView = {
+  domain: { [key: string]: JsonValue };
+  primaryType: string;
+  message: { [key: string]: JsonValue };
+  signableHash?: string;
   summary?: string;
 };
 
-export type onchain_tx_meta = {
-  chain_id: number;
-  block_number?: string;
+export type OnchainTxMeta = {
+  chainId: number;
+  blockNumber?: string;
   status: "success" | "fail" | "pending";
-  gas_used?: string;
-  explorer_url?: string;
+  gasUsed?: string;
+  explorerUrl?: string;
 };
 
-export type debank_simulation = {
+export type DebankSimulation = {
   success: boolean;
   error?: string;
-  gas_used?: string;
-  balance_changes?: unknown[];
+  gasUsed?: string;
+  balanceChanges?: unknown[];
 };
 
-export type parse_result = {
-  kind: input_kind;
+export type ParseResult = {
+  kind: InputKind;
   summary: string;
-  summary_en?: string;
-  warnings: warning_item[];
-  raw: json_value;
-  tx?: normalized_tx;
-  calldata?: calldata_decode;
-  typed_data?: typed_data_view;
-  simulation?: debank_simulation;
+  summaryEn?: string;
+  warnings: WarningItem[];
+  raw: JsonValue;
+  tx?: NormalizedTx;
+  calldata?: CalldataDecode;
+  typedData?: TypedDataView;
+  simulation?: DebankSimulation;
   explanation?: string;
-  explanation_en?: string;
-  onchain?: onchain_tx_meta;
-  discovery?: discovery_result;
-  missing_fields?: string[];
+  explanationEn?: string;
+  onchain?: OnchainTxMeta;
+  discovery?: DiscoveryResult;
+  missingFields?: string[];
 };

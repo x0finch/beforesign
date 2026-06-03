@@ -1,117 +1,113 @@
-import type { parse_input, parse_result } from "@beforesign/core";
-import { serialize_parse_result } from "@beforesign/core";
-import type { clients_bundle } from "@beforesign/clients";
-import { resolve_chain_id } from "@beforesign/clients";
-import { detect_input_type } from "@beforesign/detect";
-import { can_simulate_debank, parse_locally } from "@beforesign/parse";
-import { run_risk_rules } from "@beforesign/risk";
-import { parse_calldata } from "@beforesign/parse";
+import type { ParseInput, ParseResult } from "@beforesign/core";
+import { serializeParseResult } from "@beforesign/core";
+import type { ClientsBundle } from "@beforesign/clients";
+import { resolveChainId } from "@beforesign/clients";
+import { detectInputType } from "@beforesign/detect";
+import { canSimulateDebank, parseLocally, parseCalldata } from "@beforesign/parse";
+import { runRiskRules } from "@beforesign/risk";
 
-export type parse_input_deps = clients_bundle & {
-  blockscout_enabled?: boolean;
-  etherscan_enabled?: boolean;
-  debank_enabled?: boolean;
+export type ParseInputDeps = ClientsBundle & {
+  blockscoutEnabled?: boolean;
+  etherscanEnabled?: boolean;
+  debankEnabled?: boolean;
 };
 
-export async function parse_input(
-  input: parse_input,
-  deps: parse_input_deps,
-): Promise<parse_result> {
-  const { kind } = detect_input_type(input.raw);
-  let result = parse_locally(kind, input.raw, {
+export async function parseInput(input: ParseInput, deps: ParseInputDeps): Promise<ParseResult> {
+  const { kind } = detectInputType(input.raw);
+  const result = parseLocally(kind, input.raw, {
     abi: input.abi,
   });
 
-  const api_errors: string[] = [];
+  const apiErrors: string[] = [];
 
-  if (kind === "tx_hash" && deps.blockscout_enabled !== false) {
+  if (kind === "txHash" && deps.blockscoutEnabled !== false) {
     try {
-      const discovery = await deps.blockscout.search_quick(input.raw.trim());
+      const discovery = await deps.blockscout.searchQuick(input.raw.trim());
       result.discovery = discovery;
-      const chain_id = resolve_chain_id(
+      const chainId = resolveChainId(
         discovery,
-        input.chain_id,
-        input.selected_discovery_hit,
+        input.chainId,
+        input.selectedDiscoveryHit,
       );
 
-      if (chain_id && deps.etherscan_enabled !== false) {
+      if (chainId && deps.etherscanEnabled !== false) {
         try {
-          const { tx, onchain } = await deps.etherscan.get_transaction(
-            chain_id,
+          const { tx, onchain } = await deps.etherscan.getTransaction(
+            chainId,
             input.raw.trim(),
           );
           result.tx = tx;
           result.onchain = onchain;
-          result.kind = "signed_tx";
+          result.kind = "signedTx";
           if (tx.data) {
-            let parsed_abi;
+            let parsedAbi;
             try {
-              parsed_abi = input.abi ? JSON.parse(input.abi) : undefined;
+              parsedAbi = input.abi ? JSON.parse(input.abi) : undefined;
             } catch {
-              parsed_abi = undefined;
+              parsedAbi = undefined;
             }
-            result.calldata = parse_calldata(tx.data, {
-              abi: parsed_abi,
-              contract_address: tx.to,
+            result.calldata = parseCalldata(tx.data, {
+              abi: parsedAbi,
+              contractAddress: tx.to,
             });
           }
           result.summary = "已上链交易";
-          result.summary_en = "On-chain transaction";
+          result.summaryEn = "On-chain transaction";
         } catch (e) {
-          api_errors.push(`Etherscan: ${e instanceof Error ? e.message : "failed"}`);
+          apiErrors.push(`Etherscan: ${e instanceof Error ? e.message : "failed"}`);
         }
-      } else if (!chain_id) {
+      } else if (!chainId) {
         result.summary = "请选择链或匹配结果";
-        result.summary_en = "Select chain or pick a discovery match";
+        result.summaryEn = "Select chain or pick a discovery match";
       }
     } catch (e) {
-      api_errors.push(`Blockscout: ${e instanceof Error ? e.message : "failed"}`);
-      if (input.chain_id && deps.etherscan_enabled !== false) {
+      apiErrors.push(`Blockscout: ${e instanceof Error ? e.message : "failed"}`);
+      if (input.chainId && deps.etherscanEnabled !== false) {
         try {
-          const { tx, onchain } = await deps.etherscan.get_transaction(
-            input.chain_id,
+          const { tx, onchain } = await deps.etherscan.getTransaction(
+            input.chainId,
             input.raw.trim(),
           );
           result.tx = tx;
           result.onchain = onchain;
-          result.kind = "signed_tx";
+          result.kind = "signedTx";
           result.summary = "已上链交易";
-          result.summary_en = "On-chain transaction";
+          result.summaryEn = "On-chain transaction";
         } catch (err) {
-          api_errors.push(`Etherscan: ${err instanceof Error ? err.message : "failed"}`);
+          apiErrors.push(`Etherscan: ${err instanceof Error ? err.message : "failed"}`);
         }
       }
     }
   }
 
-  if (kind === "unsigned_tx" && can_simulate_debank(result.tx) && deps.debank_enabled !== false) {
+  if (kind === "unsignedTx" && canSimulateDebank(result.tx) && deps.debankEnabled !== false) {
     try {
-      result.simulation = await deps.debank.pre_exec_tx(result.tx!);
-      const explanation = await deps.debank.explain_tx(result.tx!);
+      result.simulation = await deps.debank.preExecTx(result.tx!);
+      const explanation = await deps.debank.explainTx(result.tx!);
       if (explanation) {
         result.explanation = explanation;
         result.summary = explanation;
       }
     } catch (e) {
-      api_errors.push(`DeBank: ${e instanceof Error ? e.message : "failed"}`);
+      apiErrors.push(`DeBank: ${e instanceof Error ? e.message : "failed"}`);
     }
   }
 
-  const risk_warnings = run_risk_rules(result, {
-    selected_chain_id: input.chain_id,
+  const riskWarnings = runRiskRules(result, {
+    selectedChainId: input.chainId,
   });
-  result.warnings = [...result.warnings, ...risk_warnings];
+  result.warnings = [...result.warnings, ...riskWarnings];
 
-  if (api_errors.length > 0) {
-    for (const msg of api_errors) {
+  if (apiErrors.length > 0) {
+    for (const msg of apiErrors) {
       result.warnings.push({
-        code: "api_error",
+        code: "apiError",
         severity: "warning",
         message: msg,
-        message_en: msg,
+        messageEn: msg,
       });
     }
   }
 
-  return serialize_parse_result(result);
+  return serializeParseResult(result);
 }

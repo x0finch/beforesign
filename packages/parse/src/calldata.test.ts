@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { calldata_hex } from "@beforesign/test-fixtures";
-import { parse_calldata } from "./calldata.ts";
+import { CALLDATA_HEX } from "@beforesign/test-fixtures";
+import { parseCalldata } from "./calldata.ts";
 
-describe("parse_calldata", () => {
+describe("parseCalldata", () => {
   it("extracts selector", () => {
-    const result = parse_calldata(calldata_hex);
+    const result = parseCalldata(CALLDATA_HEX);
     expect(result.selector).toBe("0xa9059cbb");
   });
 });
