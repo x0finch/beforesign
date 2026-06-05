@@ -52,38 +52,45 @@ export abstract class TokenApprovalProfile extends TypedDataProfile {
         result = this.setRiskOnId(result, id, "destructive");
       }
     }
-    return result;
+    return this.setDescriptions(result, this.buildDescriptionMap(result, ctx));
   }
 
-  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
+  protected buildDescriptionMap(
+    checks: ReviewCheckItem[],
+    ctx: TypedDataContext,
+  ): Record<string, string> {
     void ctx;
-    return this.addGuidance([
-      {
-        id: "guidance.owner",
-        label: "Owner",
-        value: "Owner must be an address you control (not spender or relayer)",
-      },
-      {
-        id: "guidance.spender",
-        label: "Spender",
-        value: "Spender can move your tokens on-chain within the allowance",
-      },
-      {
-        id: "guidance.value",
-        label: "Allowance",
-        value: "Unlimited allowance equals on-chain approve(max)",
-      },
-      {
-        id: "guidance.deadline",
-        label: "Deadline",
-        value: "Confirm deadline is acceptable and not already expired",
-      },
-      {
-        id: "guidance.nonce",
-        label: "Nonce",
-        value: "Nonce prevents replay; should align with on-chain state",
-      },
+    const descriptions: Record<string, string> = {};
+
+    if (checks.some((c) => c.id === "message.owner")) {
+      descriptions["message.owner"] =
+        "Owner must be an address you control (not spender or relayer)";
+    }
+    if (checks.some((c) => c.id === "message.spender")) {
+      descriptions["message.spender"] =
+        "Spender can move your tokens on-chain within the allowance";
+    }
+
+    const allowanceId = this.firstExistingCheckId(checks, this.allowanceFieldIds);
+    if (allowanceId) {
+      descriptions[allowanceId] = "Unlimited allowance equals on-chain approve(max)";
+    }
+
+    const deadlineId = this.firstExistingCheckId(checks, [
+      "message.deadline",
+      "message.expiration",
+      "message.sigDeadline",
     ]);
+    if (deadlineId) {
+      descriptions[deadlineId] = "Confirm deadline is acceptable and not already expired";
+    }
+
+    if (checks.some((c) => c.id === "message.nonce")) {
+      descriptions["message.nonce"] =
+        "Nonce prevents replay; should align with on-chain state";
+    }
+
+    return descriptions;
   }
 
   protected buildWarnings(ctx: TypedDataContext, checks: ReviewCheckItem[]): WarningItem[] {

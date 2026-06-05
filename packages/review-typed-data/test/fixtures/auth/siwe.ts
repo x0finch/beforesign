@@ -37,7 +37,8 @@ const output = {
       "label": "Domain name",
       "value": "Login",
       "kind": "text",
-      "highlight": true
+      "highlight": true,
+      "description": "Confirm domain matches the application you intend to sign in to. Login signatures should not be reusable as other protocol actions"
     },
     {
       "id": "domain.version",
@@ -74,7 +75,8 @@ const output = {
       "label": "URI",
       "value": "https://example.com",
       "kind": "text",
-      "highlight": true
+      "highlight": true,
+      "description": "URI should match the site requesting the signature"
     },
     {
       "id": "message.nonce",
@@ -82,7 +84,8 @@ const output = {
       "label": "Nonce",
       "value": "random-nonce-123",
       "kind": "text",
-      "highlight": true
+      "highlight": true,
+      "description": "Nonce prevents replay of this login signature"
     },
     {
       "id": "message.expirationTime",
@@ -113,34 +116,6 @@ const output = {
       "label": "Signable hash",
       "value": "0x644bb0f7a4d568e5eb7f0e7df511a2c68990497da6b4658a24cda6f66a122f94",
       "kind": "hash"
-    },
-    {
-      "id": "guidance.domain",
-      "group": "guidance",
-      "label": "Domain",
-      "value": "Confirm domain matches the application you intend to sign in to",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.uri",
-      "group": "guidance",
-      "label": "URI",
-      "value": "URI should match the site requesting the signature",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.nonce",
-      "group": "guidance",
-      "label": "Nonce",
-      "value": "Nonce prevents replay of this login signature",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.reuse",
-      "group": "guidance",
-      "label": "Reuse risk",
-      "value": "Login signatures should not be reusable as other protocol actions",
-      "kind": "text"
     }
   ],
   "warnings": [],

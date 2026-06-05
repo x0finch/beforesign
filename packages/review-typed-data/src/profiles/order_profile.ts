@@ -21,7 +21,27 @@ export class OrderProfile extends TypedDataProfile {
   }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
-    return this.highlightIds(checks, this.summaryFocusIds(ctx, checks));
+    const result = this.highlightIds(checks, this.summaryFocusIds(ctx, checks));
+    const descriptions: Record<string, string> = {};
+
+    const firstOffer = checks.find((c) => c.id.startsWith("message.offer"));
+    if (firstOffer) {
+      descriptions[firstOffer.id] =
+        "Review which tokens and amounts you give versus receive";
+    }
+
+    const firstConsideration = checks.find((c) => c.id.startsWith("message.consideration"));
+    if (firstConsideration) {
+      descriptions[firstConsideration.id] =
+        "Check fees, royalties, and extra consideration items";
+    }
+
+    if (checks.some((c) => c.id === "message.zone")) {
+      descriptions["message.zone"] =
+        "Confirm whether any address can fill this signed order";
+    }
+
+    return this.setDescriptions(result, descriptions);
   }
 
   protected summaryFocusIds(ctx: TypedDataContext, checks: ReviewCheckItem[]): string[] {
@@ -36,26 +56,5 @@ export class OrderProfile extends TypedDataProfile {
       }
     }
     return [...new Set(ids)];
-  }
-
-  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
-    void ctx;
-    return this.addGuidance([
-      {
-        id: "guidance.tokens",
-        label: "Tokens",
-        value: "Review which tokens and amounts you give versus receive",
-      },
-      {
-        id: "guidance.fees",
-        label: "Fees",
-        value: "Check fees, royalties, and extra consideration items",
-      },
-      {
-        id: "guidance.filler",
-        label: "Filler",
-        value: "Confirm whether any address can fill this signed order",
-      },
-    ]);
   }
 }

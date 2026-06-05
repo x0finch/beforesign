@@ -95,7 +95,8 @@ const output = {
       "label": "Offer 0 Token",
       "value": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Review which tokens and amounts you give versus receive"
     },
     {
       "id": "message.offer.0.amount",
@@ -111,7 +112,8 @@ const output = {
       "label": "Consideration 0 Token",
       "value": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Check fees, royalties, and extra consideration items"
     },
     {
       "id": "message.consideration.0.amount",
@@ -162,27 +164,6 @@ const output = {
       "label": "Signable hash",
       "value": "0xd954185bc3c28c0691dce91cbc46618d6d8c2905bc6b9c99ff7a836b032fde06",
       "kind": "hash"
-    },
-    {
-      "id": "guidance.tokens",
-      "group": "guidance",
-      "label": "Tokens",
-      "value": "Review which tokens and amounts you give versus receive",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.fees",
-      "group": "guidance",
-      "label": "Fees",
-      "value": "Check fees, royalties, and extra consideration items",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.filler",
-      "group": "guidance",
-      "label": "Filler",
-      "value": "Confirm whether any address can fill this signed order",
-      "kind": "text"
     }
   ],
   "warnings": [],

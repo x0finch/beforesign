@@ -23,39 +23,27 @@ export class AuthSiweProfile extends TypedDataProfile {
   }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
-    return this.highlightIds(checks, this.summaryFocusIds(ctx));
+    const result = this.highlightIds(checks, this.summaryFocusIds(ctx));
+    const descriptions: Record<string, string> = {};
+
+    if (result.some((c) => c.id === "domain.name")) {
+      descriptions["domain.name"] =
+        "Confirm domain matches the application you intend to sign in to. Login signatures should not be reusable as other protocol actions";
+    }
+    if (result.some((c) => c.id === "message.uri")) {
+      descriptions["message.uri"] = "URI should match the site requesting the signature";
+    }
+    if (result.some((c) => c.id === "message.nonce")) {
+      descriptions["message.nonce"] = "Nonce prevents replay of this login signature";
+    }
+
+    return this.setDescriptions(result, descriptions);
   }
 
   protected summaryFocusIds(ctx: TypedDataContext): string[] {
     const ids = ["domain.name", "message.uri", "message.nonce"];
     if (this.hasFields(ctx, ["expirationTime"])) ids.push("message.expirationTime");
     return ids;
-  }
-
-  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
-    void ctx;
-    return this.addGuidance([
-      {
-        id: "guidance.domain",
-        label: "Domain",
-        value: "Confirm domain matches the application you intend to sign in to",
-      },
-      {
-        id: "guidance.uri",
-        label: "URI",
-        value: "URI should match the site requesting the signature",
-      },
-      {
-        id: "guidance.nonce",
-        label: "Nonce",
-        value: "Nonce prevents replay of this login signature",
-      },
-      {
-        id: "guidance.reuse",
-        label: "Reuse risk",
-        value: "Login signatures should not be reusable as other protocol actions",
-      },
-    ]);
   }
 
   protected buildWarnings(ctx: TypedDataContext, checks: ReviewCheckItem[]): WarningItem[] {

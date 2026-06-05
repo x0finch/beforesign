@@ -19,7 +19,15 @@ export class GovernanceProfile extends TypedDataProfile {
   }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
-    return this.highlightIds(checks, this.summaryFocusIds(ctx));
+    const result = this.highlightIds(checks, this.summaryFocusIds(ctx));
+    const descriptions: Record<string, string> = {};
+
+    if (result.some((c) => c.id === "message.delegatee")) {
+      descriptions["message.delegatee"] =
+        "Delegatee will act on your behalf within the signed scope. Confirm token amount, proposal ID, and whether delegation is permanent or one-time";
+    }
+
+    return this.setDescriptions(result, descriptions);
   }
 
   protected summaryFocusIds(ctx: TypedDataContext): string[] {
@@ -29,22 +37,6 @@ export class GovernanceProfile extends TypedDataProfile {
       if (this.hasFields(ctx, [field])) ids.push(`message.${field}`);
     }
     return ids;
-  }
-
-  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
-    void ctx;
-    return this.addGuidance([
-      {
-        id: "guidance.delegatee",
-        label: "Delegatee",
-        value: "Delegatee will act on your behalf within the signed scope",
-      },
-      {
-        id: "guidance.scope",
-        label: "Scope",
-        value: "Confirm token amount, proposal ID, and whether delegation is permanent or one-time",
-      },
-    ]);
   }
 
   protected buildWarnings(ctx: TypedDataContext, checks: ReviewCheckItem[]): WarningItem[] {

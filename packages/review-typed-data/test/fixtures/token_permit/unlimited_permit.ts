@@ -59,7 +59,8 @@ const output = {
       "label": "Owner",
       "value": "0x974caa59e49682cda0ad2bbe82983419a2ecc400",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Owner must be an address you control (not spender or relayer)"
     },
     {
       "id": "message.spender",
@@ -67,7 +68,8 @@ const output = {
       "label": "Spender",
       "value": "0x0000000000000000000000000000000000000002",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Spender can move your tokens on-chain within the allowance"
     },
     {
       "id": "message.value",
@@ -76,7 +78,8 @@ const output = {
       "value": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
       "kind": "amount",
       "highlight": true,
-      "risk": "destructive"
+      "risk": "destructive",
+      "description": "Unlimited allowance equals on-chain approve(max)"
     },
     {
       "id": "signature.domainHash",
@@ -98,41 +101,6 @@ const output = {
       "label": "Signable hash",
       "value": "0x7aa66d86c7658cc96cd86f8e2550b33ebc4b4ad2e499442da7b109db876e0ad9",
       "kind": "hash"
-    },
-    {
-      "id": "guidance.owner",
-      "group": "guidance",
-      "label": "Owner",
-      "value": "Owner must be an address you control (not spender or relayer)",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.spender",
-      "group": "guidance",
-      "label": "Spender",
-      "value": "Spender can move your tokens on-chain within the allowance",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.value",
-      "group": "guidance",
-      "label": "Allowance",
-      "value": "Unlimited allowance equals on-chain approve(max)",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.deadline",
-      "group": "guidance",
-      "label": "Deadline",
-      "value": "Confirm deadline is acceptable and not already expired",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.nonce",
-      "group": "guidance",
-      "label": "Nonce",
-      "value": "Nonce prevents replay; should align with on-chain state",
-      "kind": "text"
     }
   ],
   "warnings": [],

@@ -32,10 +32,9 @@ export abstract class TypedDataProfile {
 
   enrich(ctx: TypedDataContext, checks: ReviewCheckItem[]): ProfileEnrichResult {
     const mutated = this.mutateChecks(checks, ctx);
-    const guidance = this.buildGuidance(ctx);
     const warnings = this.buildWarnings(ctx, mutated);
     return {
-      checks: [...mutated, ...guidance],
+      checks: mutated,
       warnings,
       facts: { scenarioId: this.id, ...this.buildFacts(ctx) },
     };
@@ -44,11 +43,6 @@ export abstract class TypedDataProfile {
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
     void ctx;
     return checks;
-  }
-
-  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
-    void ctx;
-    return [];
   }
 
   protected buildWarnings(ctx: TypedDataContext, checks: ReviewCheckItem[]): WarningItem[] {
@@ -73,24 +67,26 @@ export abstract class TypedDataProfile {
       .map((check) => check.id);
   }
 
+  protected setDescriptions(
+    checks: ReviewCheckItem[],
+    descriptions: Record<string, string>,
+  ): ReviewCheckItem[] {
+    return checks.map((check) =>
+      descriptions[check.id] ? { ...check, description: descriptions[check.id] } : check,
+    );
+  }
+
+  protected firstExistingCheckId(checks: ReviewCheckItem[], ids: string[]): string | undefined {
+    const idSet = new Set(checks.map((check) => check.id));
+    return ids.find((id) => idSet.has(id));
+  }
+
   protected setRiskOnId(
     checks: ReviewCheckItem[],
     id: string,
     risk: WarningSeverity,
   ): ReviewCheckItem[] {
     return checks.map((check) => (check.id === id ? { ...check, risk } : check));
-  }
-
-  protected addGuidance(
-    items: Array<{ id: string; label: string; value: string }>,
-  ): ReviewCheckItem[] {
-    return items.map((item) => ({
-      id: item.id,
-      group: "guidance",
-      label: item.label,
-      value: item.value,
-      kind: "text" as const,
-    }));
   }
 
   protected warnSignerFieldMismatch(

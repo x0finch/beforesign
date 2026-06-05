@@ -89,7 +89,8 @@ const output = {
       "value": "1000000",
       "kind": "amount",
       "displayValue": "1.000000 USDC",
-      "highlight": true
+      "highlight": true,
+      "description": "Unlimited allowance equals on-chain approve(max)"
     },
     {
       "id": "message.details.expiration",
@@ -112,7 +113,8 @@ const output = {
       "label": "Spender",
       "value": "0x4a6c312ec70e8747a587ee860a0353cd42be0ae0",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Spender can move your tokens on-chain within the allowance"
     },
     {
       "id": "message.sigDeadline",
@@ -120,7 +122,8 @@ const output = {
       "label": "Deadline",
       "value": "1780517526",
       "kind": "timestamp",
-      "displayValue": "2026-06-03T20:12:06Z"
+      "displayValue": "2026-06-03T20:12:06Z",
+      "description": "Confirm deadline is acceptable and not already expired"
     },
     {
       "id": "signature.domainHash",
@@ -142,34 +145,6 @@ const output = {
       "label": "Signable hash",
       "value": "0x89c974e69462e12ee023c8c92cfdbb24dffc330db4ceafb66d608967315dd573",
       "kind": "hash"
-    },
-    {
-      "id": "guidance.spender",
-      "group": "guidance",
-      "label": "Spender",
-      "value": "Spender can move your tokens on-chain within the allowance",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.value",
-      "group": "guidance",
-      "label": "Allowance",
-      "value": "Unlimited allowance equals on-chain approve(max)",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.deadline",
-      "group": "guidance",
-      "label": "Deadline",
-      "value": "Confirm deadline is acceptable and not already expired",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.nonce",
-      "group": "guidance",
-      "label": "Nonce",
-      "value": "Nonce prevents replay; should align with on-chain state",
-      "kind": "text"
     }
   ],
   "warnings": [

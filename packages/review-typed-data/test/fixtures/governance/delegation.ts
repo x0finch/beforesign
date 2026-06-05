@@ -87,7 +87,8 @@ const output = {
       "label": "Delegatee",
       "value": "0x0000000000000000000000000000000000000002",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Delegatee will act on your behalf within the signed scope. Confirm token amount, proposal ID, and whether delegation is permanent or one-time"
     },
     {
       "id": "message.balance",
@@ -124,20 +125,6 @@ const output = {
       "label": "Signable hash",
       "value": "0xa813fe76bd4ec8b2c395185590215bc3c8486bc35aef6805064d792e110cc64c",
       "kind": "hash"
-    },
-    {
-      "id": "guidance.delegatee",
-      "group": "guidance",
-      "label": "Delegatee",
-      "value": "Delegatee will act on your behalf within the signed scope",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.scope",
-      "group": "guidance",
-      "label": "Scope",
-      "value": "Confirm token amount, proposal ID, and whether delegation is permanent or one-time",
-      "kind": "text"
     }
   ],
   "warnings": [],

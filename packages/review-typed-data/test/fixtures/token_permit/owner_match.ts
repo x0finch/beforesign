@@ -57,7 +57,8 @@ const output = {
       "label": "Owner",
       "value": "0x974caa59e49682cda0ad2bbe82983419a2ecc400",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Owner must be an address you control (not spender or relayer)"
     },
     {
       "id": "message.spender",
@@ -65,7 +66,8 @@ const output = {
       "label": "Spender",
       "value": "0x4a6c312ec70e8747a587ee860a0353cd42be0ae0",
       "kind": "address",
-      "highlight": true
+      "highlight": true,
+      "description": "Spender can move your tokens on-chain within the allowance"
     },
     {
       "id": "message.value",
@@ -74,14 +76,16 @@ const output = {
       "value": "9420522466979",
       "kind": "amount",
       "displayValue": "9,420,522.466979 USDC",
-      "highlight": true
+      "highlight": true,
+      "description": "Unlimited allowance equals on-chain approve(max)"
     },
     {
       "id": "message.nonce",
       "group": "message",
       "label": "Nonce",
       "value": "0",
-      "kind": "text"
+      "kind": "text",
+      "description": "Nonce prevents replay; should align with on-chain state"
     },
     {
       "id": "message.deadline",
@@ -89,7 +93,8 @@ const output = {
       "label": "Deadline",
       "value": "1780517526",
       "kind": "timestamp",
-      "displayValue": "2026-06-03T20:12:06Z"
+      "displayValue": "2026-06-03T20:12:06Z",
+      "description": "Confirm deadline is acceptable and not already expired"
     },
     {
       "id": "signature.domainHash",
@@ -111,41 +116,6 @@ const output = {
       "label": "Signable hash",
       "value": "0xe6410f9a0c14ed6005ef600c3268feb65bd11bdfc646565fe58b1abd74988698",
       "kind": "hash"
-    },
-    {
-      "id": "guidance.owner",
-      "group": "guidance",
-      "label": "Owner",
-      "value": "Owner must be an address you control (not spender or relayer)",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.spender",
-      "group": "guidance",
-      "label": "Spender",
-      "value": "Spender can move your tokens on-chain within the allowance",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.value",
-      "group": "guidance",
-      "label": "Allowance",
-      "value": "Unlimited allowance equals on-chain approve(max)",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.deadline",
-      "group": "guidance",
-      "label": "Deadline",
-      "value": "Confirm deadline is acceptable and not already expired",
-      "kind": "text"
-    },
-    {
-      "id": "guidance.nonce",
-      "group": "guidance",
-      "label": "Nonce",
-      "value": "Nonce prevents replay; should align with on-chain state",
-      "kind": "text"
     }
   ],
   "warnings": [

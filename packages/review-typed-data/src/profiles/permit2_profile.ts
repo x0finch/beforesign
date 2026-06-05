@@ -67,30 +67,4 @@ export class Permit2Profile extends TokenApprovalProfile {
     }
     return ids;
   }
-
-  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
-    void ctx;
-    return this.addGuidance([
-      {
-        id: "guidance.spender",
-        label: "Spender",
-        value: "Spender can move your tokens on-chain within the allowance",
-      },
-      {
-        id: "guidance.value",
-        label: "Allowance",
-        value: "Unlimited allowance equals on-chain approve(max)",
-      },
-      {
-        id: "guidance.deadline",
-        label: "Deadline",
-        value: "Confirm deadline is acceptable and not already expired",
-      },
-      {
-        id: "guidance.nonce",
-        label: "Nonce",
-        value: "Nonce prevents replay; should align with on-chain state",
-      },
-    ]);
-  }
 }
