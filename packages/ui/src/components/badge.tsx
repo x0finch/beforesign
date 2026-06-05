@@ -52,7 +52,7 @@ export function Badge({
   ...props
 }: BadgeProps): React.ReactElement {
   const defaultProps = {
-    className: cn(badgeVariants({ className, size, variant })),
+    className: cn(badgeVariants({ size, variant }), className),
     "data-slot": "badge",
   };
 
