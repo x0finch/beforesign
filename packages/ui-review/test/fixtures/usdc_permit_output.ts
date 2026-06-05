@@ -19,6 +19,7 @@ export const usdcPermitOutput = {
       label: "Owner",
       value: "0x974caa59e49682cda0ad2bbe82983419a2ecc400",
       kind: "address",
+      description: "Owner must be an address you control (not spender or relayer)",
       highlight: true,
     },
     {
@@ -37,13 +38,6 @@ export const usdcPermitOutput = {
       kind: "amount",
       displayValue: "9,420,522.466979 USDC",
       highlight: true,
-    },
-    {
-      id: "guidance.owner",
-      group: "guidance",
-      label: "Owner",
-      value: "Owner must be an address you control (not spender or relayer)",
-      kind: "text",
     },
   ],
   warnings: [

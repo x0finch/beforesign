@@ -23,6 +23,8 @@ describe("formatFactValue", () => {
 
 describe("inferFactKind", () => {
   it("maps known hash and selector keys", () => {
+    expect(inferFactKind("domainHash", "0xabc")).toBe("hash");
+    expect(inferFactKind("structHash", "0xabc")).toBe("hash");
     expect(inferFactKind("signableHash", "0xabc")).toBe("hash");
     expect(inferFactKind("hash", "0xabc")).toBe("hash");
     expect(inferFactKind("selector", "0x1234")).toBe("selector");
@@ -54,16 +56,22 @@ describe("factsToRows", () => {
     const rows = factsToRows({
       scenarioId: "tokenPermit",
       primaryType: "Permit",
+      domainHash: "0xdomain",
+      structHash: "0xstruct",
       signableHash: "0xabc",
     });
 
     expect(rows.map((row) => row.id)).toEqual([
+      "facts.domainHash",
       "facts.primaryType",
       "facts.scenarioId",
       "facts.signableHash",
+      "facts.structHash",
     ]);
     expect(rows.find((row) => row.id === "facts.primaryType")?.label).toBe("Primary type");
     expect(rows.find((row) => row.id === "facts.scenarioId")?.label).toBe("Scenario");
+    expect(rows.find((row) => row.id === "facts.domainHash")?.label).toBe("Domain hash");
+    expect(rows.find((row) => row.id === "facts.structHash")?.label).toBe("Struct hash");
     expect(rows.find((row) => row.id === "facts.signableHash")?.kind).toBe("hash");
   });
 

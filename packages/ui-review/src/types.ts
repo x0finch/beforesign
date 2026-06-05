@@ -8,5 +8,4 @@ export type ReviewSectionGroup = {
 
 export type GroupedChecks = {
   sections: ReviewSectionGroup[];
-  guidance: ReviewCheckItem[];
 };

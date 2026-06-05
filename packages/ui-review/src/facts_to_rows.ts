@@ -2,6 +2,8 @@ import type { JsonValue, ReviewCheckKind } from "@beforesign/core";
 
 const FACT_LABELS: Record<string, string> = {
   primaryType: "Primary type",
+  domainHash: "Domain hash",
+  structHash: "Struct hash",
   signableHash: "Signable hash",
   scenarioId: "Scenario",
   tokenSymbol: "Token symbol",
@@ -14,7 +16,7 @@ const FACT_LABELS: Record<string, string> = {
   missingFields: "Missing fields",
 };
 
-const HASH_KEYS = new Set(["signableHash", "hash"]);
+const HASH_KEYS = new Set(["domainHash", "structHash", "signableHash", "hash"]);
 const ETHEREUM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 const HASH_PATTERN = /^0x[a-fA-F0-9]+$/;
 

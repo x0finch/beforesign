@@ -55,7 +55,7 @@ export function ReviewSectionList({
   showId?: boolean;
 }) {
   return (
-    <div data-slot="review-section-list" className="-mx-2 flex flex-col px-2">
+    <div data-slot="review-section-list" className="flex flex-col gap-3">
       {checks.map((check) => (
         <ReviewSectionItem key={check.id} check={check} showId={showId} />
       ))}

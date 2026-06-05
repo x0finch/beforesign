@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@beforesign/ui/card";
 import { Separator } from "@beforesign/ui/separator";
+import { TooltipProvider } from "@beforesign/ui/tooltip";
 import * as React from "react";
 import { groupChecksBySection } from "./group_checks.ts";
 import { ReviewFactsList } from "./review_facts_list.tsx";
@@ -17,20 +18,16 @@ import { dedupeWarnings, ReviewWarningList } from "./review_warning_list.tsx";
 
 function ReviewBody({
   document,
-  guidanceMode,
   showWarnings,
   showFacts,
   warnings,
   sections,
-  guidance,
 }: {
   document: ReviewDocument;
-  guidanceMode: "inline" | "collapsed" | "hidden";
   showWarnings: boolean;
   showFacts: boolean;
   warnings: WarningItem[];
   sections: ReturnType<typeof groupChecksBySection>["sections"];
-  guidance: ReturnType<typeof groupChecksBySection>["guidance"];
 }) {
   const blocks: { id: string; node: React.ReactNode }[] = [];
 
@@ -46,22 +43,6 @@ function ReviewBody({
       id: section.id,
       node: (
         <ReviewSection id={section.id} title={section.label} checks={section.checks} />
-      ),
-    });
-  }
-
-  if (guidanceMode !== "hidden" && guidance.length > 0) {
-    blocks.push({
-      id: "guidance",
-      node: (
-        <ReviewSection
-          id="guidance"
-          title="Guidance"
-          checks={guidance}
-          showId={false}
-          collapsible
-          defaultOpen={guidanceMode === "inline"}
-        />
       ),
     });
   }
@@ -97,20 +78,18 @@ function ReviewBody({
 
 export function ReviewDocumentView({
   document,
-  guidanceMode = "collapsed",
   extraWarnings,
   showWarnings = true,
   showBadges = true,
   showFacts = true,
 }: {
   document: ReviewDocument;
-  guidanceMode?: "inline" | "collapsed" | "hidden";
   extraWarnings?: WarningItem[];
   showWarnings?: boolean;
   showBadges?: boolean;
   showFacts?: boolean;
 }) {
-  const { sections, guidance } = groupChecksBySection(document.checks);
+  const { sections } = groupChecksBySection(document.checks);
   const warnings = showWarnings ? dedupeWarnings(document, extraWarnings) : document.warnings;
   const scenarioId =
     document.facts && typeof document.facts.scenarioId === "string"
@@ -120,12 +99,10 @@ export function ReviewDocumentView({
   const body = (
     <ReviewBody
       document={document}
-      guidanceMode={guidanceMode}
       showWarnings={showWarnings}
       showFacts={showFacts}
       warnings={warnings}
       sections={sections}
-      guidance={guidance}
     />
   );
 
@@ -140,7 +117,9 @@ export function ReviewDocumentView({
           </CardAction>
         )}
       </CardHeader>
-      <CardPanel>{body}</CardPanel>
+      <CardPanel>
+        <TooltipProvider delay={0}>{body}</TooltipProvider>
+      </CardPanel>
     </Card>
   );
 }

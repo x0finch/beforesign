@@ -4,34 +4,27 @@ import { ReviewDocumentView, groupChecksBySection } from "../src/index.ts";
 import { usdcPermitOutput } from "./fixtures/usdc_permit_output.ts";
 
 describe("groupChecksBySection", () => {
-  it("separates guidance from field groups", () => {
+  it("groups checks by section", () => {
     const grouped = groupChecksBySection(usdcPermitOutput.checks);
     expect(grouped.sections.map((s) => s.id)).toEqual(["domain", "message"]);
-    expect(grouped.guidance).toHaveLength(1);
   });
 });
 
 describe("ReviewDocumentView", () => {
-  it("renders title, badges, check rows, guidance section, and warnings", () => {
+  it("renders title, badges, check rows, inline descriptions, and warnings", () => {
     render(<ReviewDocumentView document={usdcPermitOutput} />);
 
     expect(screen.getByText("EIP-712 Typed Data Signature")).toBeTruthy();
     expect(document.querySelector('[data-slot="badge"]')?.textContent).toBe("tokenPermit");
     expect(screen.getByText(usdcPermitOutput.summary)).toBeTruthy();
     expect(screen.getByText("Message")).toBeTruthy();
-    expect(screen.getByText("domain.chainId")).toBeTruthy();
+    expect(screen.getByText("Owner")).toBeTruthy();
     expect(screen.getByText("9,420,522.466979 USDC")).toBeTruthy();
-    expect(screen.getByText("Guidance")).toBeTruthy();
+    expect(screen.queryByText("Guidance")).toBeNull();
     expect(document.querySelector('[data-check-id="message.owner"]')).toBeTruthy();
     expect(
-      screen.queryByText("Owner must be an address you control (not spender or relayer)"),
-    ).toBeNull();
-
-    const guidanceSection = document.querySelector('[data-group="guidance"]');
-    const guidanceButton = within(guidanceSection as HTMLElement).getByRole("button", {
-      name: "Guidance",
-    });
-    expect(guidanceButton.getAttribute("aria-expanded")).toBe("false");
+      screen.getByText("Owner must be an address you control (not spender or relayer)"),
+    ).toBeTruthy();
     expect(screen.getByText("longDeadline")).toBeTruthy();
     const highlightedRow = document.querySelector('[data-highlight="true"]');
     expect(highlightedRow).toBeTruthy();

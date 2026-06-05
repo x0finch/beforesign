@@ -13,14 +13,9 @@ function sectionLabel(group: string): string {
 }
 
 export function groupChecksBySection(checks: ReviewCheckItem[]): GroupedChecks {
-  const guidance: ReviewCheckItem[] = [];
   const byGroup = new Map<string, ReviewCheckItem[]>();
 
   for (const check of checks) {
-    if (check.group === "guidance") {
-      guidance.push(check);
-      continue;
-    }
     const list = byGroup.get(check.group) ?? [];
     list.push(check);
     byGroup.set(check.group, list);
@@ -37,5 +32,5 @@ export function groupChecksBySection(checks: ReviewCheckItem[]): GroupedChecks {
     checks: byGroup.get(group) ?? [],
   }));
 
-  return { sections, guidance };
+  return { sections };
 }

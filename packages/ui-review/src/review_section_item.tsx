@@ -1,21 +1,40 @@
+"use client";
+
 import type { ReviewCheckItem } from "@beforesign/core";
-import { Field, FieldDescription, FieldLabel } from "@beforesign/ui/field";
+import { Tooltip, TooltipPopup, TooltipTrigger } from "@beforesign/ui/tooltip";
 import { cn } from "@beforesign/ui/utils";
 
 const rowBaseClass = cn(
-  "px-2 py-2.5 transition-colors",
+  "rounded-lg px-3 py-2.5 transition-colors",
   "hover:bg-black/5 dark:hover:bg-white/10",
 );
 
 const highlightClass = cn(
-  "bg-blue-100 dark:bg-blue-950/55",
+  "rounded-lg bg-blue-100 px-3 py-2.5 transition-colors",
+  "dark:bg-blue-950/55",
   "hover:bg-blue-200 dark:hover:bg-blue-900/60",
 );
 
 const keyValueGridClass =
   "grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-4 whitespace-normal min-h-[3.875rem]";
 
-const idRowClass = "col-span-2 row-start-1 min-h-4 text-xs leading-normal";
+const labelClass =
+  "inline-flex font-medium text-base/4.5 text-foreground sm:text-sm/4";
+
+function CheckLabel({ check, showId }: { check: ReviewCheckItem; showId: boolean }) {
+  if (!showId) {
+    return <span className={labelClass}>{check.label}</span>;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className={cn(labelClass, "w-fit cursor-default")} />}>
+        {check.label}
+      </TooltipTrigger>
+      <TooltipPopup className="font-mono">{check.id}</TooltipPopup>
+    </Tooltip>
+  );
+}
 
 export function ReviewSectionItem({
   check,
@@ -27,7 +46,6 @@ export function ReviewSectionItem({
   const display = check.displayValue ?? check.value;
   const highlighted = check.highlight === true;
   const destructive = check.risk === "destructive";
-  const highlightCellClass = highlighted ? highlightClass : undefined;
 
   const valueClass = cn(
     "min-w-0 self-center break-all text-right [overflow-wrap:anywhere]",
@@ -40,34 +58,17 @@ export function ReviewSectionItem({
       data-slot="review-section-item"
       data-highlight={highlighted ? "true" : undefined}
       className={cn(
-        rowBaseClass,
         keyValueGridClass,
-        showId ? "grid-rows-[auto_1fr] gap-y-2" : "grid-rows-1",
-        highlightCellClass,
+        highlighted ? highlightClass : rowBaseClass,
       )}
     >
-      <Field className="contents">
-        {showId && (
-          <FieldDescription className={cn(idRowClass, "min-w-0")}>{check.id}</FieldDescription>
+      <div className="col-start-1 flex min-w-0 flex-col gap-1 self-center">
+        <CheckLabel check={check} showId={showId} />
+        {check.description && (
+          <p className="text-muted-foreground text-xs leading-normal">{check.description}</p>
         )}
-        <FieldLabel
-          className={cn(
-            "col-start-1 min-w-0 self-center",
-            showId ? "row-start-2" : "row-start-1",
-          )}
-        >
-          {check.label}
-        </FieldLabel>
-      </Field>
-      <div
-        className={cn(
-          "col-start-2",
-          showId ? "row-start-2" : "row-start-1",
-          valueClass,
-        )}
-      >
-        {display}
       </div>
+      <div className={cn("col-start-2", valueClass)}>{display}</div>
     </div>
   );
 }
