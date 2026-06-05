@@ -1,0 +1,166 @@
+import type { JsonValue, ReviewCheckItem, WarningItem, WarningSeverity } from "@beforesign/core";
+import { addressesEqual } from "../address_rules.ts";
+import { isExpired, isLongDeadline, parseUnixSeconds } from "../time_rules.ts";
+import type { TypedDataContext, TypedDataScenarioId } from "./context.ts";
+
+export type ProfileEnrichResult = {
+  checks: ReviewCheckItem[];
+  warnings: WarningItem[];
+  facts: Record<string, JsonValue>;
+};
+
+export abstract class TypedDataProfile {
+  abstract readonly id: TypedDataScenarioId;
+  abstract readonly priority: number;
+
+  abstract match(ctx: TypedDataContext): boolean;
+  abstract summary(ctx: TypedDataContext): string;
+
+  title(ctx: TypedDataContext): string {
+    void ctx;
+    return "EIP-712 Typed Data Signature";
+  }
+
+  enrich(ctx: TypedDataContext, checks: ReviewCheckItem[]): ProfileEnrichResult {
+    const mutated = this.mutateChecks(checks, ctx);
+    const guidance = this.buildGuidance(ctx);
+    const warnings = this.buildWarnings(ctx, mutated);
+    return {
+      checks: [...mutated, ...guidance],
+      warnings,
+      facts: { scenarioId: this.id, ...this.buildFacts(ctx) },
+    };
+  }
+
+  protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
+    void ctx;
+    return checks;
+  }
+
+  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
+    void ctx;
+    return [];
+  }
+
+  protected buildWarnings(ctx: TypedDataContext, checks: ReviewCheckItem[]): WarningItem[] {
+    void ctx;
+    void checks;
+    return [];
+  }
+
+  protected buildFacts(ctx: TypedDataContext): Record<string, JsonValue> {
+    void ctx;
+    return {};
+  }
+
+  protected highlightIds(checks: ReviewCheckItem[], ids: string[]): ReviewCheckItem[] {
+    const idSet = new Set(ids);
+    return checks.map((check) => (idSet.has(check.id) ? { ...check, highlight: true } : check));
+  }
+
+  protected setRiskOnId(
+    checks: ReviewCheckItem[],
+    id: string,
+    risk: WarningSeverity,
+  ): ReviewCheckItem[] {
+    return checks.map((check) => (check.id === id ? { ...check, risk } : check));
+  }
+
+  protected addGuidance(
+    items: Array<{ id: string; label: string; value: string }>,
+  ): ReviewCheckItem[] {
+    return items.map((item) => ({
+      id: item.id,
+      group: "guidance",
+      label: item.label,
+      value: item.value,
+      kind: "text" as const,
+    }));
+  }
+
+  protected warnSignerFieldMismatch(
+    ctx: TypedDataContext,
+    fieldName: string,
+    code = "ownerMismatch",
+  ): WarningItem | undefined {
+    const signer = ctx.payload?.signerAddress;
+    const fieldValue = this.getMessageString(ctx, fieldName);
+    if (!signer || !fieldValue) return undefined;
+    if (addressesEqual(signer, fieldValue)) return undefined;
+    return {
+      code,
+      severity: "destructive",
+      message: `${fieldName} does not match signer address`,
+      messageEn: `${fieldName} does not match signer address`,
+    };
+  }
+
+  protected warnExpiredDeadline(
+    ctx: TypedDataContext,
+    fieldNames: string[],
+    nowSeconds?: number,
+  ): WarningItem[] {
+    const warnings: WarningItem[] = [];
+    for (const name of fieldNames) {
+      const raw = this.getMessageString(ctx, name);
+      const ts = parseUnixSeconds(raw);
+      if (ts !== undefined && isExpired(ts, nowSeconds)) {
+        warnings.push({
+          code: "expiredDeadline",
+          severity: "destructive",
+          message: `${name} has already expired`,
+          messageEn: `${name} has already expired`,
+        });
+      }
+    }
+    return warnings;
+  }
+
+  protected warnLongDeadline(
+    ctx: TypedDataContext,
+    fieldNames: string[],
+    nowSeconds?: number,
+  ): WarningItem | undefined {
+    for (const name of fieldNames) {
+      const raw = this.getMessageString(ctx, name);
+      const ts = parseUnixSeconds(raw);
+      if (ts !== undefined && isLongDeadline(ts, nowSeconds)) {
+        return {
+          code: "longDeadline",
+          severity: "warning",
+          message: `${name} is more than one year in the future`,
+          messageEn: `${name} is more than one year in the future`,
+        };
+      }
+    }
+    return undefined;
+  }
+
+  protected hasFields(ctx: TypedDataContext, names: string[]): boolean {
+    return names.every((name) => ctx.primaryFieldNames.includes(name));
+  }
+
+  protected getMessageString(ctx: TypedDataContext, field: string): string | undefined {
+    const value = ctx.message[field];
+    if (value === undefined || value === null) return undefined;
+    if (typeof value === "string") return value;
+    if (typeof value === "number" || typeof value === "bigint") return String(value);
+    return undefined;
+  }
+
+  protected getDomainString(ctx: TypedDataContext, field: string): string | undefined {
+    const value = ctx.domain[field];
+    if (value === undefined || value === null) return undefined;
+    if (typeof value === "string") return value;
+    if (typeof value === "number" || typeof value === "bigint") return String(value);
+    return undefined;
+  }
+
+  protected firstExistingMessageField(ctx: TypedDataContext, names: string[]): string | undefined {
+    for (const name of names) {
+      const value = this.getMessageString(ctx, name);
+      if (value !== undefined) return name;
+    }
+    return undefined;
+  }
+}

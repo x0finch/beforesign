@@ -107,3 +107,33 @@ export type ParseResult = {
   discovery?: DiscoveryResult;
   missingFields?: string[];
 };
+
+export type ReviewCheckKind =
+  | "address"
+  | "hash"
+  | "amount"
+  | "selector"
+  | "text"
+  | "timestamp"
+  | "chainId"
+  | "bool";
+
+export type ReviewCheckItem = {
+  id: string;
+  group: string;
+  label: string;
+  value: string;
+  displayValue?: string;
+  kind: ReviewCheckKind;
+  highlight?: boolean;
+  risk?: WarningSeverity;
+};
+
+export type ReviewDocument = {
+  kind: InputKind;
+  title: string;
+  summary: string;
+  checks: ReviewCheckItem[];
+  warnings: WarningItem[];
+  facts?: Record<string, JsonValue>;
+};
