@@ -7,11 +7,13 @@ export type {
   TxHashMatch,
   TypedDataMatch,
   UnsignedTxMatch,
-  UnsignedTxNormalized,
+  UnsignedTxNormalized
 } from "./input_type.ts";
-export { normalizeTypedDataFromJson } from "./normalize_typed_data.ts";
 export {
   normalizeTxFromHex,
   normalizeTxFromJson,
-  transactionHasSignature,
+  transactionHasSignature
 } from "./normalize_tx.ts";
+export { normalizeTypedDataFromJson } from "./normalize_typed_data.ts";
+export { normalizeRawInputToJson, parseInputObject } from "./parse_input_object.ts";
+

@@ -1,4 +1,5 @@
 import type { Hex, Signature, TransactionSerializable } from "viem";
+import { parseInputObject } from "./parse_input_object.ts";
 import {
   hexToBigInt,
   hexToNumber,
@@ -87,7 +88,7 @@ export function normalizeTxFromHex(raw: string): ParseTransactionReturnType {
 }
 
 export function normalizeTxFromJson(raw: string): ParseTransactionReturnType {
-  const record = JSON.parse(raw) as Record<string, unknown>;
+  const record = parseInputObject(raw);
   const serializable = walletJsonToSerializable(record);
   const signature = walletJsonToSignature(record);
   const serialized = serializeTransaction(serializable, signature);
@@ -106,7 +107,7 @@ export function tryNormalizeTxFromHex(raw: string): ParseTransactionReturnType |
 export function tryNormalizeTxFromJson(raw: string): ParseTransactionReturnType | null {
   if (!raw.startsWith("{") && !raw.startsWith("[")) return null;
   try {
-    const record = JSON.parse(raw) as Record<string, unknown>;
+    const record = parseInputObject(raw);
     const keys = ["from", "to", "data", "chainId", "nonce", "gas", "value"];
     if (!keys.some((k) => k in record)) return null;
     return normalizeTxFromJson(raw);

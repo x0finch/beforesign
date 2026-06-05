@@ -6,12 +6,13 @@ import type {
   TypedDataDefinition,
 } from "viem";
 import { isHash, isHex } from "viem";
-import { normalizeTypedDataFromJson } from "./normalize_typed_data.ts";
 import {
   normalizeTxFromJson,
   transactionHasSignature,
   tryNormalizeTxFromHex,
 } from "./normalize_tx.ts";
+import { normalizeTypedDataFromJson } from "./normalize_typed_data.ts";
+import { parseInputObject } from "./parse_input_object.ts";
 
 export type TypedDataMatch =
   | { matched: false }
@@ -94,7 +95,7 @@ export function isSignedTxJson(value: string): SignedTxMatch {
     return { matched: false };
   }
   try {
-    const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+    const parsed = parseInputObject(trimmed);
     if (!isTxJsonCandidate(parsed) || !hasSignatureFields(parsed)) {
       return { matched: false };
     }
@@ -114,7 +115,7 @@ export function isUnsignedTxJson(value: string): UnsignedTxMatch {
     return { matched: false };
   }
   try {
-    const parsed = JSON.parse(trimmed) as Record<string, unknown>;
+    const parsed = parseInputObject(trimmed);
     if (!isTxJsonCandidate(parsed) || hasSignatureFields(parsed)) {
       return { matched: false };
     }

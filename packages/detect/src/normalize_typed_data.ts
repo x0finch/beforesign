@@ -1,5 +1,6 @@
 import type { TypedDataDefinition } from "viem";
 import { serializeTypedData, validateTypedData } from "viem";
+import { parseInputObject } from "./parse_input_object.ts";
 
 function isTypedDataCandidate(obj: Record<string, unknown>): boolean {
   return (
@@ -14,7 +15,7 @@ function isTypedDataCandidate(obj: Record<string, unknown>): boolean {
 }
 
 export function normalizeTypedDataFromJson(raw: string): TypedDataDefinition {
-  const parsed = JSON.parse(raw) as Record<string, unknown>;
+  const parsed = parseInputObject(raw);
   if (!isTypedDataCandidate(parsed)) {
     throw new Error("Not EIP-712 typed data");
   }
