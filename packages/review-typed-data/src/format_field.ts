@@ -1,5 +1,5 @@
-import { getChainById } from "@beforesign/core";
 import type { ReviewCheckItem, ReviewCheckKind } from "@beforesign/core";
+import { getChainById } from "@beforesign/core";
 import type { TokenHint } from "./token_hints.ts";
 
 export const MAX_UINT256 =

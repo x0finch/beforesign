@@ -1,5 +1,10 @@
 import type { TypedDataDefinition } from "viem";
-import { hashTypedData } from "viem";
+import {
+  getTypesForEIP712Domain,
+  hashDomain,
+  hashStruct,
+  hashTypedData,
+} from "viem";
 import type { TypedDataContext, TypedDataPayload } from "./profiles/context.ts";
 
 function getPrimaryFieldNames(normalized: TypedDataDefinition): string[] {
@@ -15,6 +20,21 @@ export function buildContext(
   const domain = normalized.domain as Record<string, unknown>;
   const message = normalized.message as Record<string, unknown>;
 
+  const types = {
+    EIP712Domain: getTypesForEIP712Domain({ domain: normalized.domain }),
+    ...normalized.types,
+  };
+
+  const domainHash = hashDomain({ domain: normalized.domain ?? {}, types });
+  const structHash =
+    normalized.primaryType !== "EIP712Domain"
+      ? hashStruct({
+          data: normalized.message,
+          primaryType: normalized.primaryType,
+          types,
+        })
+      : undefined;
+
   const signableHash = hashTypedData({
     domain: normalized.domain,
     types: normalized.types,
@@ -24,6 +44,8 @@ export function buildContext(
 
   return {
     normalized,
+    domainHash,
+    structHash,
     signableHash,
     payload,
     domain,

@@ -15,6 +15,8 @@ export type TypedDataPayload = {
 
 export type TypedDataContext = {
   normalized: TypedDataDefinition;
+  domainHash: `0x${string}`;
+  structHash?: `0x${string}`;
   signableHash: `0x${string}`;
   payload?: TypedDataPayload;
   domain: Record<string, unknown>;

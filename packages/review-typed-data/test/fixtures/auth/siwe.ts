@@ -94,6 +94,20 @@ const output = {
       "highlight": true
     },
     {
+      "id": "signature.domainHash",
+      "group": "signature",
+      "label": "Domain hash",
+      "value": "0x2101f2ebee6f62be4b0f87a225b17ffc6b22af9b4467aa817fbddc8c6d388118",
+      "kind": "hash"
+    },
+    {
+      "id": "signature.structHash",
+      "group": "signature",
+      "label": "Struct hash",
+      "value": "0x20d34882318c7a7c824d4dd5587ea474239f328f101e1abbee216a58336a057b",
+      "kind": "hash"
+    },
+    {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
@@ -132,6 +146,8 @@ const output = {
   "warnings": [],
   "facts": {
     "primaryType": "Login",
+    "domainHash": "0x2101f2ebee6f62be4b0f87a225b17ffc6b22af9b4467aa817fbddc8c6d388118",
+    "structHash": "0x20d34882318c7a7c824d4dd5587ea474239f328f101e1abbee216a58336a057b",
     "signableHash": "0x644bb0f7a4d568e5eb7f0e7df511a2c68990497da6b4658a24cda6f66a122f94",
     "scenarioId": "auth"
   }

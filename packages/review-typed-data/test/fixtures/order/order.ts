@@ -143,6 +143,20 @@ const output = {
       "kind": "text"
     },
     {
+      "id": "signature.domainHash",
+      "group": "signature",
+      "label": "Domain hash",
+      "value": "0xd38749c53eb6d85e1d776a3d0bac96aca981a18b5605c9f5d1b28e2b3a7bbdc1",
+      "kind": "hash"
+    },
+    {
+      "id": "signature.structHash",
+      "group": "signature",
+      "label": "Struct hash",
+      "value": "0xc0b0bfe3627992c0ac2a273edd07018e18ee8dcd722db3e929538ac046084d0c",
+      "kind": "hash"
+    },
+    {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
@@ -174,6 +188,8 @@ const output = {
   "warnings": [],
   "facts": {
     "primaryType": "Order",
+    "domainHash": "0xd38749c53eb6d85e1d776a3d0bac96aca981a18b5605c9f5d1b28e2b3a7bbdc1",
+    "structHash": "0xc0b0bfe3627992c0ac2a273edd07018e18ee8dcd722db3e929538ac046084d0c",
     "signableHash": "0xd954185bc3c28c0691dce91cbc46618d6d8c2905bc6b9c99ff7a836b032fde06",
     "scenarioId": "order"
   }

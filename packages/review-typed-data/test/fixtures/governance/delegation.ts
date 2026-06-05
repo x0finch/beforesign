@@ -105,6 +105,20 @@ const output = {
       "kind": "text"
     },
     {
+      "id": "signature.domainHash",
+      "group": "signature",
+      "label": "Domain hash",
+      "value": "0x1dbeacf1a398f7f3c4db81eba05ca9b3b087ce2d23ad93d6355dc5352059150d",
+      "kind": "hash"
+    },
+    {
+      "id": "signature.structHash",
+      "group": "signature",
+      "label": "Struct hash",
+      "value": "0x10d9f135b5f1fea0f66fb347ec58de8313f7c95701bf5ff80b76b5b96a61c8cc",
+      "kind": "hash"
+    },
+    {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
@@ -129,6 +143,8 @@ const output = {
   "warnings": [],
   "facts": {
     "primaryType": "Delegation",
+    "domainHash": "0x1dbeacf1a398f7f3c4db81eba05ca9b3b087ce2d23ad93d6355dc5352059150d",
+    "structHash": "0x10d9f135b5f1fea0f66fb347ec58de8313f7c95701bf5ff80b76b5b96a61c8cc",
     "signableHash": "0xa813fe76bd4ec8b2c395185590215bc3c8486bc35aef6805064d792e110cc64c",
     "scenarioId": "governance"
   }

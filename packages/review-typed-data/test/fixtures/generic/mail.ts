@@ -83,6 +83,20 @@ const output = {
       "highlight": true
     },
     {
+      "id": "signature.domainHash",
+      "group": "signature",
+      "label": "Domain hash",
+      "value": "0x3b98b16ad068d9d8854a6a416bd476de44a4933ec5104d7c786a422ab262ed14",
+      "kind": "hash"
+    },
+    {
+      "id": "signature.structHash",
+      "group": "signature",
+      "label": "Struct hash",
+      "value": "0xb00fd1b60681faf3e7d86b1aff876137b72c20b4acf02ecdc72f9c44edda838a",
+      "kind": "hash"
+    },
+    {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
@@ -93,6 +107,8 @@ const output = {
   "warnings": [],
   "facts": {
     "primaryType": "Mail",
+    "domainHash": "0x3b98b16ad068d9d8854a6a416bd476de44a4933ec5104d7c786a422ab262ed14",
+    "structHash": "0xb00fd1b60681faf3e7d86b1aff876137b72c20b4acf02ecdc72f9c44edda838a",
     "signableHash": "0xcda71b056b748d54b6eb3b3810356da66e9d1290aaa3eea1f3cf4ece610caa71",
     "scenarioId": "generic"
   }

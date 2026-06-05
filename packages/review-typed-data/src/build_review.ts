@@ -19,6 +19,8 @@ export async function buildReview(
 
   const facts: Record<string, JsonValue> = {
     primaryType: normalized.primaryType,
+    domainHash: preparedCtx.domainHash,
+    ...(preparedCtx.structHash ? { structHash: preparedCtx.structHash } : {}),
     signableHash: preparedCtx.signableHash,
     ...enriched.facts,
   };

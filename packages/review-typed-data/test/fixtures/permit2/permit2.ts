@@ -123,6 +123,20 @@ const output = {
       "displayValue": "2026-06-03T20:12:06Z"
     },
     {
+      "id": "signature.domainHash",
+      "group": "signature",
+      "label": "Domain hash",
+      "value": "0xd028d4fc77b1b2fc8eebd8c0ce613cea92b47a3161bc096d31ec4549a017884f",
+      "kind": "hash"
+    },
+    {
+      "id": "signature.structHash",
+      "group": "signature",
+      "label": "Struct hash",
+      "value": "0x49801b7500c9d8517ce906ceb6d4d247bcbe57d31f3aa8031224e66a2ea7bd0e",
+      "kind": "hash"
+    },
+    {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
@@ -167,6 +181,8 @@ const output = {
   ],
   "facts": {
     "primaryType": "PermitSingle",
+    "domainHash": "0xd028d4fc77b1b2fc8eebd8c0ce613cea92b47a3161bc096d31ec4549a017884f",
+    "structHash": "0x49801b7500c9d8517ce906ceb6d4d247bcbe57d31f3aa8031224e66a2ea7bd0e",
     "signableHash": "0x89c974e69462e12ee023c8c92cfdbb24dffc330db4ceafb66d608967315dd573",
     "scenarioId": "permit2",
     "tokenSymbol": "USDC",

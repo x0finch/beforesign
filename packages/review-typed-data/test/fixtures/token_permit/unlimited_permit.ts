@@ -79,6 +79,20 @@ const output = {
       "risk": "destructive"
     },
     {
+      "id": "signature.domainHash",
+      "group": "signature",
+      "label": "Domain hash",
+      "value": "0x330296c1ee57897aba3923af747e365907189fcd0bf5fedf7087fa9dd9d1d2db",
+      "kind": "hash"
+    },
+    {
+      "id": "signature.structHash",
+      "group": "signature",
+      "label": "Struct hash",
+      "value": "0xea921c7d8a0cb841741adaf170a9ae823c37318260eee4854d314c772f53eef4",
+      "kind": "hash"
+    },
+    {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
@@ -124,6 +138,8 @@ const output = {
   "warnings": [],
   "facts": {
     "primaryType": "Permit",
+    "domainHash": "0x330296c1ee57897aba3923af747e365907189fcd0bf5fedf7087fa9dd9d1d2db",
+    "structHash": "0xea921c7d8a0cb841741adaf170a9ae823c37318260eee4854d314c772f53eef4",
     "signableHash": "0x7aa66d86c7658cc96cd86f8e2550b33ebc4b4ad2e499442da7b109db876e0ad9",
     "scenarioId": "tokenPermit"
   }

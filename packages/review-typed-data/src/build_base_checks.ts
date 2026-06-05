@@ -68,16 +68,42 @@ function buildMessageChecks(ctx: TypedDataContext): ReviewCheckItem[] {
   return checks;
 }
 
+function buildSignatureChecks(ctx: TypedDataContext): ReviewCheckItem[] {
+  const checks: ReviewCheckItem[] = [
+    {
+      id: "signature.domainHash",
+      group: "signature",
+      label: "Domain hash",
+      value: ctx.domainHash,
+      kind: "hash",
+    },
+  ];
+
+  if (ctx.structHash) {
+    checks.push({
+      id: "signature.structHash",
+      group: "signature",
+      label: "Struct hash",
+      value: ctx.structHash,
+      kind: "hash",
+    });
+  }
+
+  checks.push({
+    id: "signature.signableHash",
+    group: "signature",
+    label: "Signable hash",
+    value: ctx.signableHash,
+    kind: "hash",
+  });
+
+  return checks;
+}
+
 export function buildBaseChecks(ctx: TypedDataContext): ReviewCheckItem[] {
   return [
     ...buildDomainChecks(ctx),
     ...buildMessageChecks(ctx),
-    {
-      id: "signature.signableHash",
-      group: "signature",
-      label: "Signable hash",
-      value: ctx.signableHash,
-      kind: "hash",
-    },
+    ...buildSignatureChecks(ctx),
   ];
 }
