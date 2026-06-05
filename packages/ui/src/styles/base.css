@@ -1,0 +1,20 @@
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    @apply font-sans font-sans font-mono;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    @apply bg-background text-foreground;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--font-mono);
+  }
+}
