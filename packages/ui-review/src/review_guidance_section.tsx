@@ -16,7 +16,7 @@ export function ReviewGuidanceSection({
       title="Guidance"
       defaultOpen={mode === "inline"}
     >
-      <ReviewSectionList checks={checks} layout="guidance" showId={false} />
+      <ReviewSectionList checks={checks} showId={false} />
     </ReviewAccordionSection>
   );
 }

@@ -7,7 +7,6 @@ export function ReviewCheckGroup({ section }: { section: ReviewSectionGroup }) {
       id={section.id}
       title={section.label}
       checks={section.checks}
-      layout="keyValue"
     />
   );
 }

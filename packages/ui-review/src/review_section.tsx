@@ -7,10 +7,7 @@ import {
 } from "@beforesign/ui/accordion";
 import { cn } from "@beforesign/ui/utils";
 import type { ReactNode } from "react";
-import {
-  ReviewSectionItem,
-  type ReviewSectionItemLayout,
-} from "./review_section_item.tsx";
+import { ReviewSectionItem } from "./review_section_item.tsx";
 
 const sectionTitleClass = "font-semibold text-lg leading-none";
 
@@ -29,10 +26,10 @@ export function ReviewAccordionSection({
     <section data-group={id}>
       <Accordion defaultValue={defaultOpen ? [id] : []}>
         <AccordionItem value={id} className="border-0">
-          <AccordionTrigger className={cn(sectionTitleClass, "py-0")}>
+          <AccordionTrigger className={cn(sectionTitleClass, "py-0 text-lg")}>
             {title}
           </AccordionTrigger>
-          <AccordionPanel className="pt-4">{children}</AccordionPanel>
+          <AccordionPanel className="pt-4 text-foreground">{children}</AccordionPanel>
         </AccordionItem>
       </Accordion>
     </section>
@@ -58,22 +55,15 @@ export function ReviewSectionBlock({
 
 export function ReviewSectionList({
   checks,
-  layout = "keyValue",
   showId = true,
 }: {
   checks: ReviewCheckItem[];
-  layout?: ReviewSectionItemLayout;
   showId?: boolean;
 }) {
   return (
-    <div data-slot="review-section-list" className="flex flex-col">
+    <div data-slot="review-section-list" className="-mx-2 flex flex-col px-2">
       {checks.map((check) => (
-        <ReviewSectionItem
-          key={check.id}
-          check={check}
-          layout={layout}
-          showId={showId}
-        />
+        <ReviewSectionItem key={check.id} check={check} showId={showId} />
       ))}
     </div>
   );
@@ -83,14 +73,12 @@ export function ReviewSection({
   id,
   title,
   checks,
-  layout = "keyValue",
   showId = true,
   empty,
 }: {
   id: string;
   title: string;
   checks: ReviewCheckItem[];
-  layout?: ReviewSectionItemLayout;
   showId?: boolean;
   empty?: ReactNode;
 }) {
@@ -106,7 +94,7 @@ export function ReviewSection({
 
   return (
     <ReviewSectionBlock id={id} title={title}>
-      <ReviewSectionList checks={checks} layout={layout} showId={showId} />
+      <ReviewSectionList checks={checks} showId={showId} />
     </ReviewSectionBlock>
   );
 }
