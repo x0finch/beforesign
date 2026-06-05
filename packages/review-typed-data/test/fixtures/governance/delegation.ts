@@ -57,8 +57,7 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "domain.verifyingContract",
@@ -110,8 +109,7 @@ const output = {
       "group": "signature",
       "label": "Signable hash",
       "value": "0xa813fe76bd4ec8b2c395185590215bc3c8486bc35aef6805064d792e110cc64c",
-      "kind": "hash",
-      "highlight": true
+      "kind": "hash"
     },
     {
       "id": "guidance.delegatee",

@@ -1,4 +1,5 @@
 import type { ClientsBundle } from "@beforesign/clients";
+import type { ReviewCheckItem } from "@beforesign/core";
 import { domainChainId, fetchTokenHint } from "../token_hints.ts";
 import type { TypedDataContext } from "./context.ts";
 import { TokenApprovalProfile } from "./token_approval_profile.ts";
@@ -58,10 +59,38 @@ export class Permit2Profile extends TokenApprovalProfile {
     };
   }
 
-  protected highlightFieldIds(ctx: TypedDataContext): string[] {
-    const ids = super.highlightFieldIds(ctx);
-    if (this.hasFields(ctx, ["token"])) ids.push("message.token");
-    if (this.hasFields(ctx, ["sigDeadline"])) ids.push("message.sigDeadline");
+  protected summaryFocusIds(ctx: TypedDataContext): string[] {
+    const ids: string[] = [];
+    if (this.hasFields(ctx, ["spender"])) ids.push("message.spender");
+    if (this.hasFields(ctx, ["details"])) {
+      ids.push("message.details.token", "message.details.amount");
+    }
     return ids;
+  }
+
+  protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {
+    void ctx;
+    return this.addGuidance([
+      {
+        id: "guidance.spender",
+        label: "Spender",
+        value: "Spender can move your tokens on-chain within the allowance",
+      },
+      {
+        id: "guidance.value",
+        label: "Allowance",
+        value: "Unlimited allowance equals on-chain approve(max)",
+      },
+      {
+        id: "guidance.deadline",
+        label: "Deadline",
+        value: "Confirm deadline is acceptable and not already expired",
+      },
+      {
+        id: "guidance.nonce",
+        label: "Nonce",
+        value: "Nonce prevents replay; should align with on-chain state",
+      },
+    ]);
   }
 }

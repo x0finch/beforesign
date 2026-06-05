@@ -52,8 +52,7 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "message.primaryType",
@@ -67,8 +66,7 @@ const output = {
       "group": "message",
       "label": "Statement",
       "value": "Sign in to Example App",
-      "kind": "text",
-      "highlight": true
+      "kind": "text"
     },
     {
       "id": "message.uri",
@@ -89,7 +87,7 @@ const output = {
     {
       "id": "message.expirationTime",
       "group": "message",
-      "label": "ExpirationTime",
+      "label": "Expiration",
       "value": "1893456000",
       "kind": "timestamp",
       "displayValue": "2030-01-01T00:00:00Z",
@@ -100,8 +98,7 @@ const output = {
       "group": "signature",
       "label": "Signable hash",
       "value": "0x644bb0f7a4d568e5eb7f0e7df511a2c68990497da6b4658a24cda6f66a122f94",
-      "kind": "hash",
-      "highlight": true
+      "kind": "hash"
     },
     {
       "id": "guidance.domain",

@@ -73,16 +73,14 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "domain.verifyingContract",
       "group": "domain",
       "label": "Verifying contract",
       "value": "0x0000000000000077000000000000000000000000",
-      "kind": "address",
-      "highlight": true
+      "kind": "address"
     },
     {
       "id": "message.primaryType",
@@ -126,34 +124,30 @@ const output = {
     {
       "id": "message.startTime",
       "group": "message",
-      "label": "StartTime",
+      "label": "Start time",
       "value": "1700000000",
-      "kind": "text",
-      "highlight": true
+      "kind": "text"
     },
     {
       "id": "message.endTime",
       "group": "message",
-      "label": "EndTime",
+      "label": "End time",
       "value": "1800000000",
-      "kind": "text",
-      "highlight": true
+      "kind": "text"
     },
     {
       "id": "message.salt",
       "group": "message",
       "label": "Salt",
       "value": "42",
-      "kind": "text",
-      "highlight": true
+      "kind": "text"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0xd954185bc3c28c0691dce91cbc46618d6d8c2905bc6b9c99ff7a836b032fde06",
-      "kind": "hash",
-      "highlight": true
+      "kind": "hash"
     },
     {
       "id": "guidance.tokens",

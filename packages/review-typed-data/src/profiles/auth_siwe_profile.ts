@@ -23,17 +23,13 @@ export class AuthSiweProfile extends TypedDataProfile {
   }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
-    const ids = [
-      "domain.name",
-      "domain.chainId",
-      "message.statement",
-      "message.uri",
-      "message.nonce",
-      "signature.signableHash",
-    ];
+    return this.highlightIds(checks, this.summaryFocusIds(ctx));
+  }
+
+  protected summaryFocusIds(ctx: TypedDataContext): string[] {
+    const ids = ["domain.name", "message.uri", "message.nonce"];
     if (this.hasFields(ctx, ["expirationTime"])) ids.push("message.expirationTime");
-    if (this.hasFields(ctx, ["issuedAt"])) ids.push("message.issuedAt");
-    return this.highlightIds(checks, ids);
+    return ids;
   }
 
   protected buildGuidance(ctx: TypedDataContext): ReviewCheckItem[] {

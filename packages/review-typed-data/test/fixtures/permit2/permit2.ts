@@ -57,8 +57,7 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "domain.verifyingContract",
@@ -66,8 +65,7 @@ const output = {
       "label": "Verifying contract",
       "value": "0x000000000022d473030f116ddee9fd6b43ac78b3",
       "kind": "address",
-      "displayValue": "USDC (0x0000…c78b3)",
-      "highlight": true
+      "displayValue": "USDC (0x0000…c78b3)"
     },
     {
       "id": "message.primaryType",
@@ -77,10 +75,35 @@ const output = {
       "kind": "text"
     },
     {
-      "id": "message.details",
+      "id": "message.details.token",
       "group": "message",
-      "label": "Details",
-      "value": "{\"token\":\"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48\",\"amount\":\"1000000\",\"expiration\":1780517526,\"nonce\":0}",
+      "label": "Details Token",
+      "value": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "kind": "address",
+      "highlight": true
+    },
+    {
+      "id": "message.details.amount",
+      "group": "message",
+      "label": "Allowance",
+      "value": "1000000",
+      "kind": "amount",
+      "displayValue": "1.000000 USDC",
+      "highlight": true
+    },
+    {
+      "id": "message.details.expiration",
+      "group": "message",
+      "label": "Details Expiration",
+      "value": "1780517526",
+      "kind": "timestamp",
+      "displayValue": "2026-06-03T20:12:06Z"
+    },
+    {
+      "id": "message.details.nonce",
+      "group": "message",
+      "label": "Details Nonce",
+      "value": "0",
       "kind": "text"
     },
     {
@@ -94,26 +117,17 @@ const output = {
     {
       "id": "message.sigDeadline",
       "group": "message",
-      "label": "SigDeadline",
+      "label": "Deadline",
       "value": "1780517526",
       "kind": "timestamp",
-      "displayValue": "2026-06-03T20:12:06Z",
-      "highlight": true
+      "displayValue": "2026-06-03T20:12:06Z"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0x89c974e69462e12ee023c8c92cfdbb24dffc330db4ceafb66d608967315dd573",
-      "kind": "hash",
-      "highlight": true
-    },
-    {
-      "id": "guidance.owner",
-      "group": "guidance",
-      "label": "Owner",
-      "value": "Owner must be an address you control (not spender or relayer)",
-      "kind": "text"
+      "kind": "hash"
     },
     {
       "id": "guidance.spender",
@@ -148,8 +162,7 @@ const output = {
     {
       "code": "longDeadline",
       "severity": "warning",
-      "message": "sigDeadline is more than one year in the future",
-      "messageEn": "sigDeadline is more than one year in the future"
+      "message": "sigDeadline is more than one year in the future"
     }
   ],
   "facts": {

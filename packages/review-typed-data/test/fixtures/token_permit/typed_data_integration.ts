@@ -59,8 +59,7 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "domain.verifyingContract",
@@ -68,8 +67,7 @@ const output = {
       "label": "Verifying contract",
       "value": "0x0000000000000000000000000000000000000001",
       "kind": "address",
-      "displayValue": "USDC (0x0000…00001)",
-      "highlight": true
+      "displayValue": "USDC (0x0000…00001)"
     },
     {
       "id": "message.primaryType",
@@ -97,7 +95,7 @@ const output = {
     {
       "id": "message.value",
       "group": "message",
-      "label": "Value",
+      "label": "Allowance",
       "value": "1000000000000000000",
       "kind": "amount",
       "displayValue": "1,000,000,000,000.000000 USDC",
@@ -116,16 +114,14 @@ const output = {
       "label": "Deadline",
       "value": "9999999999",
       "kind": "timestamp",
-      "displayValue": "2286-11-20T17:46:39Z",
-      "highlight": true
+      "displayValue": "2286-11-20T17:46:39Z"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0x2a0809284be1f9c2ce01fda73a7fd98bce58142d28ff7f56de7dcd3a2b3b3924",
-      "kind": "hash",
-      "highlight": true
+      "kind": "hash"
     },
     {
       "id": "guidance.owner",
@@ -167,8 +163,7 @@ const output = {
     {
       "code": "longDeadline",
       "severity": "warning",
-      "message": "deadline is more than one year in the future",
-      "messageEn": "deadline is more than one year in the future"
+      "message": "deadline is more than one year in the future"
     }
   ],
   "facts": {

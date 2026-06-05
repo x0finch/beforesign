@@ -3,7 +3,13 @@ import { buildFieldCheck } from "./format_field.ts";
 import type { TypedDataContext } from "./profiles/context.ts";
 import { hintForField } from "./token_hints.ts";
 
-const NESTED_EXPAND_FIELDS = new Set(["offer", "consideration", "counter", "zone"]);
+const NESTED_EXPAND_FIELDS = new Set([
+  "offer",
+  "consideration",
+  "counter",
+  "zone",
+  "details",
+]);
 
 type FlattenOpts = {
   ctx: TypedDataContext;

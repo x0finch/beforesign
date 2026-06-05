@@ -8,6 +8,7 @@ import {
   REVIEW_FIXTURE_CASES,
   usdcPermitFixture,
 } from "./fixtures/index.ts";
+import { permit2Fixture } from "./fixtures/permit2/permit2.ts";
 import { mailFixture } from "./fixtures/generic/mail.ts";
 import { siweFixture } from "./fixtures/auth/siwe.ts";
 
@@ -78,5 +79,42 @@ describe("buildReview", () => {
     const valueCheck = doc.checks.find((check) => check.id === "message.value");
     expect(valueCheck?.displayValue).toBeUndefined();
     expect(doc.facts?.tokenSymbol).toBeUndefined();
+  });
+
+  it("labels token permit value field as Allowance", async () => {
+    const doc = await buildReview(normalizedFromJson(usdcPermitFixture.input), mockClients());
+    const valueCheck = doc.checks.find((check) => check.id === "message.value");
+    expect(valueCheck?.label).toBe("Allowance");
+  });
+
+  it("labels permit2 allowance and deadline fields for review", async () => {
+    const doc = await buildReview(normalizedFromJson(permit2Fixture.input), mockClients());
+    const allowanceCheck = doc.checks.find((check) => check.id === "message.details.amount");
+    const deadlineCheck = doc.checks.find((check) => check.id === "message.sigDeadline");
+    expect(allowanceCheck?.label).toBe("Allowance");
+    expect(deadlineCheck?.label).toBe("Deadline");
+    expect(doc.checks.find((check) => check.id === "guidance.owner")).toBeUndefined();
+  });
+
+  function highlightedIds(doc: Awaited<ReturnType<typeof buildReview>>): string[] {
+    return doc.checks.filter((check) => check.highlight).map((check) => check.id);
+  }
+
+  it("highlights only summary focus fields for USDC permit", async () => {
+    const doc = await buildReview(normalizedFromJson(usdcPermitFixture.input), mockClients());
+    expect(highlightedIds(doc)).toEqual([
+      "message.owner",
+      "message.spender",
+      "message.value",
+    ]);
+  });
+
+  it("highlights only summary focus fields for permit2", async () => {
+    const doc = await buildReview(normalizedFromJson(permit2Fixture.input), mockClients());
+    expect(highlightedIds(doc)).toEqual([
+      "message.details.token",
+      "message.details.amount",
+      "message.spender",
+    ]);
   });
 });

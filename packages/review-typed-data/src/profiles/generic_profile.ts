@@ -17,10 +17,6 @@ export class GenericProfile extends TypedDataProfile {
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
     void ctx;
-    return this.highlightIds(checks, [
-      "domain.chainId",
-      "domain.verifyingContract",
-      "signature.signableHash",
-    ]);
+    return this.highlightIds(checks, this.messageCheckIds(checks));
   }
 }

@@ -43,8 +43,7 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "message.primaryType",
@@ -72,7 +71,7 @@ const output = {
     {
       "id": "message.value",
       "group": "message",
-      "label": "Value",
+      "label": "Allowance",
       "value": "100",
       "kind": "amount",
       "highlight": true
@@ -82,8 +81,7 @@ const output = {
       "group": "signature",
       "label": "Signable hash",
       "value": "0x9d9837da6254d7c2a25b3db32a46a1ce817d4a495f3e498529bbf1bdf4cc1082",
-      "kind": "hash",
-      "highlight": true
+      "kind": "hash"
     },
     {
       "id": "guidance.owner",

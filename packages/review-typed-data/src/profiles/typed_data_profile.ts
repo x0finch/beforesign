@@ -67,6 +67,12 @@ export abstract class TypedDataProfile {
     return checks.map((check) => (idSet.has(check.id) ? { ...check, highlight: true } : check));
   }
 
+  protected messageCheckIds(checks: ReviewCheckItem[]): string[] {
+    return checks
+      .filter((check) => check.group === "message" && check.id !== "message.primaryType")
+      .map((check) => check.id);
+  }
+
   protected setRiskOnId(
     checks: ReviewCheckItem[],
     id: string,
@@ -100,7 +106,6 @@ export abstract class TypedDataProfile {
       code,
       severity: "destructive",
       message: `${fieldName} does not match signer address`,
-      messageEn: `${fieldName} does not match signer address`,
     };
   }
 
@@ -118,7 +123,6 @@ export abstract class TypedDataProfile {
           code: "expiredDeadline",
           severity: "destructive",
           message: `${name} has already expired`,
-          messageEn: `${name} has already expired`,
         });
       }
     }
@@ -138,7 +142,6 @@ export abstract class TypedDataProfile {
           code: "longDeadline",
           severity: "warning",
           message: `${name} is more than one year in the future`,
-          messageEn: `${name} is more than one year in the future`,
         };
       }
     }

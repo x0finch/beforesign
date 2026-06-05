@@ -49,8 +49,7 @@ const output = {
       "label": "Chain ID",
       "value": "1",
       "kind": "chainId",
-      "displayValue": "Ethereum (1)",
-      "highlight": true
+      "displayValue": "Ethereum (1)"
     },
     {
       "id": "message.primaryType",
@@ -64,29 +63,31 @@ const output = {
       "group": "message",
       "label": "From",
       "value": "0x0000000000000000000000000000000000000001",
-      "kind": "address"
+      "kind": "address",
+      "highlight": true
     },
     {
       "id": "message.to",
       "group": "message",
       "label": "To",
       "value": "0x0000000000000000000000000000000000000002",
-      "kind": "address"
+      "kind": "address",
+      "highlight": true
     },
     {
       "id": "message.contents",
       "group": "message",
       "label": "Contents",
       "value": "Hello",
-      "kind": "text"
+      "kind": "text",
+      "highlight": true
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0xcda71b056b748d54b6eb3b3810356da66e9d1290aaa3eea1f3cf4ece610caa71",
-      "kind": "hash",
-      "highlight": true
+      "kind": "hash"
     }
   ],
   "warnings": [],

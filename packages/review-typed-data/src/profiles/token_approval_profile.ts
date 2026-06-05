@@ -6,7 +6,12 @@ import type { TypedDataContext } from "./context.ts";
 import { TypedDataProfile } from "./typed_data_profile.ts";
 
 export abstract class TokenApprovalProfile extends TypedDataProfile {
-  protected allowanceFieldIds = ["message.value", "message.allowed", "message.amount"];
+  protected allowanceFieldIds = [
+    "message.value",
+    "message.allowed",
+    "message.amount",
+    "message.details.amount",
+  ];
 
   async prepareContext(
     ctx: TypedDataContext,
@@ -36,7 +41,11 @@ export abstract class TokenApprovalProfile extends TypedDataProfile {
   }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
-    let result = this.highlightIds(checks, this.highlightFieldIds(ctx));
+    let result = this.highlightIds(checks, this.summaryFocusIds(ctx));
+    const allowanceIds = new Set(this.allowanceFieldIds);
+    result = result.map((check) =>
+      allowanceIds.has(check.id) ? { ...check, label: "Allowance" } : check,
+    );
     for (const id of this.allowanceFieldIds) {
       const check = result.find((c) => c.id === id);
       if (check?.value === MAX_UINT256) {
@@ -90,19 +99,13 @@ export abstract class TokenApprovalProfile extends TypedDataProfile {
     return warnings;
   }
 
-  protected highlightFieldIds(ctx: TypedDataContext): string[] {
-    const ids = [
-      "domain.chainId",
-      "domain.verifyingContract",
-      "signature.signableHash",
-    ];
+  protected summaryFocusIds(ctx: TypedDataContext): string[] {
+    const ids: string[] = [];
     if (this.hasFields(ctx, ["owner"])) ids.push("message.owner");
     if (this.hasFields(ctx, ["spender"])) ids.push("message.spender");
     if (this.hasFields(ctx, ["value"])) ids.push("message.value");
     if (this.hasFields(ctx, ["allowed"])) ids.push("message.allowed");
     if (this.hasFields(ctx, ["amount"])) ids.push("message.amount");
-    if (this.hasFields(ctx, ["deadline"])) ids.push("message.deadline");
-    if (this.hasFields(ctx, ["expiration"])) ids.push("message.expiration");
     return ids;
   }
 }
