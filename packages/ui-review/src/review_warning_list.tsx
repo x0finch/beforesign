@@ -1,6 +1,6 @@
 import type { ReviewDocument, WarningItem } from "@beforesign/core";
 import { Alert, AlertDescription, AlertTitle } from "@beforesign/ui/alert";
-import { ReviewSectionBlock } from "./review_section.tsx";
+import { ReviewSection } from "./review_section.tsx";
 
 function alertVariant(
   severity: WarningItem["severity"],
@@ -9,6 +9,19 @@ function alertVariant(
   if (severity === "warning") return "warning";
   if (severity === "info") return "info";
   return "default";
+}
+
+function ReviewWarningAlerts({ warnings }: { warnings: WarningItem[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {warnings.map((w) => (
+        <Alert key={`${w.code}-${w.message}`} variant={alertVariant(w.severity)}>
+          <AlertTitle>{w.code}</AlertTitle>
+          <AlertDescription>{w.message}</AlertDescription>
+        </Alert>
+      ))}
+    </div>
+  );
 }
 
 export function ReviewWarningList({
@@ -20,23 +33,14 @@ export function ReviewWarningList({
 }) {
   if (warnings.length === 0) return null;
 
-  const alerts = (
-    <div className="flex flex-col gap-2">
-      {warnings.map((w) => (
-        <Alert key={`${w.code}-${w.message}`} variant={alertVariant(w.severity)}>
-          <AlertTitle>{w.code}</AlertTitle>
-          <AlertDescription>{w.message}</AlertDescription>
-        </Alert>
-      ))}
-    </div>
-  );
+  const alerts = <ReviewWarningAlerts warnings={warnings} />;
 
   if (!showHeading) return alerts;
 
   return (
-    <ReviewSectionBlock id="warnings" title="Warnings">
+    <ReviewSection id="warnings" title="Warnings">
       {alerts}
-    </ReviewSectionBlock>
+    </ReviewSection>
   );
 }
 

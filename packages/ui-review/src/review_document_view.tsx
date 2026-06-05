@@ -8,14 +8,11 @@ import {
   CardPanel,
   CardTitle,
 } from "@beforesign/ui/card";
-import { Frame, FramePanel } from "@beforesign/ui/frame";
 import { Separator } from "@beforesign/ui/separator";
-import { Tabs, TabsList, TabsPanel, TabsTab } from "@beforesign/ui/tabs";
 import * as React from "react";
 import { groupChecksBySection } from "./group_checks.ts";
-import { ReviewCheckGroup } from "./review_check_group.tsx";
 import { ReviewFactsList } from "./review_facts_list.tsx";
-import { ReviewGuidanceSection } from "./review_guidance_section.tsx";
+import { ReviewSection } from "./review_section.tsx";
 import { dedupeWarnings, ReviewWarningList } from "./review_warning_list.tsx";
 
 function ReviewBody({
@@ -35,46 +32,76 @@ function ReviewBody({
   sections: ReturnType<typeof groupChecksBySection>["sections"];
   guidance: ReturnType<typeof groupChecksBySection>["guidance"];
 }) {
-  const blocks: React.ReactNode[] = [];
+  const blocks: { id: string; node: React.ReactNode }[] = [];
 
   if (showWarnings && warnings.length > 0) {
-    blocks.push(<ReviewWarningList key="warnings" warnings={warnings} />);
+    blocks.push({
+      id: "warnings",
+      node: <ReviewWarningList warnings={warnings} />,
+    });
   }
 
   for (const section of sections) {
-    blocks.push(<ReviewCheckGroup key={section.id} section={section} />);
+    blocks.push({
+      id: section.id,
+      node: (
+        <ReviewSection id={section.id} title={section.label} checks={section.checks} />
+      ),
+    });
   }
 
   if (guidanceMode !== "hidden" && guidance.length > 0) {
-    blocks.push(
-      <ReviewGuidanceSection key="guidance" checks={guidance} mode={guidanceMode} />,
-    );
+    blocks.push({
+      id: "guidance",
+      node: (
+        <ReviewSection
+          id="guidance"
+          title="Guidance"
+          checks={guidance}
+          showId={false}
+          collapsible
+          defaultOpen={guidanceMode === "inline"}
+        />
+      ),
+    });
   }
 
   if (showFacts) {
-    blocks.push(<ReviewFactsList key="facts" facts={document.facts ?? {}} />);
+    blocks.push({
+      id: "facts",
+      node: <ReviewFactsList facts={document.facts ?? {}} />,
+    });
   }
 
   return (
     <div className="flex flex-col text-sm">
-      {blocks.map((block, index) => (
-        <React.Fragment key={index}>
-          {index > 0 && <Separator className="my-4" />}
-          {block}
-        </React.Fragment>
-      ))}
+      {blocks.map((block, index) => {
+        const prev = index > 0 ? blocks[index - 1] : undefined;
+        const afterWarnings = prev?.id === "warnings";
+
+        return (
+          <React.Fragment key={block.id}>
+            {index > 0 &&
+              (afterWarnings ? (
+                <div className="mt-4" aria-hidden="true" />
+              ) : (
+                <Separator className="my-4" />
+              ))}
+            {block.node}
+          </React.Fragment>
+        );
+      })}
     </div>
   );
 }
 
 export function ReviewDocumentView({
   document,
-  guidanceMode = "inline",
+  guidanceMode = "collapsed",
   extraWarnings,
   showWarnings = true,
   showBadges = true,
   showFacts = true,
-  showRawTab = false,
 }: {
   document: ReviewDocument;
   guidanceMode?: "inline" | "collapsed" | "hidden";
@@ -82,7 +109,6 @@ export function ReviewDocumentView({
   showWarnings?: boolean;
   showBadges?: boolean;
   showFacts?: boolean;
-  showRawTab?: boolean;
 }) {
   const { sections, guidance } = groupChecksBySection(document.checks);
   const warnings = showWarnings ? dedupeWarnings(document, extraWarnings) : document.warnings;
@@ -114,28 +140,7 @@ export function ReviewDocumentView({
           </CardAction>
         )}
       </CardHeader>
-      <CardPanel>
-        {showRawTab ? (
-          <Tabs defaultValue="review">
-            <TabsList>
-              <TabsTab value="review">Review</TabsTab>
-              <TabsTab value="raw">Raw JSON</TabsTab>
-            </TabsList>
-            <TabsPanel value="review">{body}</TabsPanel>
-            <TabsPanel value="raw">
-              <Frame>
-                <FramePanel>
-                  <pre className="overflow-auto font-mono text-xs">
-                    {JSON.stringify(document, null, 2)}
-                  </pre>
-                </FramePanel>
-              </Frame>
-            </TabsPanel>
-          </Tabs>
-        ) : (
-          body
-        )}
-      </CardPanel>
+      <CardPanel>{body}</CardPanel>
     </Card>
   );
 }

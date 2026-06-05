@@ -11,40 +11,34 @@ import { ReviewSectionItem } from "./review_section_item.tsx";
 
 const sectionTitleClass = "font-semibold text-lg leading-none";
 
-export function ReviewAccordionSection({
+function ReviewSectionShell({
   id,
   title,
+  collapsible = false,
+  defaultOpen = true,
   children,
-  defaultOpen = false,
 }: {
   id: string;
   title: ReactNode;
-  children: ReactNode;
+  collapsible?: boolean;
   defaultOpen?: boolean;
-}) {
-  return (
-    <section data-group={id}>
-      <Accordion defaultValue={defaultOpen ? [id] : []}>
-        <AccordionItem value={id} className="border-0">
-          <AccordionTrigger className={cn(sectionTitleClass, "py-0 text-lg")}>
-            {title}
-          </AccordionTrigger>
-          <AccordionPanel className="pt-4 text-foreground">{children}</AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-    </section>
-  );
-}
-
-export function ReviewSectionBlock({
-  id,
-  title,
-  children,
-}: {
-  id: string;
-  title: ReactNode;
   children: ReactNode;
 }) {
+  if (collapsible) {
+    return (
+      <section data-group={id}>
+        <Accordion defaultValue={defaultOpen ? [id] : []}>
+          <AccordionItem value={id} className="border-0">
+            <AccordionTrigger className={cn(sectionTitleClass, "py-0 text-lg")}>
+              {title}
+            </AccordionTrigger>
+            <AccordionPanel className="pt-4 text-foreground">{children}</AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      </section>
+    );
+  }
+
   return (
     <section data-group={id} className="flex flex-col gap-4">
       <h3 className={sectionTitleClass}>{title}</h3>
@@ -75,26 +69,43 @@ export function ReviewSection({
   checks,
   showId = true,
   empty,
+  collapsible = false,
+  defaultOpen = true,
+  children,
 }: {
   id: string;
-  title: string;
-  checks: ReviewCheckItem[];
+  title: ReactNode;
+  checks?: ReviewCheckItem[];
   showId?: boolean;
   empty?: ReactNode;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
+  children?: ReactNode;
 }) {
-  if (checks.length === 0 && empty) {
-    return (
-      <ReviewSectionBlock id={id} title={title}>
-        {empty}
-      </ReviewSectionBlock>
-    );
+  let content: ReactNode;
+
+  if (children !== undefined) {
+    content = children;
+  } else if (checks !== undefined) {
+    if (checks.length === 0 && empty) {
+      content = empty;
+    } else if (checks.length === 0) {
+      return null;
+    } else {
+      content = <ReviewSectionList checks={checks} showId={showId} />;
+    }
+  } else {
+    return null;
   }
 
-  if (checks.length === 0) return null;
-
   return (
-    <ReviewSectionBlock id={id} title={title}>
-      <ReviewSectionList checks={checks} showId={showId} />
-    </ReviewSectionBlock>
+    <ReviewSectionShell
+      id={id}
+      title={title}
+      collapsible={collapsible}
+      defaultOpen={defaultOpen}
+    >
+      {content}
+    </ReviewSectionShell>
   );
 }

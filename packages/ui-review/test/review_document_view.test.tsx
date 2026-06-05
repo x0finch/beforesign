@@ -24,8 +24,14 @@ describe("ReviewDocumentView", () => {
     expect(screen.getByText("Guidance")).toBeTruthy();
     expect(document.querySelector('[data-check-id="message.owner"]')).toBeTruthy();
     expect(
-      screen.getByText("Owner must be an address you control (not spender or relayer)"),
-    ).toBeTruthy();
+      screen.queryByText("Owner must be an address you control (not spender or relayer)"),
+    ).toBeNull();
+
+    const guidanceSection = document.querySelector('[data-group="guidance"]');
+    const guidanceButton = within(guidanceSection as HTMLElement).getByRole("button", {
+      name: "Guidance",
+    });
+    expect(guidanceButton.getAttribute("aria-expanded")).toBe("false");
     expect(screen.getByText("longDeadline")).toBeTruthy();
     const highlightedRow = document.querySelector('[data-highlight="true"]');
     expect(highlightedRow).toBeTruthy();
