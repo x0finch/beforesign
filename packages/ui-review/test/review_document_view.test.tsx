@@ -16,7 +16,7 @@ describe("ReviewDocumentView", () => {
     render(<ReviewDocumentView document={usdcPermitOutput} />);
 
     expect(screen.getByText("EIP-712 Typed Data Signature")).toBeTruthy();
-    expect(screen.getByText("tokenPermit")).toBeTruthy();
+    expect(document.querySelector('[data-slot="badge"]')?.textContent).toBe("tokenPermit");
     expect(screen.getByText(usdcPermitOutput.summary)).toBeTruthy();
     expect(screen.getByText("Message")).toBeTruthy();
     expect(screen.getByText("domain.chainId")).toBeTruthy();
@@ -29,9 +29,13 @@ describe("ReviewDocumentView", () => {
     expect(screen.getByText("longDeadline")).toBeTruthy();
     const highlightedRow = document.querySelector('[data-highlight="true"]');
     expect(highlightedRow).toBeTruthy();
-    const highlightedCell = highlightedRow?.querySelector("td");
-    expect(highlightedCell?.className).toContain("bg-blue-100");
-    expect(screen.getByRole("button", { name: "Facts" })).toBeTruthy();
+    expect(highlightedRow?.className).toContain("bg-blue-100");
+    expect(screen.getByText("Facts")).toBeTruthy();
+
+    const nestedCards = document.querySelectorAll(
+      '[data-slot="card-panel"] [data-slot="card"]',
+    );
+    expect(nestedCards.length).toBe(0);
   });
 
   it("renders parsed fact rows instead of raw JSON", () => {

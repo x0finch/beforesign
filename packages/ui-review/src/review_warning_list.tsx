@@ -1,6 +1,6 @@
 import type { ReviewDocument, WarningItem } from "@beforesign/core";
 import { Alert, AlertDescription, AlertTitle } from "@beforesign/ui/alert";
-import { Card, CardHeader, CardPanel, CardTitle } from "@beforesign/ui/card";
+import { ReviewSectionBlock } from "./review_section.tsx";
 
 function alertVariant(
   severity: WarningItem["severity"],
@@ -34,12 +34,9 @@ export function ReviewWarningList({
   if (!showHeading) return alerts;
 
   return (
-    <Card data-group="warnings">
-      <CardHeader>
-        <CardTitle>Warnings</CardTitle>
-      </CardHeader>
-      <CardPanel>{alerts}</CardPanel>
-    </Card>
+    <ReviewSectionBlock id="warnings" title="Warnings">
+      {alerts}
+    </ReviewSectionBlock>
   );
 }
 

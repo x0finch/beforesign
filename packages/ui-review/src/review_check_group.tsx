@@ -1,23 +1,13 @@
-import { Card, CardHeader, CardPanel, CardTitle } from "@beforesign/ui/card";
-import { Table, TableBody } from "@beforesign/ui/table";
-import type { ReviewSection } from "./types.ts";
-import { ReviewCheckRow } from "./review_check_row.tsx";
+import type { ReviewSectionGroup } from "./types.ts";
+import { ReviewSection } from "./review_section.tsx";
 
-export function ReviewCheckGroup({ section }: { section: ReviewSection }) {
+export function ReviewCheckGroup({ section }: { section: ReviewSectionGroup }) {
   return (
-    <Card data-group={section.id}>
-      <CardHeader>
-        <CardTitle>{section.label}</CardTitle>
-      </CardHeader>
-      <CardPanel>
-        <Table variant="card">
-          <TableBody>
-            {section.checks.map((check) => (
-              <ReviewCheckRow key={check.id} check={check} />
-            ))}
-          </TableBody>
-        </Table>
-      </CardPanel>
-    </Card>
+    <ReviewSection
+      id={section.id}
+      title={section.label}
+      checks={section.checks}
+      layout="keyValue"
+    />
   );
 }

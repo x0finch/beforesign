@@ -9,10 +9,11 @@ import {
   CardTitle,
 } from "@beforesign/ui/card";
 import { Frame, FramePanel } from "@beforesign/ui/frame";
+import { Separator } from "@beforesign/ui/separator";
 import { Tabs, TabsList, TabsPanel, TabsTab } from "@beforesign/ui/tabs";
+import * as React from "react";
 import { groupChecksBySection } from "./group_checks.ts";
 import { ReviewCheckGroup } from "./review_check_group.tsx";
-import { ReviewCollapsibleSection } from "./review_collapsible_section.tsx";
 import { ReviewFactsList } from "./review_facts_list.tsx";
 import { ReviewGuidanceSection } from "./review_guidance_section.tsx";
 import { dedupeWarnings, ReviewWarningList } from "./review_warning_list.tsx";
@@ -34,23 +35,34 @@ function ReviewBody({
   sections: ReturnType<typeof groupChecksBySection>["sections"];
   guidance: ReturnType<typeof groupChecksBySection>["guidance"];
 }) {
+  const blocks: React.ReactNode[] = [];
+
+  if (showWarnings && warnings.length > 0) {
+    blocks.push(<ReviewWarningList key="warnings" warnings={warnings} />);
+  }
+
+  for (const section of sections) {
+    blocks.push(<ReviewCheckGroup key={section.id} section={section} />);
+  }
+
+  if (guidanceMode !== "hidden" && guidance.length > 0) {
+    blocks.push(
+      <ReviewGuidanceSection key="guidance" checks={guidance} mode={guidanceMode} />,
+    );
+  }
+
+  if (showFacts) {
+    blocks.push(<ReviewFactsList key="facts" facts={document.facts ?? {}} />);
+  }
+
   return (
-    <div className="flex flex-col gap-4 text-sm">
-      {showWarnings && warnings.length > 0 && (
-        <ReviewWarningList warnings={warnings} />
-      )}
-
-      {sections.map((section) => (
-        <ReviewCheckGroup key={section.id} section={section} />
+    <div className="flex flex-col text-sm">
+      {blocks.map((block, index) => (
+        <React.Fragment key={index}>
+          {index > 0 && <Separator className="my-4" />}
+          {block}
+        </React.Fragment>
       ))}
-
-      <ReviewGuidanceSection checks={guidance} mode={guidanceMode} />
-
-      {showFacts && (
-        <ReviewCollapsibleSection title="Facts" dataGroup="facts">
-          <ReviewFactsList facts={document.facts ?? {}} />
-        </ReviewCollapsibleSection>
-      )}
     </div>
   );
 }
