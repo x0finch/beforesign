@@ -20,5 +20,6 @@ export type TypedDataContext = {
   domain: Record<string, unknown>;
   message: Record<string, unknown>;
   primaryFieldNames: string[];
+  tokenHintsByAddress?: Record<string, TokenHint>;
   tokenHint?: TokenHint;
 };

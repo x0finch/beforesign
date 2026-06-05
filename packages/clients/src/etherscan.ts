@@ -1,7 +1,19 @@
 import { explorerTxUrl } from "@beforesign/core";
 import type { NormalizedTx, OnchainTxMeta } from "@beforesign/core";
+import {
+  decodeFunctionResult,
+  encodeFunctionData,
+  erc20Abi,
+  getAddress,
+  isAddress,
+} from "viem";
 
 const ETHERSCAN_V2 = "https://api.etherscan.io/v2/api";
+
+export type TokenInfo = {
+  symbol: string;
+  decimals: number;
+};
 
 export type EtherscanClient = {
   getTransaction: (
@@ -11,6 +23,7 @@ export type EtherscanClient = {
     tx: NormalizedTx;
     onchain: OnchainTxMeta;
   }>;
+  getTokenInfo: (chainId: number, address: string) => Promise<TokenInfo>;
 };
 
 function hexToNum(hex?: string): number | undefined {
@@ -41,6 +54,14 @@ export function createEtherscanClient(opts: {
     if (!res.ok) throw new Error(`Etherscan HTTP ${res.status}`);
     const json = (await res.json()) as { result?: unknown };
     return json.result;
+  }
+
+  async function ethCall(chainId: number, to: string, data: `0x${string}`): Promise<`0x${string}`> {
+    const result = await proxyCall(chainId, "eth_call", { to, data, tag: "latest" });
+    if (typeof result !== "string" || !result.startsWith("0x")) {
+      throw new Error("Invalid eth_call response");
+    }
+    return result as `0x${string}`;
   }
 
   return {
@@ -85,6 +106,33 @@ export function createEtherscanClient(opts: {
       };
 
       return { tx, onchain };
+    },
+
+    async getTokenInfo(chainId: number, address: string) {
+      if (!isAddress(address)) {
+        throw new Error("Invalid token address");
+      }
+      const to = getAddress(address);
+      const symbolData = encodeFunctionData({ abi: erc20Abi, functionName: "symbol" });
+      const decimalsData = encodeFunctionData({ abi: erc20Abi, functionName: "decimals" });
+
+      const [symbolHex, decimalsHex] = await Promise.all([
+        ethCall(chainId, to, symbolData),
+        ethCall(chainId, to, decimalsData),
+      ]);
+
+      const symbol = decodeFunctionResult({
+        abi: erc20Abi,
+        functionName: "symbol",
+        data: symbolHex,
+      });
+      const decimals = decodeFunctionResult({
+        abi: erc20Abi,
+        functionName: "decimals",
+        data: decimalsHex,
+      });
+
+      return { symbol, decimals: Number(decimals) };
     },
   };
 }

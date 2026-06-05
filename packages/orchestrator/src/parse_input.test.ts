@@ -8,7 +8,7 @@ describe("parseInput", () => {
       { raw: METAMASK_UNSIGNED_JSON },
       {
         blockscout: { searchQuick: vi.fn() },
-        etherscan: { getTransaction: vi.fn() },
+        etherscan: { getTransaction: vi.fn(), getTokenInfo: vi.fn() },
         debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
         debankEnabled: false,
         blockscoutEnabled: false,
@@ -34,6 +34,7 @@ describe("parseInput", () => {
             tx: { from: "0xabc", hash: TX_HASH, chainId: 1 },
             onchain: { chainId: 1, status: "success" },
           }),
+          getTokenInfo: vi.fn(),
         },
         debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
       },

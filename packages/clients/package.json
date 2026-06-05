@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@beforesign/core": "workspace:*",
+    "viem": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

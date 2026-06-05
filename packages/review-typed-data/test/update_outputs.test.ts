@@ -1,9 +1,9 @@
+import type { ClientsBundle } from "@beforesign/clients";
+import type { ReviewDocument } from "@beforesign/core";
+import { detectInputType } from "@beforesign/detect";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ClientsBundle } from "@beforesign/clients";
-import { detectInputType } from "@beforesign/detect";
-import type { ReviewDocument } from "@beforesign/core";
 import type { TypedDataDefinition } from "viem";
 import { afterEach, beforeEach, describe, it, vi } from "vitest";
 import { buildReview } from "../src/build_review.ts";
@@ -19,7 +19,10 @@ const OUTPUT_BLOCK_RE =
 function mockClients(): ClientsBundle {
   return {
     blockscout: { searchQuick: vi.fn() },
-    etherscan: { getTransaction: vi.fn() },
+    etherscan: {
+      getTransaction: vi.fn(),
+      getTokenInfo: vi.fn().mockResolvedValue({ symbol: "USDC", decimals: 6 }),
+    },
     debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
   };
 }
@@ -37,21 +40,21 @@ function formatOutputBlock(doc: ReviewDocument): string {
   return `// @generated output — fixtures:update 维护，勿手改\nconst output = ${body} satisfies ReviewDocument;`;
 }
 
-function writeFixtureOutput(fixture: ReviewFixture): void {
+async function writeFixtureOutput(fixture: ReviewFixture): Promise<void> {
   const fileName = FIXTURE_FILE_BY_NAME[fixture.name];
   if (!fileName) {
     throw new Error(`missing fixture file mapping for ${fixture.name}`);
   }
   const filePath = join(fixturesDir, fileName);
   const content = readFileSync(filePath, "utf8");
-  const doc = buildReview(
+  const doc = await buildReview(
     normalizedFromJson(fixture.input),
     mockClients(),
     fixture.payload,
   );
   const next = content.replace(OUTPUT_BLOCK_RE, formatOutputBlock(doc));
   if (next === content) {
-    throw new Error(`failed to update generated output block in ${fileName}`);
+    return;
   }
   writeFileSync(filePath, next);
 }
@@ -66,9 +69,9 @@ describe.runIf(process.env.UPDATE_REVIEW_FIXTURES)("update fixture outputs", () 
     vi.useRealTimers();
   });
 
-  it("writes ReviewDocument output into each fixture file", () => {
+  it("writes ReviewDocument output into each fixture file", async () => {
     for (const fixture of REVIEW_FIXTURE_CASES) {
-      writeFixtureOutput(fixture);
+      await writeFixtureOutput(fixture);
     }
   });
 });

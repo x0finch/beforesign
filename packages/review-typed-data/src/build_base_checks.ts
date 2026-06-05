@@ -3,6 +3,7 @@ import type { TypedDataDefinition } from "viem";
 import { flattenMessageValue, shouldFlattenField } from "./flatten_nested.ts";
 import { buildFieldCheck } from "./format_field.ts";
 import type { TypedDataContext } from "./profiles/context.ts";
+import { hintForField } from "./token_hints.ts";
 
 function getTypeFields(
   types: TypedDataDefinition["types"],
@@ -24,7 +25,7 @@ function buildDomainChecks(ctx: TypedDataContext): ReviewCheckItem[] {
       fieldName: field.name,
       fieldType: field.type,
       rawValue: domain[field.name],
-      tokenHint: ctx.tokenHint,
+      tokenHint: hintForField(ctx, field.name, domain[field.name]),
     }),
   );
 }
@@ -47,9 +48,7 @@ function buildMessageChecks(ctx: TypedDataContext): ReviewCheckItem[] {
     const rawValue = message[field.name];
     if (shouldFlattenField(field.name) && typeof rawValue === "object" && rawValue !== null) {
       checks.push(
-        ...flattenMessageValue(`message.${field.name}`, rawValue, {
-          tokenHint: ctx.tokenHint,
-        }),
+        ...flattenMessageValue(`message.${field.name}`, rawValue, { ctx }),
       );
       continue;
     }
@@ -61,7 +60,7 @@ function buildMessageChecks(ctx: TypedDataContext): ReviewCheckItem[] {
         fieldName: field.name,
         fieldType: field.type,
         rawValue,
-        tokenHint: ctx.tokenHint,
+        tokenHint: hintForField(ctx, field.name, rawValue),
       }),
     );
   }

@@ -1,10 +1,39 @@
+import type { ClientsBundle } from "@beforesign/clients";
 import type { ReviewCheckItem, WarningItem } from "@beforesign/core";
 import { MAX_UINT256 } from "../format_field.ts";
+import { domainChainId, fetchTokenHint } from "../token_hints.ts";
 import type { TypedDataContext } from "./context.ts";
 import { TypedDataProfile } from "./typed_data_profile.ts";
 
 export abstract class TokenApprovalProfile extends TypedDataProfile {
   protected allowanceFieldIds = ["message.value", "message.allowed", "message.amount"];
+
+  async prepareContext(
+    ctx: TypedDataContext,
+    clients: ClientsBundle,
+  ): Promise<TypedDataContext> {
+    const verifyingContract =
+      typeof ctx.domain.verifyingContract === "string"
+        ? ctx.domain.verifyingContract
+        : undefined;
+    if (!verifyingContract) return ctx;
+
+    const hint = await fetchTokenHint(
+      domainChainId(ctx.domain),
+      verifyingContract,
+      clients.etherscan,
+    );
+    if (!hint) return ctx;
+
+    return {
+      ...ctx,
+      tokenHint: hint,
+      tokenHintsByAddress: {
+        ...ctx.tokenHintsByAddress,
+        [verifyingContract.toLowerCase()]: hint,
+      },
+    };
+  }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
     let result = this.highlightIds(checks, this.highlightFieldIds(ctx));

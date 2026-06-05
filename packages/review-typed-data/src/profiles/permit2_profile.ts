@@ -1,3 +1,5 @@
+import type { ClientsBundle } from "@beforesign/clients";
+import { domainChainId, fetchTokenHint } from "../token_hints.ts";
 import type { TypedDataContext } from "./context.ts";
 import { TokenApprovalProfile } from "./token_approval_profile.ts";
 
@@ -22,6 +24,38 @@ export class Permit2Profile extends TokenApprovalProfile {
   summary(ctx: TypedDataContext): string {
     void ctx;
     return "Permit2 approval: verify token, spender, and allowance before signing";
+  }
+
+  async prepareContext(
+    ctx: TypedDataContext,
+    clients: ClientsBundle,
+  ): Promise<TypedDataContext> {
+    const prepared = await super.prepareContext(ctx, clients);
+    const details = prepared.message.details;
+    const tokenAddress =
+      typeof details === "object" &&
+      details !== null &&
+      "token" in details &&
+      typeof details.token === "string"
+        ? details.token
+        : undefined;
+    if (!tokenAddress) return prepared;
+
+    const hint = await fetchTokenHint(
+      domainChainId(prepared.domain),
+      tokenAddress,
+      clients.etherscan,
+    );
+    if (!hint) return prepared;
+
+    return {
+      ...prepared,
+      tokenHint: hint,
+      tokenHintsByAddress: {
+        ...prepared.tokenHintsByAddress,
+        [tokenAddress.toLowerCase()]: hint,
+      },
+    };
   }
 
   protected highlightFieldIds(ctx: TypedDataContext): string[] {

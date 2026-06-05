@@ -28,6 +28,7 @@ export default tseslint.config(
             String.raw`^vite\.config\.ts$`,
             String.raw`^vitest\.config\.ts$`,
             String.raw`^vitest\.workspace\.ts$`,
+            String.raw`^review-demo\.tsx$`,
           ],
         },
       ],

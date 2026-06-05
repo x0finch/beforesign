@@ -1,37 +1,36 @@
-import type { JsonValue, ReviewDocument } from "@beforesign/core";
 import type { ClientsBundle } from "@beforesign/clients";
+import type { JsonValue, ReviewDocument } from "@beforesign/core";
 import type { TypedDataDefinition } from "viem";
 import { buildBaseChecks } from "./build_base_checks.ts";
 import { buildContext } from "./build_context.ts";
-import { defaultRegistry } from "./profiles/profile_registry.ts";
 import type { TypedDataPayload } from "./profiles/context.ts";
+import { defaultRegistry } from "./profiles/profile_registry.ts";
 
-export function buildReview(
+export async function buildReview(
   normalized: TypedDataDefinition,
   clients: ClientsBundle,
   payload?: TypedDataPayload,
-): ReviewDocument {
-  void clients;
-
+): Promise<ReviewDocument> {
   const ctx = buildContext(normalized, payload);
-  const baseChecks = buildBaseChecks(ctx);
   const profile = defaultRegistry.resolve(ctx);
-  const enriched = profile.enrich(ctx, baseChecks);
+  const preparedCtx = await profile.prepareContext(ctx, clients);
+  const baseChecks = buildBaseChecks(preparedCtx);
+  const enriched = profile.enrich(preparedCtx, baseChecks);
 
   const facts: Record<string, JsonValue> = {
     primaryType: normalized.primaryType,
-    signableHash: ctx.signableHash,
+    signableHash: preparedCtx.signableHash,
     ...enriched.facts,
   };
-  if (ctx.tokenHint) {
-    facts.tokenSymbol = ctx.tokenHint.symbol;
-    facts.tokenDecimals = ctx.tokenHint.decimals;
+  if (preparedCtx.tokenHint) {
+    facts.tokenSymbol = preparedCtx.tokenHint.symbol;
+    facts.tokenDecimals = preparedCtx.tokenHint.decimals;
   }
 
   return {
     kind: "typedData",
-    title: profile.title(ctx),
-    summary: profile.summary(ctx),
+    title: profile.title(preparedCtx),
+    summary: profile.summary(preparedCtx),
     checks: enriched.checks,
     warnings: enriched.warnings,
     facts,

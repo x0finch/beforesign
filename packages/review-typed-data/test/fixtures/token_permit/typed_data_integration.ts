@@ -68,6 +68,7 @@ const output = {
       "label": "Verifying contract",
       "value": "0x0000000000000000000000000000000000000001",
       "kind": "address",
+      "displayValue": "USDC (0x0000…00001)",
       "highlight": true
     },
     {
@@ -99,6 +100,7 @@ const output = {
       "label": "Value",
       "value": "1000000000000000000",
       "kind": "amount",
+      "displayValue": "1,000,000,000,000.000000 USDC",
       "highlight": true
     },
     {
@@ -172,7 +174,9 @@ const output = {
   "facts": {
     "primaryType": "Permit",
     "signableHash": "0x2a0809284be1f9c2ce01fda73a7fd98bce58142d28ff7f56de7dcd3a2b3b3924",
-    "scenarioId": "tokenPermit"
+    "scenarioId": "tokenPermit",
+    "tokenSymbol": "USDC",
+    "tokenDecimals": 6
   }
 } satisfies ReviewDocument;
 

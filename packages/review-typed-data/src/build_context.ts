@@ -1,7 +1,6 @@
 import type { TypedDataDefinition } from "viem";
 import { hashTypedData } from "viem";
 import type { TypedDataContext, TypedDataPayload } from "./profiles/context.ts";
-import { lookupTokenHint } from "./token_hints.ts";
 
 function getPrimaryFieldNames(normalized: TypedDataDefinition): string[] {
   const fields = normalized.types[normalized.primaryType as keyof typeof normalized.types];
@@ -15,9 +14,6 @@ export function buildContext(
 ): TypedDataContext {
   const domain = normalized.domain as Record<string, unknown>;
   const message = normalized.message as Record<string, unknown>;
-  const verifyingContract =
-    typeof domain.verifyingContract === "string" ? domain.verifyingContract : undefined;
-  const domainName = typeof domain.name === "string" ? domain.name : undefined;
 
   const signableHash = hashTypedData({
     domain: normalized.domain,
@@ -33,6 +29,5 @@ export function buildContext(
     domain,
     message,
     primaryFieldNames: getPrimaryFieldNames(normalized),
-    tokenHint: lookupTokenHint(verifyingContract, domainName),
   };
 }

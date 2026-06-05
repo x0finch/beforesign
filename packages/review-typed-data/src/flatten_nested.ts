@@ -1,11 +1,12 @@
 import type { ReviewCheckItem } from "@beforesign/core";
 import { buildFieldCheck } from "./format_field.ts";
-import type { TokenHint } from "./token_hints.ts";
+import type { TypedDataContext } from "./profiles/context.ts";
+import { hintForField } from "./token_hints.ts";
 
 const NESTED_EXPAND_FIELDS = new Set(["offer", "consideration", "counter", "zone"]);
 
 type FlattenOpts = {
-  tokenHint?: TokenHint;
+  ctx: TypedDataContext;
   maxDepth?: number;
 };
 
@@ -51,7 +52,7 @@ export function flattenMessageValue(
             fieldName: key,
             fieldType: inferSimpleType(child),
             rawValue: child,
-            tokenHint: opts.tokenHint,
+            tokenHint: hintForField(opts.ctx, key, child),
             pathLabel: formatPathLabel(childId),
           }),
         );
@@ -60,14 +61,15 @@ export function flattenMessageValue(
     return checks;
   }
 
+  const fieldName = prefix.split(".").pop() ?? prefix;
   return [
     buildFieldCheck({
       id: prefix,
       group: "message",
-      fieldName: prefix.split(".").pop() ?? prefix,
+      fieldName,
       fieldType: inferSimpleType(value),
       rawValue: value,
-      tokenHint: opts.tokenHint,
+      tokenHint: hintForField(opts.ctx, fieldName, value),
       pathLabel: formatPathLabel(prefix),
     }),
   ];

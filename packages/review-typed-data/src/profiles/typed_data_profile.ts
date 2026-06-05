@@ -1,3 +1,4 @@
+import type { ClientsBundle } from "@beforesign/clients";
 import type { JsonValue, ReviewCheckItem, WarningItem, WarningSeverity } from "@beforesign/core";
 import { addressesEqual } from "../address_rules.ts";
 import { isExpired, isLongDeadline, parseUnixSeconds } from "../time_rules.ts";
@@ -19,6 +20,14 @@ export abstract class TypedDataProfile {
   title(ctx: TypedDataContext): string {
     void ctx;
     return "EIP-712 Typed Data Signature";
+  }
+
+  async prepareContext(
+    ctx: TypedDataContext,
+    clients: ClientsBundle,
+  ): Promise<TypedDataContext> {
+    void clients;
+    return ctx;
   }
 
   enrich(ctx: TypedDataContext, checks: ReviewCheckItem[]): ProfileEnrichResult {
