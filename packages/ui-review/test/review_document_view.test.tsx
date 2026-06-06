@@ -37,6 +37,19 @@ describe("ReviewDocumentView", () => {
     expect(nestedCards.length).toBe(0);
   });
 
+  it("hides Facts section when document has no external facts", () => {
+    render(
+      <ReviewDocumentView
+        document={{
+          ...usdcPermitOutput,
+          facts: {},
+        }}
+      />,
+    );
+
+    expect(screen.queryByText("Facts")).toBeNull();
+  });
+
   it("renders parsed fact rows instead of raw JSON", () => {
     const { container } = render(
       <ReviewDocumentView

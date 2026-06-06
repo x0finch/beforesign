@@ -48,7 +48,8 @@ export const usdcPermitOutput = {
     },
   ],
   facts: {
-    primaryType: "Permit",
-    scenarioId: "tokenPermit",
+    tokenSymbol: "USDC",
+    tokenDecimals: 6,
   },
+  scenarioId: "tokenPermit",
 } satisfies ReviewDocument;

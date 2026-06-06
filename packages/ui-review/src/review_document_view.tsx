@@ -47,7 +47,7 @@ function ReviewBody({
     });
   }
 
-  if (showFacts) {
+  if (showFacts && Object.keys(document.facts ?? {}).length > 0) {
     blocks.push({
       id: "facts",
       node: <ReviewFactsList facts={document.facts ?? {}} />,
@@ -92,9 +92,10 @@ export function ReviewDocumentView({
   const { sections } = groupChecksBySection(document.checks);
   const warnings = showWarnings ? dedupeWarnings(document, extraWarnings) : document.warnings;
   const scenarioId =
-    document.facts && typeof document.facts.scenarioId === "string"
+    document.scenarioId ??
+    (document.facts && typeof document.facts.scenarioId === "string"
       ? document.facts.scenarioId
-      : undefined;
+      : undefined);
 
   const body = (
     <ReviewBody
