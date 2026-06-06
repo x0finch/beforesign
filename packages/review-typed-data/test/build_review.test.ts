@@ -1,23 +1,23 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ClientsBundle } from "@beforesign/clients";
 import { detectInputType } from "@beforesign/detect";
 import type { TypedDataDefinition } from "viem";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildReview } from "../src/build_review.ts";
+import { siweFixture } from "./fixtures/auth/siwe.ts";
+import { mailFixture } from "./fixtures/generic/mail.ts";
 import {
   FIXTURE_NOW_MS,
   REVIEW_FIXTURE_CASES,
   usdcPermitFixture,
 } from "./fixtures/index.ts";
 import { permit2Fixture } from "./fixtures/permit2/permit2.ts";
-import { mailFixture } from "./fixtures/generic/mail.ts";
-import { siweFixture } from "./fixtures/auth/siwe.ts";
 
 const USDC_TOKEN = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
 const USDC_TOKEN_INFO = { symbol: "USDC", decimals: 6 };
 
 function mockClients(): ClientsBundle {
   return {
-    blockscout: { searchQuick: vi.fn() },
+    txLookup: { searchQuick: vi.fn(), getTransaction: vi.fn() },
     etherscan: {
       getTransaction: vi.fn(),
       getTokenInfo: vi.fn().mockResolvedValue(USDC_TOKEN_INFO),
@@ -59,7 +59,7 @@ describe("buildReview", () => {
     const clients = mockClients();
     await buildReview(normalizedFromJson(usdcPermitFixture.input), clients);
     expect(clients.etherscan.getTokenInfo).toHaveBeenCalledWith(1, USDC_TOKEN);
-    expect(clients.blockscout.searchQuick).not.toHaveBeenCalled();
+    expect(clients.txLookup.searchQuick).not.toHaveBeenCalled();
     expect(clients.etherscan.getTransaction).not.toHaveBeenCalled();
     expect(clients.debank.preExecTx).not.toHaveBeenCalled();
     expect(clients.debank.explainTx).not.toHaveBeenCalled();

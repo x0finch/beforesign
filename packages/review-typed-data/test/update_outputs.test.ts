@@ -18,7 +18,7 @@ const OUTPUT_BLOCK_RE =
 
 function mockClients(): ClientsBundle {
   return {
-    blockscout: { searchQuick: vi.fn() },
+    txLookup: { searchQuick: vi.fn(), getTransaction: vi.fn() },
     etherscan: {
       getTransaction: vi.fn(),
       getTokenInfo: vi.fn().mockResolvedValue({ symbol: "USDC", decimals: 6 }),
