@@ -53,6 +53,18 @@ export function ReviewSectionItem({
     destructive && "font-medium text-destructive",
   );
 
+  const scrollableValueClass = cn(
+    "max-h-32 overflow-y-auto overflow-x-hidden font-mono text-xs leading-relaxed",
+    valueClass,
+  );
+
+  function renderPlainValue(content: string) {
+    if (check.kind === "hash") {
+      return <div className={scrollableValueClass}>{content}</div>;
+    }
+    return content;
+  }
+
   const hasRichValue = check.href !== undefined || check.badge !== undefined;
 
   const valueContent = hasRichValue ? (
@@ -76,7 +88,7 @@ export function ReviewSectionItem({
       ) : null}
     </div>
   ) : (
-    display
+    renderPlainValue(display)
   );
 
   return (

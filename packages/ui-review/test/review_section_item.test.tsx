@@ -60,21 +60,22 @@ describe("ReviewSectionItem", () => {
     expect(screen.queryByText("13579024")).toBeNull();
   });
 
-  it("renders plain text when href and badge are absent", () => {
-    render(
+  it("renders hash values in a scrollable container", () => {
+    const longHex = `0x${"ab".repeat(200)}`;
+    const { container } = render(
       <ReviewSectionItem
         check={{
-          id: "message.owner",
-          group: "message",
-          label: "Owner",
-          value: "0xabc",
-          kind: "address",
+          id: "transaction.data",
+          group: "default",
+          label: "Data",
+          value: longHex,
+          kind: "hash",
         }}
         showId={false}
       />,
     );
 
-    expect(screen.getByText("0xabc")).toBeTruthy();
-    expect(screen.queryByRole("link")).toBeNull();
+    const scrollContainer = container.querySelector(".max-h-32.overflow-y-auto");
+    expect(scrollContainer?.textContent).toBe(longHex);
   });
 });
