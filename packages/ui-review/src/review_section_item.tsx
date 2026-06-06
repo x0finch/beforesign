@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReviewCheckItem } from "@beforesign/core";
+import { Badge } from "@beforesign/ui/badge";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "@beforesign/ui/tooltip";
 import { cn } from "@beforesign/ui/utils";
 
@@ -52,6 +53,32 @@ export function ReviewSectionItem({
     destructive && "font-medium text-destructive",
   );
 
+  const hasRichValue = check.href !== undefined || check.badge !== undefined;
+
+  const valueContent = hasRichValue ? (
+    <div className="flex min-w-0 items-center justify-end gap-2">
+      {check.href ? (
+        <a
+          href={check.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn("min-w-0 truncate hover:underline", destructive && "text-destructive")}
+        >
+          {display}
+        </a>
+      ) : (
+        <span className="min-w-0 truncate">{display}</span>
+      )}
+      {check.badge && check.badgeVariant ? (
+        <Badge variant={check.badgeVariant} size="sm">
+          {check.badge}
+        </Badge>
+      ) : null}
+    </div>
+  ) : (
+    display
+  );
+
   return (
     <div
       data-check-id={check.id}
@@ -68,7 +95,7 @@ export function ReviewSectionItem({
           <p className="text-muted-foreground text-xs leading-normal">{check.description}</p>
         )}
       </div>
-      <div className={cn("col-start-2", valueClass)}>{display}</div>
+      <div className={cn("col-start-2", valueClass)}>{valueContent}</div>
     </div>
   );
 }

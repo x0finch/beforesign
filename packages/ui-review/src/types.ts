@@ -2,7 +2,7 @@ import type { ReviewCheckItem } from "@beforesign/core";
 
 export type ReviewSectionGroup = {
   id: string;
-  label: string;
+  label: string | null;
   checks: ReviewCheckItem[];
 };
 

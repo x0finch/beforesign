@@ -1,9 +1,10 @@
 import type { ReviewCheckItem } from "@beforesign/core";
 import type { GroupedChecks } from "./types.ts";
 
-const SECTION_ORDER = ["domain", "message", "transaction", "calldata", "signature"];
+const SECTION_ORDER = ["domain", "message", "default", "transaction", "calldata", "signature"];
 
-function sectionLabel(group: string): string {
+function sectionLabel(group: string): string | null {
+  if (group === "default") return null;
   if (group === "domain") return "Domain";
   if (group === "message") return "Message";
   if (group === "transaction") return "Transaction";

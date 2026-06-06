@@ -40,8 +40,8 @@ function ReviewSectionShell({
   }
 
   return (
-    <section data-group={id} className="flex flex-col gap-4">
-      <h3 className={sectionTitleClass}>{title}</h3>
+    <section data-group={id} className={cn("flex flex-col", title ? "gap-4" : "gap-3")}>
+      {title ? <h3 className={sectionTitleClass}>{title}</h3> : null}
       {children}
     </section>
   );

@@ -87,4 +87,31 @@ describe("ReviewDocumentView", () => {
     expect(missingFieldsRow?.textContent).toContain("nonce, deadline");
     expect(container.textContent).not.toContain('"primaryType"');
   });
+
+  it("omits section heading when group label is null", () => {
+    const { container } = render(
+      <ReviewDocumentView
+        document={{
+          kind: "txHash",
+          title: "Transaction",
+          summary: "On-chain transaction",
+          checks: [
+            {
+              id: "transaction.chain",
+              group: "default",
+              label: "Chain",
+              value: "1",
+              displayValue: "Ethereum",
+              kind: "chainId",
+            },
+          ],
+          warnings: [],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Transaction")).toBeTruthy();
+    expect(container.querySelector('[data-group="default"] h3')).toBeNull();
+    expect(screen.getByText("Chain")).toBeTruthy();
+  });
 });
