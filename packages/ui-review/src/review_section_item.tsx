@@ -19,7 +19,7 @@ const keyValueGridClass =
   "grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-4 whitespace-normal min-h-[3.875rem]";
 
 const labelClass =
-  "inline-flex font-medium text-base/4.5 text-foreground sm:text-sm/4";
+  "inline-flex font-medium capitalize text-base/4.5 text-foreground sm:text-sm/4";
 
 function CheckLabel({ check, showId }: { check: ReviewCheckItem; showId: boolean }) {
   if (!showId) {
