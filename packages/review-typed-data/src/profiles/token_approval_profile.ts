@@ -1,5 +1,5 @@
 import type { ClientsBundle } from "@beforesign/clients";
-import type { ReviewCheckItem, WarningItem } from "@beforesign/core";
+import type { JsonValue, ReviewCheckItem, WarningItem } from "@beforesign/core";
 import { MAX_UINT256 } from "../format_field.ts";
 import { domainChainId, fetchTokenHint } from "../token_hints.ts";
 import type { TypedDataContext } from "./context.ts";
@@ -37,6 +37,14 @@ export abstract class TokenApprovalProfile extends TypedDataProfile {
         ...ctx.tokenHintsByAddress,
         [verifyingContract.toLowerCase()]: hint,
       },
+    };
+  }
+
+  buildExternalFacts(ctx: TypedDataContext): Record<string, JsonValue> {
+    if (!ctx.tokenHint) return {};
+    return {
+      tokenSymbol: ctx.tokenHint.symbol,
+      tokenDecimals: ctx.tokenHint.decimals,
     };
   }
 

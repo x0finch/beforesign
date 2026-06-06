@@ -34,6 +34,7 @@ const input = JSON.stringify({
 // @generated output — fixtures:update 维护，勿手改
 const output = {
   "kind": "typedData",
+  "scenarioId": "governance",
   "title": "EIP-712 Typed Data Signature",
   "summary": "Governance signature (Delegation): verify delegatee and delegation scope",
   "checks": [
@@ -110,31 +111,28 @@ const output = {
       "group": "signature",
       "label": "Domain hash",
       "value": "0x1dbeacf1a398f7f3c4db81eba05ca9b3b087ce2d23ad93d6355dc5352059150d",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the EIP-712 domain separator; binds this signature to a specific chain and contract"
     },
     {
       "id": "signature.structHash",
       "group": "signature",
       "label": "Struct hash",
       "value": "0x10d9f135b5f1fea0f66fb347ec58de8313f7c95701bf5ff80b76b5b96a61c8cc",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the typed message struct (primaryType and field values)"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0xa813fe76bd4ec8b2c395185590215bc3c8486bc35aef6805064d792e110cc64c",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Final digest your wallet signs under EIP-712"
     }
   ],
   "warnings": [],
-  "facts": {
-    "primaryType": "Delegation",
-    "domainHash": "0x1dbeacf1a398f7f3c4db81eba05ca9b3b087ce2d23ad93d6355dc5352059150d",
-    "structHash": "0x10d9f135b5f1fea0f66fb347ec58de8313f7c95701bf5ff80b76b5b96a61c8cc",
-    "signableHash": "0xa813fe76bd4ec8b2c395185590215bc3c8486bc35aef6805064d792e110cc64c",
-    "scenarioId": "governance"
-  }
+  "facts": {}
 } satisfies ReviewDocument;
 
 export const delegationFixture: ReviewFixture = {

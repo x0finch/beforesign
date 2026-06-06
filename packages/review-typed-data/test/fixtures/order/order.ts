@@ -50,6 +50,7 @@ const input = JSON.stringify({
 // @generated output — fixtures:update 维护，勿手改
 const output = {
   "kind": "typedData",
+  "scenarioId": "order",
   "title": "EIP-712 Typed Data Signature",
   "summary": "Marketplace order: verify tokens offered, received, fees, and who can fill the order",
   "checks": [
@@ -149,31 +150,28 @@ const output = {
       "group": "signature",
       "label": "Domain hash",
       "value": "0xd38749c53eb6d85e1d776a3d0bac96aca981a18b5605c9f5d1b28e2b3a7bbdc1",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the EIP-712 domain separator; binds this signature to a specific chain and contract"
     },
     {
       "id": "signature.structHash",
       "group": "signature",
       "label": "Struct hash",
       "value": "0xc0b0bfe3627992c0ac2a273edd07018e18ee8dcd722db3e929538ac046084d0c",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the typed message struct (primaryType and field values)"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0xd954185bc3c28c0691dce91cbc46618d6d8c2905bc6b9c99ff7a836b032fde06",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Final digest your wallet signs under EIP-712"
     }
   ],
   "warnings": [],
-  "facts": {
-    "primaryType": "Order",
-    "domainHash": "0xd38749c53eb6d85e1d776a3d0bac96aca981a18b5605c9f5d1b28e2b3a7bbdc1",
-    "structHash": "0xc0b0bfe3627992c0ac2a273edd07018e18ee8dcd722db3e929538ac046084d0c",
-    "signableHash": "0xd954185bc3c28c0691dce91cbc46618d6d8c2905bc6b9c99ff7a836b032fde06",
-    "scenarioId": "order"
-  }
+  "facts": {}
 } satisfies ReviewDocument;
 
 export const orderFixture: ReviewFixture = {

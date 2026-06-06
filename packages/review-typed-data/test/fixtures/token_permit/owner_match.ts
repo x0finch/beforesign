@@ -11,6 +11,7 @@ const payload = {
 // @generated output — fixtures:update 维护，勿手改
 const output = {
   "kind": "typedData",
+  "scenarioId": "tokenPermit",
   "title": "EIP-712 Typed Data Signature",
   "summary": "Token permit: verify owner, spender, and allowance before signing",
   "checks": [
@@ -101,21 +102,24 @@ const output = {
       "group": "signature",
       "label": "Domain hash",
       "value": "0x06c37168a7db5138defc7866392bb87a741f9b3d104deb5094588ce041cae335",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the EIP-712 domain separator; binds this signature to a specific chain and contract"
     },
     {
       "id": "signature.structHash",
       "group": "signature",
       "label": "Struct hash",
       "value": "0x33d9ffb4d245f25e56ff09019a4261a3a75ef9838969fcc4848d86ae34c673eb",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the typed message struct (primaryType and field values)"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0xe6410f9a0c14ed6005ef600c3268feb65bd11bdfc646565fe58b1abd74988698",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Final digest your wallet signs under EIP-712"
     }
   ],
   "warnings": [
@@ -126,11 +130,6 @@ const output = {
     }
   ],
   "facts": {
-    "primaryType": "Permit",
-    "domainHash": "0x06c37168a7db5138defc7866392bb87a741f9b3d104deb5094588ce041cae335",
-    "structHash": "0x33d9ffb4d245f25e56ff09019a4261a3a75ef9838969fcc4848d86ae34c673eb",
-    "signableHash": "0xe6410f9a0c14ed6005ef600c3268feb65bd11bdfc646565fe58b1abd74988698",
-    "scenarioId": "tokenPermit",
     "tokenSymbol": "USDC",
     "tokenDecimals": 6
   }

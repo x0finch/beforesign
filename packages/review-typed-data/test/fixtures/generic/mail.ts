@@ -26,6 +26,7 @@ const input = JSON.stringify({
 // @generated output — fixtures:update 维护，勿手改
 const output = {
   "kind": "typedData",
+  "scenarioId": "generic",
   "title": "EIP-712 Typed Data Signature",
   "summary": "EIP-712 signature: verify Mail fields before signing",
   "checks": [
@@ -87,31 +88,28 @@ const output = {
       "group": "signature",
       "label": "Domain hash",
       "value": "0x3b98b16ad068d9d8854a6a416bd476de44a4933ec5104d7c786a422ab262ed14",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the EIP-712 domain separator; binds this signature to a specific chain and contract"
     },
     {
       "id": "signature.structHash",
       "group": "signature",
       "label": "Struct hash",
       "value": "0xb00fd1b60681faf3e7d86b1aff876137b72c20b4acf02ecdc72f9c44edda838a",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the typed message struct (primaryType and field values)"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0xcda71b056b748d54b6eb3b3810356da66e9d1290aaa3eea1f3cf4ece610caa71",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Final digest your wallet signs under EIP-712"
     }
   ],
   "warnings": [],
-  "facts": {
-    "primaryType": "Mail",
-    "domainHash": "0x3b98b16ad068d9d8854a6a416bd476de44a4933ec5104d7c786a422ab262ed14",
-    "structHash": "0xb00fd1b60681faf3e7d86b1aff876137b72c20b4acf02ecdc72f9c44edda838a",
-    "signableHash": "0xcda71b056b748d54b6eb3b3810356da66e9d1290aaa3eea1f3cf4ece610caa71",
-    "scenarioId": "generic"
-  }
+  "facts": {}
 } satisfies ReviewDocument;
 
 export const mailFixture: ReviewFixture = {

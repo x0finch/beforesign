@@ -28,6 +28,7 @@ const input = JSON.stringify({
 // @generated output — fixtures:update 维护，勿手改
 const output = {
   "kind": "typedData",
+  "scenarioId": "auth",
   "title": "EIP-712 Typed Data Signature",
   "summary": "Sign-in message: verify domain, URI, nonce, and expiration (low asset risk)",
   "checks": [
@@ -101,31 +102,28 @@ const output = {
       "group": "signature",
       "label": "Domain hash",
       "value": "0x2101f2ebee6f62be4b0f87a225b17ffc6b22af9b4467aa817fbddc8c6d388118",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the EIP-712 domain separator; binds this signature to a specific chain and contract"
     },
     {
       "id": "signature.structHash",
       "group": "signature",
       "label": "Struct hash",
       "value": "0x20d34882318c7a7c824d4dd5587ea474239f328f101e1abbee216a58336a057b",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Hash of the typed message struct (primaryType and field values)"
     },
     {
       "id": "signature.signableHash",
       "group": "signature",
       "label": "Signable hash",
       "value": "0x644bb0f7a4d568e5eb7f0e7df511a2c68990497da6b4658a24cda6f66a122f94",
-      "kind": "hash"
+      "kind": "hash",
+      "description": "Final digest your wallet signs under EIP-712"
     }
   ],
   "warnings": [],
-  "facts": {
-    "primaryType": "Login",
-    "domainHash": "0x2101f2ebee6f62be4b0f87a225b17ffc6b22af9b4467aa817fbddc8c6d388118",
-    "structHash": "0x20d34882318c7a7c824d4dd5587ea474239f328f101e1abbee216a58336a057b",
-    "signableHash": "0x644bb0f7a4d568e5eb7f0e7df511a2c68990497da6b4658a24cda6f66a122f94",
-    "scenarioId": "auth"
-  }
+  "facts": {}
 } satisfies ReviewDocument;
 
 export const siweFixture: ReviewFixture = {

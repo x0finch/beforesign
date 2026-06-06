@@ -76,6 +76,8 @@ function buildSignatureChecks(ctx: TypedDataContext): ReviewCheckItem[] {
       label: "Domain hash",
       value: ctx.domainHash,
       kind: "hash",
+      description:
+        "Hash of the EIP-712 domain separator; binds this signature to a specific chain and contract",
     },
   ];
 
@@ -86,6 +88,7 @@ function buildSignatureChecks(ctx: TypedDataContext): ReviewCheckItem[] {
       label: "Struct hash",
       value: ctx.structHash,
       kind: "hash",
+      description: "Hash of the typed message struct (primaryType and field values)",
     });
   }
 
@@ -95,6 +98,7 @@ function buildSignatureChecks(ctx: TypedDataContext): ReviewCheckItem[] {
     label: "Signable hash",
     value: ctx.signableHash,
     kind: "hash",
+    description: "Final digest your wallet signs under EIP-712",
   });
 
   return checks;

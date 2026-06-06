@@ -7,7 +7,6 @@ import type { TypedDataContext, TypedDataScenarioId } from "./context.ts";
 export type ProfileEnrichResult = {
   checks: ReviewCheckItem[];
   warnings: WarningItem[];
-  facts: Record<string, JsonValue>;
 };
 
 export abstract class TypedDataProfile {
@@ -36,8 +35,12 @@ export abstract class TypedDataProfile {
     return {
       checks: mutated,
       warnings,
-      facts: { scenarioId: this.id, ...this.buildFacts(ctx) },
     };
+  }
+
+  buildExternalFacts(ctx: TypedDataContext): Record<string, JsonValue> {
+    void ctx;
+    return {};
   }
 
   protected mutateChecks(checks: ReviewCheckItem[], ctx: TypedDataContext): ReviewCheckItem[] {
@@ -49,11 +52,6 @@ export abstract class TypedDataProfile {
     void ctx;
     void checks;
     return [];
-  }
-
-  protected buildFacts(ctx: TypedDataContext): Record<string, JsonValue> {
-    void ctx;
-    return {};
   }
 
   protected highlightIds(checks: ReviewCheckItem[], ids: string[]): ReviewCheckItem[] {
