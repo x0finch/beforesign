@@ -12,7 +12,8 @@ export type {
 export {
   normalizeTxFromHex,
   normalizeTxFromJson,
-  transactionHasSignature
+  transactionHasSignature,
+  walletJsonToPartialNormalized,
 } from "./normalize_tx.ts";
 export { normalizeTypedDataFromJson } from "./normalize_typed_data.ts";
 export { normalizeRawInputToJson, parseInputObject } from "./parse_input_object.ts";

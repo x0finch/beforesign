@@ -97,4 +97,36 @@ describe("detectInputType", () => {
       expect(result.normalized).toBe("hello");
     }
   });
+
+  it("classifies partial unsigned tx json without chainId", () => {
+    const input = JSON.stringify({
+      from: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+      to: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      data: "0x",
+      value: "0x0",
+      nonce: "0x0",
+      gas: "0x5208",
+      maxFeePerGas: "0x4e3b29200",
+      maxPriorityFeePerGas: "0x4e3b29200",
+      type: "0x2",
+    });
+    const result = detectInputType(input);
+    expect(result.kind).toBe("unsignedTx");
+    if (result.kind !== "unsignedTx") return;
+    expect(result.normalized.chainId).toBeUndefined();
+    expect(result.normalized.to).toBe("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2");
+  });
+
+  it("classifies partial unsigned tx json with to and data only", () => {
+    const input = JSON.stringify({
+      to: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      data: CALLDATA_HEX,
+    });
+    const result = detectInputType(input);
+    expect(result.kind).toBe("unsignedTx");
+    if (result.kind !== "unsignedTx") return;
+    expect(result.normalized.chainId).toBeUndefined();
+    expect(result.normalized.to).toBe("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48");
+    expect(result.normalized.data).toBe(CALLDATA_HEX);
+  });
 });

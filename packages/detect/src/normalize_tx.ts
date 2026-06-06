@@ -87,12 +87,49 @@ export function normalizeTxFromHex(raw: string): ParseTransactionReturnType {
   return parseTransaction(raw.trim().toLowerCase() as Hex) as ParseTransactionReturnType;
 }
 
+export function walletJsonToPartialNormalized(
+  record: Record<string, unknown>,
+): ParseTransactionReturnType {
+  const data = (record.data ?? record.input ?? "0x") as Hex;
+  const type = txTypeFromInput(record.type);
+  const tx: Record<string, unknown> = {};
+
+  if (record.chainId != null) tx.chainId = parseHexOrNumber(record.chainId);
+  if (record.to != null) tx.to = record.to;
+  tx.data = data === "0x" ? undefined : data;
+  if (record.nonce != null) tx.nonce = parseHexOrNumber(record.nonce);
+  if (record.gas != null) tx.gas = parseHexOrBigInt(record.gas);
+  if (record.value != null) tx.value = parseHexOrBigInt(record.value);
+  if (record.maxFeePerGas != null) tx.maxFeePerGas = parseHexOrBigInt(record.maxFeePerGas);
+  if (record.maxPriorityFeePerGas != null) {
+    tx.maxPriorityFeePerGas = parseHexOrBigInt(record.maxPriorityFeePerGas);
+  }
+  if (record.gasPrice != null) tx.gasPrice = parseHexOrBigInt(record.gasPrice);
+  if (type !== undefined) tx.type = type;
+
+  const signature = walletJsonToSignature(record);
+  if (signature) {
+    if ("v" in signature && signature.v !== undefined) tx.v = signature.v;
+    if ("yParity" in signature && signature.yParity !== undefined) {
+      tx.yParity = signature.yParity;
+    }
+    tx.r = signature.r;
+    tx.s = signature.s;
+  }
+
+  return tx as ParseTransactionReturnType;
+}
+
 export function normalizeTxFromJson(raw: string): ParseTransactionReturnType {
   const record = parseInputObject(raw);
-  const serializable = walletJsonToSerializable(record);
-  const signature = walletJsonToSignature(record);
-  const serialized = serializeTransaction(serializable, signature);
-  return parseTransaction(serialized) as ParseTransactionReturnType;
+  try {
+    const serializable = walletJsonToSerializable(record);
+    const signature = walletJsonToSignature(record);
+    const serialized = serializeTransaction(serializable, signature);
+    return parseTransaction(serialized) as ParseTransactionReturnType;
+  } catch {
+    return walletJsonToPartialNormalized(record);
+  }
 }
 
 export function tryNormalizeTxFromHex(raw: string): ParseTransactionReturnType | null {
