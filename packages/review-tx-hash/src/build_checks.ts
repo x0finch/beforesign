@@ -1,6 +1,5 @@
 import type { ReviewCheckBadgeVariant, ReviewCheckItem } from "@beforesign/core";
 import { explorerTxUrl } from "@beforesign/core";
-import { slice } from "viem";
 import { formatChainName, formatEthValue, formatTimestamp } from "./format_tx.ts";
 import type { TxHashContext } from "./types.ts";
 
@@ -84,39 +83,20 @@ export function buildChecks(ctx: TxHashContext): ReviewCheckItem[] {
   if (txData !== undefined) {
     checks.push(
       check("transaction.data", "default", "Data", txData, {
-        kind: "text",
+        kind: txData === "0x" ? "text" : "hash",
         displayValue: txData === "0x" ? "0x (empty)" : undefined,
       }),
     );
   }
 
-  if (txData && txData !== "0x") {
-    if (ctx.decodedMethod) {
-      checks.push({
-        id: "calldata.function",
-        group: "default",
-        label: "Function",
-        value: ctx.decodedMethod,
-        kind: "text",
-      });
-    }
-
+  if (txData && txData !== "0x" && ctx.decodedMethod) {
     checks.push({
-      id: "calldata.selector",
+      id: "calldata.function",
       group: "default",
-      label: "Selector",
-      value: slice(txData as `0x${string}`, 0, 4),
-      kind: "selector",
+      label: "Function",
+      value: ctx.decodedMethod,
+      kind: "text",
     });
-
-    checks.push(
-      check("calldata.raw_input", "default", "Raw input", txData, {
-        kind: "text",
-        description: ctx.rawInputTruncated
-          ? "Input truncated; open explorer for full calldata"
-          : undefined,
-      }),
-    );
   }
 
   return checks;

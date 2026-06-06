@@ -41,7 +41,6 @@ export async function prepareTxHash(
       tx: ctx.tx,
       onchain: ctx.onchain,
       decodedMethod: ctx.decodedMethod,
-      rawInputTruncated: ctx.rawInputTruncated,
       timestamp: ctx.timestamp,
     };
   }
@@ -71,7 +70,6 @@ export async function prepareTxHash(
         tx: detail.tx,
         onchain: detail.onchain,
         decodedMethod: detail.decodedMethod,
-        rawInputTruncated: detail.rawInputTruncated,
         timestamp: detail.timestamp,
       };
     } catch {
@@ -98,7 +96,6 @@ export async function prepareTxHash(
       tx: ctx.tx,
       onchain: ctx.onchain,
       decodedMethod: ctx.decodedMethod,
-      rawInputTruncated: ctx.rawInputTruncated,
       timestamp: ctx.timestamp,
     };
   }
@@ -110,7 +107,6 @@ export async function prepareTxHash(
     tx: detail.tx,
     onchain: detail.onchain,
     decodedMethod: detail.decodedMethod,
-    rawInputTruncated: detail.rawInputTruncated,
     timestamp: detail.timestamp,
   };
 }
@@ -126,7 +122,6 @@ export async function enrichContext(
     tx: ctx.tx,
     onchain: ctx.onchain,
     decodedMethod: ctx.decodedMethod,
-    rawInputTruncated: ctx.rawInputTruncated,
     timestamp: ctx.timestamp,
   });
 
@@ -142,7 +137,6 @@ export async function enrichContext(
     tx: prepared.tx,
     onchain: prepared.onchain,
     decodedMethod: prepared.decodedMethod,
-    rawInputTruncated: prepared.rawInputTruncated,
     timestamp: prepared.timestamp ?? ctx.timestamp,
     resolvedChainId,
     activeHit: activeHitFor({

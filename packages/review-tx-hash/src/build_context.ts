@@ -10,7 +10,6 @@ export function buildContext(hash: Hash, payload?: TxHashPayload): TxHashContext
     tx: payload?.tx,
     onchain: payload?.onchain,
     decodedMethod: payload?.decodedMethod,
-    rawInputTruncated: payload?.rawInputTruncated,
     timestamp: payload?.timestamp,
   };
 }

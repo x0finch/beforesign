@@ -35,7 +35,6 @@ const payload = {
     explorerUrl: `https://etherscan.io/tx/${TX_HASH}`,
   },
   decodedMethod: BLOCKSCOUT_TX_V2_TRUNCATED.decoded_input.method_call,
-  rawInputTruncated: true,
 };
 
 // @generated output — fixtures:update 维护，勿手改
@@ -82,7 +81,7 @@ const output = {
       "group": "default",
       "label": "Data",
       "value": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      "kind": "text"
+      "kind": "hash"
     },
     {
       "id": "calldata.function",
@@ -90,21 +89,6 @@ const output = {
       "label": "Function",
       "value": "transfer(address,uint256)",
       "kind": "text"
-    },
-    {
-      "id": "calldata.selector",
-      "group": "default",
-      "label": "Selector",
-      "value": "0xa9059cbb",
-      "kind": "selector"
-    },
-    {
-      "id": "calldata.raw_input",
-      "group": "default",
-      "label": "Raw input",
-      "value": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      "kind": "text",
-      "description": "Input truncated; open explorer for full calldata"
     }
   ],
   "warnings": []

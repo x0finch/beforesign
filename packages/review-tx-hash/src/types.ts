@@ -13,7 +13,6 @@ export type TxHashPayload = {
   tx?: NormalizedTx;
   onchain?: OnchainTxMeta;
   decodedMethod?: string;
-  rawInputTruncated?: boolean;
   timestamp?: string;
 };
 
@@ -25,7 +24,6 @@ export type TxHashContext = {
   tx?: NormalizedTx;
   onchain?: OnchainTxMeta;
   decodedMethod?: string;
-  rawInputTruncated?: boolean;
   timestamp?: string;
   activeHit?: DiscoveryHit;
   resolvedChainId?: number;
@@ -36,6 +34,5 @@ export type TxHashPrepared = {
   tx?: NormalizedTx;
   onchain?: OnchainTxMeta;
   decodedMethod?: string;
-  rawInputTruncated?: boolean;
   timestamp?: string;
 };

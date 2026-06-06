@@ -101,27 +101,13 @@ const output = {
       "group": "default",
       "label": "Data",
       "value": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000001",
-      "kind": "text"
+      "kind": "hash"
     },
     {
       "id": "calldata.function",
       "group": "default",
       "label": "Function",
       "value": "transfer(address,uint256)",
-      "kind": "text"
-    },
-    {
-      "id": "calldata.selector",
-      "group": "default",
-      "label": "Selector",
-      "value": "0xa9059cbb",
-      "kind": "selector"
-    },
-    {
-      "id": "calldata.raw_input",
-      "group": "default",
-      "label": "Raw input",
-      "value": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000001",
       "kind": "text"
     }
   ],
