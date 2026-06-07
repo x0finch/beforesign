@@ -12,6 +12,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@beforesign/calldata-parse": "workspace:*",
     "@beforesign/core": "workspace:*",
     "@beforesign/orchestrator": "workspace:*",
     "@tanstack/react-router": "^1.170.11",
