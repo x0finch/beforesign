@@ -259,9 +259,6 @@ importers:
 
   packages/orchestrator:
     dependencies:
-      '@beforesign/calldata-parse':
-        specifier: workspace:*
-        version: link:../calldata-parse
       '@beforesign/clients':
         specifier: workspace:*
         version: link:../clients
@@ -342,6 +339,9 @@ importers:
       '@beforesign/calldata-parse':
         specifier: workspace:*
         version: link:../calldata-parse
+      '@beforesign/clients':
+        specifier: workspace:*
+        version: link:../clients
       '@beforesign/core':
         specifier: workspace:*
         version: link:../core
@@ -361,18 +361,18 @@ importers:
 
   packages/view-tx:
     dependencies:
-      '@beforesign/calldata-parse':
+      '@beforesign/clients':
         specifier: workspace:*
-        version: link:../calldata-parse
+        version: link:../clients
       '@beforesign/core':
         specifier: workspace:*
         version: link:../core
+      '@beforesign/detect':
+        specifier: workspace:*
+        version: link:../detect
       '@beforesign/json-render-catalog':
         specifier: workspace:*
         version: link:../json-render-catalog
-      '@beforesign/view-calldata':
-        specifier: workspace:*
-        version: link:../view-calldata
       viem:
         specifier: 'catalog:'
         version: 2.52.0(typescript@5.9.3)(zod@4.4.3)
@@ -386,18 +386,15 @@ importers:
 
   packages/view-tx-hash:
     dependencies:
-      '@beforesign/calldata-parse':
+      '@beforesign/clients':
         specifier: workspace:*
-        version: link:../calldata-parse
+        version: link:../clients
       '@beforesign/core':
         specifier: workspace:*
         version: link:../core
       '@beforesign/json-render-catalog':
         specifier: workspace:*
         version: link:../json-render-catalog
-      '@beforesign/view-calldata':
-        specifier: workspace:*
-        version: link:../view-calldata
       viem:
         specifier: 'catalog:'
         version: 2.52.0(typescript@5.9.3)(zod@4.4.3)

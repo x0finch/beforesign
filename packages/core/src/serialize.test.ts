@@ -36,10 +36,15 @@ describe("serializeParseResult", () => {
       summary: "测试",
       warnings: [],
       raw: { data: "0x" },
-      tx: { value: "1000", chainId: 1 },
+      view: {
+        title: "Transaction",
+        summary: "Signed transaction",
+        chainId: 1,
+        spec: { root: "card-1", elements: {} },
+      },
     };
     const out = serializeParseResult(input);
     expect(out.kind).toBe("signedTx");
-    expect(out.tx?.value).toBe("1000");
+    expect(out.view?.chainId).toBe(1);
   });
 });

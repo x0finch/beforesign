@@ -10,8 +10,7 @@ export function ParserStatusBar({
   locale: Locale;
   result: ParseResult;
 }) {
-  const chainId =
-    result.tx?.chainId ?? result.onchain?.chainId ?? result.discovery?.resolvedChainId;
+  const chainId = result.view?.chainId;
   const chain = chainId ? getChainById(chainId) : undefined;
 
   return (

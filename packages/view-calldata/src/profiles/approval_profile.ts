@@ -78,8 +78,18 @@ export class ApprovalProfile extends CalldataProfile {
     fields: ViewFieldDescriptor[],
     overrides: Map<string, Partial<ViewFieldDescriptor>>,
   ): AlertItem[] {
-    void ctx;
     void overrides;
+    const fn = ctx.tree.functionName?.toLowerCase() ?? "";
+    if (fn.includes("setapprovalforall")) {
+      return [
+        {
+          severity: "destructive",
+          message: "setApprovalForAll affects all tokens in collection",
+          code: "approvalForAll",
+        },
+      ];
+    }
+
     const allowanceId = this.firstExistingFieldId(fields, ALLOWANCE_ARG_IDS);
     const allowance = allowanceId
       ? fields.find((field) => field.id === allowanceId)
@@ -89,8 +99,8 @@ export class ApprovalProfile extends CalldataProfile {
       return [
         {
           severity: "destructive",
-          message: "Allowance is unlimited (max uint256)",
-          code: "unlimitedAllowance",
+          message: "Unlimited token approval detected",
+          code: "unlimitedApproval",
         },
       ];
     }

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@beforesign/calldata-parse": "workspace:*",
+    "@beforesign/clients": "workspace:*",
     "@beforesign/core": "workspace:*",
     "@beforesign/json-render-catalog": "workspace:*"
   },

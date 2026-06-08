@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { parseCalldata } from "@beforesign/calldata-parse";
+import { describe, expect, it, vi } from "vitest";
+import type { ClientsBundle } from "@beforesign/clients";
 import { validateSpec, type ViewElement } from "@beforesign/json-render-catalog";
 const CALLDATA_HEX =
   "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000001";
@@ -19,29 +19,40 @@ const approveUnlimitedCalldata =
 const multicall3Calldata =
   "0x82ad56cb0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000120000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc2000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa96045000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000" as const;
 
-function specElements(spec: ReturnType<typeof buildCalldataSpec>["spec"]): ViewElement[] {
+function mockClients(): ClientsBundle {
+  return {
+    txLookup: { searchQuick: vi.fn(), getTransaction: vi.fn() },
+    etherscan: { getTransaction: vi.fn(), getTokenInfo: vi.fn() },
+    debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
+    signatureLookup: {
+      resolveBySelector: vi.fn(async (selector) => MOCK_SELECTOR_ABI[selector.toLowerCase()]),
+    },
+  };
+}
+
+function specElements(spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"]): ViewElement[] {
   return Object.values(spec.elements as Record<string, ViewElement>);
 }
 
 function specElementMap(
-  spec: ReturnType<typeof buildCalldataSpec>["spec"],
+  spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"],
 ): Record<string, ViewElement> {
   return spec.elements as Record<string, ViewElement>;
 }
 
-function fieldLabels(spec: ReturnType<typeof buildCalldataSpec>["spec"]): string[] {
+function fieldLabels(spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"]): string[] {
   return specElements(spec)
     .filter((element) => element.type === "Field")
     .map((element) => element.props.label as string);
 }
 
-function accordionTitles(spec: ReturnType<typeof buildCalldataSpec>["spec"]): string[] {
+function accordionTitles(spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"]): string[] {
   return specElements(spec)
     .filter((element) => element.type === "Accordion")
     .map((element) => element.props.title as string);
 }
 
-function elementTypes(spec: ReturnType<typeof buildCalldataSpec>["spec"]): string[] {
+function elementTypes(spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"]): string[] {
   const elements = specElementMap(spec);
   const walk = (id: string): string[] => {
     const element = elements[id];
@@ -56,7 +67,7 @@ function elementTypes(spec: ReturnType<typeof buildCalldataSpec>["spec"]): strin
 }
 
 function findAccordionByTitle(
-  spec: ReturnType<typeof buildCalldataSpec>["spec"],
+  spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"],
   pattern: RegExp,
 ): ViewElement | undefined {
   return specElements(spec).find(
@@ -65,7 +76,7 @@ function findAccordionByTitle(
 }
 
 function findFieldIdByLabel(
-  spec: ReturnType<typeof buildCalldataSpec>["spec"],
+  spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"],
   label: string,
 ): string | undefined {
   const entry = Object.entries(specElementMap(spec)).find(
@@ -75,7 +86,7 @@ function findFieldIdByLabel(
 }
 
 function childFollows(
-  spec: ReturnType<typeof buildCalldataSpec>["spec"],
+  spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"],
   parentAccordion: ViewElement,
   afterLabel: string,
   nextTitlePattern: RegExp,
@@ -98,10 +109,12 @@ function childFollows(
 
 describe("buildCalldataSpec", () => {
   it("builds a valid transfer spec with highlighted root args only", async () => {
-    const tree = await parseCalldata(CALLDATA_HEX, { abi: TRANSFER_SELECTOR_ABI });
-    const result = buildCalldataSpec({ tree });
+    const result = await buildCalldataSpec(
+      { raw: CALLDATA_HEX, abi: TRANSFER_SELECTOR_ABI },
+      mockClients(),
+    );
 
-    expect(validateSpec(result.spec).valid).toBe(true);
+    expect(validateSpec(result.spec as never).valid).toBe(true);
     expect(result.scenarioId).toBe("generic");
     expect(result.title).toBe("Contract Calldata");
     expect(result.summary).toContain("transfer");
@@ -122,12 +135,9 @@ describe("buildCalldataSpec", () => {
   });
 
   it("builds safe_exec with inner accordion after Data field", async () => {
-    const tree = await parseCalldata(safeExecCalldata, {
-      resolveAbi: async ({ selector }) => MOCK_SELECTOR_ABI[selector.toLowerCase()],
-    });
-    const result = buildCalldataSpec({ tree });
+    const result = await buildCalldataSpec({ raw: safeExecCalldata }, mockClients());
 
-    expect(validateSpec(result.spec).valid).toBe(true);
+    expect(validateSpec(result.spec as never).valid).toBe(true);
     expect(accordionTitles(result.spec)).toHaveLength(2);
 
     const rootAccordion = findAccordionByTitle(result.spec, /0x6a761202/);
@@ -148,12 +158,9 @@ describe("buildCalldataSpec", () => {
   });
 
   it("builds multicall3 with inner accordions after callData fields", async () => {
-    const tree = await parseCalldata(multicall3Calldata, {
-      resolveAbi: async ({ selector }) => MOCK_SELECTOR_ABI[selector.toLowerCase()],
-    });
-    const result = buildCalldataSpec({ tree });
+    const result = await buildCalldataSpec({ raw: multicall3Calldata }, mockClients());
 
-    expect(validateSpec(result.spec).valid).toBe(true);
+    expect(validateSpec(result.spec as never).valid).toBe(true);
     expect(accordionTitles(result.spec).length).toBeGreaterThanOrEqual(3);
 
     const rootAccordion = findAccordionByTitle(result.spec, /aggregate3|0x82ad56cb/i);
@@ -173,10 +180,12 @@ describe("buildCalldataSpec", () => {
   });
 
   it("builds approval spec with destructive allowance warning", async () => {
-    const tree = await parseCalldata(approveUnlimitedCalldata, { abi: APPROVE_SELECTOR_ABI });
-    const result = buildCalldataSpec({ tree });
+    const result = await buildCalldataSpec(
+      { raw: approveUnlimitedCalldata, abi: APPROVE_SELECTOR_ABI },
+      mockClients(),
+    );
 
-    expect(validateSpec(result.spec).valid).toBe(true);
+    expect(validateSpec(result.spec as never).valid).toBe(true);
     expect(result.scenarioId).toBe("approval");
     expect(result.title).toBe("Token Approval");
 
@@ -184,8 +193,8 @@ describe("buildCalldataSpec", () => {
     expect(alertList?.props.items).toEqual([
       {
         severity: "destructive",
-        message: "Allowance is unlimited (max uint256)",
-        code: "unlimitedAllowance",
+        message: "Unlimited token approval detected",
+        code: "unlimitedApproval",
       },
     ]);
 
@@ -196,9 +205,11 @@ describe("buildCalldataSpec", () => {
   });
 
   it("includes contract address field when provided", async () => {
-    const tree = await parseCalldata(CALLDATA_HEX, { abi: TRANSFER_SELECTOR_ABI });
     const contractAddress = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
-    const result = buildCalldataSpec({ tree, contractAddress });
+    const result = await buildCalldataSpec(
+      { raw: CALLDATA_HEX, abi: TRANSFER_SELECTOR_ABI, contractAddress },
+      mockClients(),
+    );
 
     const contractField = specElements(result.spec).find(
       (element) => element.type === "Field" && element.props.label === "Contract",

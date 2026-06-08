@@ -1,8 +1,9 @@
 import type { ViewResult } from "@beforesign/core";
-import type { CalldataCall } from "@beforesign/calldata-parse";
+import type { Abi, Hex } from "viem";
 
 export type CalldataViewInput = {
-  tree: CalldataCall;
+  raw: Hex;
+  abi?: Abi;
   contractAddress?: string;
 };
 

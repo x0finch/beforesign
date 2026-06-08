@@ -12,7 +12,10 @@ describe("buildTypedDataSpec", () => {
 
     expect(validateSpec(result.spec as never).valid).toBe(true);
     expect(result.scenarioId).toBe("tokenPermit");
-    const elements = Object.values(result.spec.elements);
+    const elements = Object.values(result.spec.elements) as Array<{
+      type: string;
+      props: { title?: string };
+    }>;
     expect(elements.some((element) => element.type === "Section" && element.props.title === "Domain")).toBe(
       true,
     );

@@ -104,9 +104,14 @@ export type ViewSpec = {
 export type ViewResult = {
   title: string;
   summary: string;
+  summaryEn?: string;
   scenarioId?: string;
   spec: ViewSpec;
   warnings?: WarningItem[];
+  /** txHash: ambiguous chain discovery for web chain picker */
+  discovery?: DiscoveryResult;
+  /** resolved chain for status bar */
+  chainId?: number;
 };
 
 export type ParseResult = {
@@ -115,17 +120,6 @@ export type ParseResult = {
   summaryEn?: string;
   warnings: WarningItem[];
   raw: JsonValue;
-  tx?: NormalizedTx;
-  calldata?: CalldataDecode;
-  typedData?: TypedDataView;
-  simulation?: DebankSimulation;
-  explanation?: string;
-  explanationEn?: string;
-  onchain?: OnchainTxMeta;
-  discovery?: DiscoveryResult;
-  txHashEnrichment?: TxHashEnrichment;
-  missingFields?: string[];
-  review?: ReviewDocument;
   view?: ViewResult;
 };
 

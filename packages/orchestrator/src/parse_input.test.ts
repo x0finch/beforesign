@@ -22,8 +22,8 @@ describe("parseInput", () => {
       },
     );
     expect(result.kind).toBe("unsignedTx");
-    expect(result.tx?.from).toBeTruthy();
     expect(result.view?.title).toBe("Transaction");
+    expect(result.view?.chainId).toBeTruthy();
   });
 
   it("resolves tx hash via tenderly search", async () => {
@@ -61,22 +61,17 @@ describe("parseInput", () => {
             timestamp: tx.timestamp,
           }),
         },
-        etherscan: {
-          getTransaction: vi.fn(),
-          getTokenInfo: vi.fn(),
-        },
+        etherscan: { getTransaction: vi.fn(), getTokenInfo: vi.fn() },
         debank: { preExecTx: vi.fn(), explainTx: vi.fn() },
         signatureLookup: { resolveBySelector: vi.fn().mockResolvedValue(undefined) },
       },
     );
 
     expect(result.kind).toBe("txHash");
-    expect(result.tx?.hash).toBe(TX_HASH);
-    expect(result.tx?.data).toBe(CALLDATA_HEX);
-    expect(result.onchain?.status).toBe("success");
-    expect(result.txHashEnrichment?.decodedMethod).toBe("transfer(address,uint256)");
-    expect(result.discovery?.status).toBe("resolved");
     expect(result.view?.title).toBe("Transaction");
+    expect(result.view?.chainId).toBe(1);
+    expect(result.view?.discovery?.status).toBe("resolved");
+    expect(result.view?.summary).toContain("On-chain transaction");
     expect(findBigIntPaths(result)).toEqual([]);
   });
 });

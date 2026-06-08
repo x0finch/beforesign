@@ -1,10 +1,16 @@
+import type { ClientsBundle } from "@beforesign/clients";
 import type { CalldataViewInput, CalldataViewResult } from "./types.ts";
 import { defaultRegistry } from "./profiles/profile_registry.ts";
+import { parseCalldataTree } from "./parse_calldata.ts";
 import { treeToSpec } from "./tree_to_spec.ts";
 
-export function buildCalldataSpec(input: CalldataViewInput): CalldataViewResult {
+export async function buildCalldataSpec(
+  input: CalldataViewInput,
+  clients: ClientsBundle,
+): Promise<CalldataViewResult> {
+  const tree = await parseCalldataTree({ raw: input.raw, abi: input.abi }, clients);
   const ctx = {
-    tree: input.tree,
+    tree,
     contractAddress: input.contractAddress,
   };
   const profile = defaultRegistry.resolve(ctx);

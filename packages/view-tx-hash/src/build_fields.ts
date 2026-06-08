@@ -1,7 +1,7 @@
 import type { FieldDescriptorInput } from "@beforesign/json-render-catalog";
 import { explorerTxUrl } from "@beforesign/core";
 import { formatChainName, formatEthValue, formatTimestamp } from "./format_tx.ts";
-import type { TxHashViewInput } from "./types.ts";
+import type { TxHashFieldContext } from "./types.ts";
 
 function statusBadgeVariant(status: string): "success" | "error" | "info" {
   if (status === "pending") return "info";
@@ -9,7 +9,7 @@ function statusBadgeVariant(status: string): "success" | "error" | "info" {
   return "success";
 }
 
-export function buildTxHashFields(ctx: TxHashViewInput): FieldDescriptorInput[] {
+export function buildTxHashFields(ctx: TxHashFieldContext): FieldDescriptorInput[] {
   const fields: FieldDescriptorInput[] = [];
   const chainId =
     ctx.tx?.chainId ?? ctx.onchain?.chainId ?? ctx.resolvedChainId ?? ctx.chainId;
@@ -78,9 +78,9 @@ export function buildTxHashFields(ctx: TxHashViewInput): FieldDescriptorInput[] 
   return fields;
 }
 
-export function buildTxHashSummary(ctx: TxHashViewInput): string {
+export function buildTxHashSummary(ctx: TxHashFieldContext): string {
   if (ctx.tx && ctx.onchain) {
-    return "On-chain transaction: verify hash, chain, counterparties, and calldata";
+    return "On-chain transaction: verify hash, chain, and counterparties";
   }
   if (ctx.discovery?.status === "ambiguous") {
     return "Transaction hash: multiple chains matched; select the correct chain";

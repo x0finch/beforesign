@@ -23,7 +23,8 @@ function HomePage() {
   const { loading, error, result, parse, clear } = useParse();
 
   const chainRequired =
-    result?.discovery?.status === "notFound" || result?.discovery?.status === "ambiguous";
+    result?.view?.discovery?.status === "notFound" ||
+    result?.view?.discovery?.status === "ambiguous";
 
   const handleParse = () => {
     const trimmed = raw.trim();
@@ -79,17 +80,17 @@ function HomePage() {
         </div>
       )}
 
-      {result?.discovery?.status === "ambiguous" && (
+      {result?.view?.discovery?.status === "ambiguous" && (
         <ParserDiscovery
           locale={locale}
-          hits={result.discovery.hits}
+          hits={result.view.discovery.hits}
           selectedId={selectedHit}
           onSelect={setSelectedHit}
           onContinue={handleParse}
         />
       )}
 
-      {result && result.discovery?.status !== "ambiguous" && (
+      {result && result.view?.discovery?.status !== "ambiguous" && (
         <ParserResult locale={locale} result={result} />
       )}
     </div>

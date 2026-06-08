@@ -22,12 +22,12 @@ export function ParserResult({
     setTab(result.view ? "review" : "summary");
   }, [result.view, result.kind]);
 
+  const missingWarnings =
+    result.view?.warnings?.filter((warning) => warning.code === "missingField") ?? [];
+
   const tabs = [
     { id: "summary", label: t(locale, "tabSummary") },
     ...(result.view ? [{ id: "review", label: t(locale, "tabReview") }] : []),
-    { id: "tx", label: t(locale, "tabTx") },
-    ...(!result.view ? [{ id: "calldata", label: t(locale, "tabCalldata") }] : []),
-    { id: "onchain", label: t(locale, "tabOnchain") },
     { id: "raw", label: t(locale, "tabRaw") },
   ];
 
@@ -49,9 +49,11 @@ export function ParserResult({
 
         <TabsPanel value="summary" className="pt-3 text-sm">
           <div className="space-y-2">
-            <p>{result.explanation ?? result.view?.summary ?? result.summary}</p>
-            {result.missingFields && result.missingFields.length > 0 && (
-              <p className="text-muted-foreground">Missing: {result.missingFields.join(", ")}</p>
+            <p>{result.view?.summary ?? result.summary}</p>
+            {missingWarnings.length > 0 && (
+              <p className="text-muted-foreground">
+                Missing: {missingWarnings.map((warning) => warning.message).join(", ")}
+              </p>
             )}
           </div>
         </TabsPanel>
@@ -61,36 +63,6 @@ export function ParserResult({
             <SpecRenderer spec={result.view.spec as unknown as Spec} />
           </TabsPanel>
         )}
-
-        <TabsPanel value="tx" className="pt-3 text-sm">
-          {result.tx && <pre className="code-block">{JSON.stringify(result.tx, null, 2)}</pre>}
-        </TabsPanel>
-
-        {!result.view && (
-          <TabsPanel value="calldata" className="pt-3 text-sm">
-            {result.calldata && (
-              <pre className="code-block">{JSON.stringify(result.calldata, null, 2)}</pre>
-            )}
-          </TabsPanel>
-        )}
-
-        <TabsPanel value="onchain" className="pt-3 text-sm">
-          {result.onchain && (
-            <div className="space-y-2">
-              <pre className="code-block">{JSON.stringify(result.onchain, null, 2)}</pre>
-              {result.onchain.explorerUrl && (
-                <a
-                  className="text-link"
-                  href={result.onchain.explorerUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Explorer
-                </a>
-              )}
-            </div>
-          )}
-        </TabsPanel>
 
         <TabsPanel value="raw" className="pt-3 text-sm">
           <pre className="code-block">{JSON.stringify(result.raw ?? result, null, 2)}</pre>
