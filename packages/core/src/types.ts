@@ -20,7 +20,6 @@ export type WarningItem = {
   code: string;
   severity: WarningSeverity;
   message: string;
-  messageEn?: string;
 };
 
 export type DiscoveryStatus = "resolved" | "notFound" | "ambiguous" | "pending";
@@ -91,6 +90,25 @@ export type DebankSimulation = {
   balanceChanges?: unknown[];
 };
 
+export type TxHashEnrichment = {
+  decodedMethod?: string;
+  timestamp?: string;
+};
+
+/** json-render spec shape (serializable over the wire). */
+export type ViewSpec = {
+  root: string;
+  elements: Record<string, JsonValue>;
+};
+
+export type ViewResult = {
+  title: string;
+  summary: string;
+  scenarioId?: string;
+  spec: ViewSpec;
+  warnings?: WarningItem[];
+};
+
 export type ParseResult = {
   kind: InputKind;
   summary: string;
@@ -105,7 +123,10 @@ export type ParseResult = {
   explanationEn?: string;
   onchain?: OnchainTxMeta;
   discovery?: DiscoveryResult;
+  txHashEnrichment?: TxHashEnrichment;
   missingFields?: string[];
+  review?: ReviewDocument;
+  view?: ViewResult;
 };
 
 export type ReviewCheckKind =
@@ -118,21 +139,28 @@ export type ReviewCheckKind =
   | "chainId"
   | "bool";
 
+export type ReviewCheckBadgeVariant = "success" | "error" | "info";
+
 export type ReviewCheckItem = {
   id: string;
   group: string;
   label: string;
   value: string;
   displayValue?: string;
+  description?: string;
   kind: ReviewCheckKind;
   highlight?: boolean;
   risk?: WarningSeverity;
+  href?: string;
+  badge?: string;
+  badgeVariant?: ReviewCheckBadgeVariant;
 };
 
 export type ReviewDocument = {
   kind: InputKind;
   title: string;
   summary: string;
+  scenarioId?: string;
   checks: ReviewCheckItem[];
   warnings: WarningItem[];
   facts?: Record<string, JsonValue>;

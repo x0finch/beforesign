@@ -6,6 +6,10 @@ export const parseInputSchema = z.object({
   abi: z.string().optional(),
   selectedDiscoveryHit: z.string().optional(),
   locale: z.enum(["zh", "en"]).optional(),
+  signerAddress: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]{40}$/)
+    .optional(),
 });
 
 export type ParseInput = z.infer<typeof parseInputSchema>;
