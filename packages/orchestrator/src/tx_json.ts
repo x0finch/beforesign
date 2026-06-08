@@ -1,4 +1,5 @@
 import type { NormalizedTx } from "@beforesign/core";
+import { parseInputObject } from "@beforesign/detect";
 
 function hexToString(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
@@ -15,13 +16,13 @@ function parseChainId(value: unknown): number | undefined {
   return Number.parseInt(s, 10);
 }
 
-export type NormalizeResult = {
+export type TxJsonNormalizeResult = {
   tx: NormalizedTx;
   missingFields: string[];
 };
 
-export function normalizeTxJson(raw: string): NormalizeResult {
-  const obj = JSON.parse(raw) as Record<string, unknown>;
+export function normalizeTxJson(raw: string): TxJsonNormalizeResult {
+  const obj = parseInputObject(raw);
   const missingFields: string[] = [];
 
   const chainId = parseChainId(obj.chainId ?? obj.chain_id);

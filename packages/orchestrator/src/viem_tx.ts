@@ -1,10 +1,10 @@
+import type { NormalizedTx } from "@beforesign/core";
 import {
   keccak256,
-  parseTransaction,
   serializeTransaction,
+  type ParseTransactionReturnType,
   type TransactionSerializable,
 } from "viem";
-import type { NormalizedTx } from "@beforesign/core";
 
 function bigintToString(v: bigint | undefined): string | undefined {
   return v === undefined ? undefined : v.toString();
@@ -20,15 +20,17 @@ function txTypeToNumber(
   return undefined;
 }
 
-export function parseTxHex(raw: string): NormalizedTx {
-  const serialized = raw.trim() as `0x${string}`;
-  const tx = parseTransaction(serialized);
-  const hash = keccak256(serialized);
-  const txRec = tx as TransactionSerializable & { from?: `0x${string}` };
+export function viemTxToNormalized(
+  tx: ParseTransactionReturnType,
+  opts?: { from?: string; serializedHex?: string },
+): NormalizedTx {
+  const serialized = opts?.serializedHex?.trim() as `0x${string}` | undefined;
+  const hash = serialized ? keccak256(serialized) : undefined;
+  const signed = "v" in tx && tx.v !== undefined;
 
-  const normalized: NormalizedTx = {
+  return {
     chainId: tx.chainId,
-    from: txRec.from,
+    from: opts?.from,
     to: tx.to ?? undefined,
     value: bigintToString(tx.value),
     data: tx.data,
@@ -41,13 +43,11 @@ export function parseTxHex(raw: string): NormalizedTx {
     gasPrice: bigintToString("gasPrice" in tx ? tx.gasPrice : undefined),
     type: txTypeToNumber(tx.type),
     hash,
-    signedHex: "v" in tx && tx.v !== undefined ? serialized : undefined,
-    v: "v" in tx && tx.v !== undefined ? `0x${tx.v.toString(16)}` : undefined,
+    signedHex: signed ? serialized : undefined,
+    v: signed && "v" in tx && tx.v !== undefined ? `0x${tx.v.toString(16)}` : undefined,
     r: "r" in tx && tx.r ? tx.r : undefined,
     s: "s" in tx && tx.s ? tx.s : undefined,
   };
-
-  return normalized;
 }
 
 export function buildUnsignedTxHash(tx: NormalizedTx): string | undefined {

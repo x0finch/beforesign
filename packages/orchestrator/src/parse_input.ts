@@ -3,81 +3,102 @@ import { serializeParseResult } from "@beforesign/core";
 import type { ClientsBundle } from "@beforesign/clients";
 import { resolveChainId } from "@beforesign/clients";
 import { detectInputType } from "@beforesign/detect";
-import { canSimulateDebank, parseLocally, parseCalldata } from "@beforesign/parse";
 import { runRiskRules } from "./risk_rules.ts";
+import type { Abi, Address, Hash, Hex } from "viem";
+import { buildParseResult } from "./build_parse_result.ts";
+import { parseCalldataContext, type CalldataContext } from "./enrich/calldata.ts";
+import { prepareSignedTx } from "./enrich/signed_tx.ts";
+import { prepareTxHash } from "./enrich/tx_hash.ts";
+import { canSimulateDebank } from "./simulate.ts";
+import { mergeWarnings } from "./merge_warnings.ts";
+import { runView } from "./run_view.ts";
 
 export type ParseInputDeps = ClientsBundle & {
-  blockscoutEnabled?: boolean;
+  txLookupEnabled?: boolean;
   etherscanEnabled?: boolean;
   debankEnabled?: boolean;
 };
 
+function parseAbi(raw?: string): Abi | undefined {
+  if (!raw?.trim()) return undefined;
+  try {
+    return JSON.parse(raw) as Abi;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function parseInput(input: ParseInput, deps: ParseInputDeps): Promise<ParseResult> {
-  const { kind } = detectInputType(input.raw);
-  const result = parseLocally(kind, input.raw, {
-    abi: input.abi,
-  });
+  const detected = detectInputType(input.raw);
+  const { kind } = detected;
+  const abi = parseAbi(input.abi);
+  const result = buildParseResult(detected, input.raw);
 
   const apiErrors: string[] = [];
+  let calldataCtx: CalldataContext | undefined;
+  let signedTxPrepared: Awaited<ReturnType<typeof prepareSignedTx>> | undefined;
 
-  if (kind === "txHash" && deps.blockscoutEnabled !== false) {
+  async function attachCalldata(data: Hex, contractAddress?: string) {
+    calldataCtx = await parseCalldataContext(data, deps, {
+      abi,
+      ...(contractAddress ? { contractAddress: contractAddress as Address } : {}),
+    });
+    result.calldata = calldataCtx.decode;
+    if (calldataCtx.decode.summary) {
+      result.summary = calldataCtx.decode.summary;
+      result.summaryEn = calldataCtx.decode.summary;
+    }
+  }
+
+  if (kind === "calldata") {
+    await attachCalldata(detected.normalized as Hex);
+  }
+
+  if (kind === "txHash" && deps.txLookupEnabled !== false) {
     try {
-      const discovery = await deps.blockscout.searchQuick(input.raw.trim());
-      result.discovery = discovery;
-      const chainId = resolveChainId(
-        discovery,
-        input.chainId,
-        input.selectedDiscoveryHit,
-      );
-
-      if (chainId && deps.etherscanEnabled !== false) {
-        try {
-          const { tx, onchain } = await deps.etherscan.getTransaction(
-            chainId,
-            input.raw.trim(),
-          );
-          result.tx = tx;
-          result.onchain = onchain;
-          result.kind = "signedTx";
-          if (tx.data) {
-            let parsedAbi;
-            try {
-              parsedAbi = input.abi ? JSON.parse(input.abi) : undefined;
-            } catch {
-              parsedAbi = undefined;
-            }
-            result.calldata = parseCalldata(tx.data, {
-              abi: parsedAbi,
-              contractAddress: tx.to,
-            });
-          }
-          result.summary = "已上链交易";
-          result.summaryEn = "On-chain transaction";
-        } catch (e) {
-          apiErrors.push(`Etherscan: ${e instanceof Error ? e.message : "failed"}`);
-        }
-      } else if (!chainId) {
+      const hash = input.raw.trim() as Hash;
+      const prepared = await prepareTxHash(hash, deps, {
+        chainId: input.chainId,
+        selectedDiscoveryHit: input.selectedDiscoveryHit,
+      });
+      result.discovery = prepared.discovery;
+      result.tx = prepared.tx;
+      result.onchain = prepared.onchain;
+      if (prepared.decodedMethod || prepared.timestamp) {
+        result.txHashEnrichment = {
+          decodedMethod: prepared.decodedMethod,
+          timestamp: prepared.timestamp,
+        };
+      }
+      if (prepared.tx?.data) {
+        await attachCalldata(prepared.tx.data as Hex, prepared.tx.to);
+      }
+      if (prepared.tx && prepared.onchain) {
+        result.summary = "已上链交易";
+        result.summaryEn = "On-chain transaction";
+      } else if (
+        !resolveChainId(prepared.discovery, input.chainId, input.selectedDiscoveryHit)
+      ) {
         result.summary = "请选择链或匹配结果";
         result.summaryEn = "Select chain or pick a discovery match";
       }
     } catch (e) {
-      apiErrors.push(`Blockscout: ${e instanceof Error ? e.message : "failed"}`);
-      if (input.chainId && deps.etherscanEnabled !== false) {
-        try {
-          const { tx, onchain } = await deps.etherscan.getTransaction(
-            input.chainId,
-            input.raw.trim(),
-          );
-          result.tx = tx;
-          result.onchain = onchain;
-          result.kind = "signedTx";
-          result.summary = "已上链交易";
-          result.summaryEn = "On-chain transaction";
-        } catch (err) {
-          apiErrors.push(`Etherscan: ${err instanceof Error ? err.message : "failed"}`);
-        }
-      }
+      apiErrors.push(`Tenderly: ${e instanceof Error ? e.message : "failed"}`);
     }
+  }
+
+  if (kind === "signedTx") {
+    try {
+      signedTxPrepared = await prepareSignedTx(detected.normalized, deps, result.tx);
+      result.tx = signedTxPrepared.tx;
+      result.onchain = signedTxPrepared.onchain ?? result.onchain;
+    } catch (e) {
+      apiErrors.push(`Tx lookup: ${e instanceof Error ? e.message : "failed"}`);
+    }
+  }
+
+  if ((kind === "signedTx" || kind === "unsignedTx") && result.tx?.data) {
+    await attachCalldata(result.tx.data as Hex, result.tx.to);
   }
 
   if (kind === "unsignedTx" && canSimulateDebank(result.tx) && deps.debankEnabled !== false) {
@@ -93,10 +114,21 @@ export async function parseInput(input: ParseInput, deps: ParseInputDeps): Promi
     }
   }
 
+  const view = await runView(detected, deps, input, result, {
+    calldataCtx,
+    signedTx: signedTxPrepared,
+  });
+  if (view) {
+    result.view = view;
+    if (view.warnings?.length) {
+      result.warnings = mergeWarnings(result.warnings, view.warnings);
+    }
+  }
+
   const riskWarnings = runRiskRules(result, {
     selectedChainId: input.chainId,
   });
-  result.warnings = [...result.warnings, ...riskWarnings];
+  result.warnings = mergeWarnings(result.warnings, riskWarnings);
 
   if (apiErrors.length > 0) {
     for (const msg of apiErrors) {
@@ -104,7 +136,6 @@ export async function parseInput(input: ParseInput, deps: ParseInputDeps): Promi
         code: "apiError",
         severity: "warning",
         message: msg,
-        messageEn: msg,
       });
     }
   }

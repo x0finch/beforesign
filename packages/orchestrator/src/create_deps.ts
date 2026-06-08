@@ -1,20 +1,16 @@
-import {
-  createBlockscoutClient,
-  createDebankClient,
-  createEtherscanClient,
-} from "@beforesign/clients";
+import { createDebankClient, createEtherscanClient, createSignatureLookupClient, createTenderlyClient } from "@beforesign/clients";
 import type { ParseInputDeps } from "./parse_input.ts";
 
 export type ApiKeys = {
   etherscanApiKey: string;
   debankAccessKey: string;
-  blockscoutApiKey: string;
+  tenderlyAccessKey?: string;
 };
 
 export function createDepsFromKeys(keys: ApiKeys): ParseInputDeps {
   return {
-    blockscout: createBlockscoutClient({
-      apiKey: keys.blockscoutApiKey || "missing",
+    txLookup: createTenderlyClient({
+      accessKey: keys.tenderlyAccessKey || undefined,
     }),
     etherscan: createEtherscanClient({
       apiKey: keys.etherscanApiKey || "missing",
@@ -22,7 +18,8 @@ export function createDepsFromKeys(keys: ApiKeys): ParseInputDeps {
     debank: createDebankClient({
       accessKey: keys.debankAccessKey || "missing",
     }),
-    blockscoutEnabled: Boolean(keys.blockscoutApiKey),
+    signatureLookup: createSignatureLookupClient(),
+    txLookupEnabled: true,
     etherscanEnabled: Boolean(keys.etherscanApiKey),
     debankEnabled: Boolean(keys.debankAccessKey),
   };
