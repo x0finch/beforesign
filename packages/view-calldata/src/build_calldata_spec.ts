@@ -15,6 +15,16 @@ export function buildCalldataSpec(input: CalldataViewInput): CalldataViewResult 
     title: profile.title(ctx),
     summary: profile.summary(ctx),
     scenarioId: profile.id,
-    spec,
+    spec: spec as unknown as CalldataViewResult["spec"],
+    warnings:
+      warnings.length > 0
+        ? warnings
+            .filter((item) => item.code !== null)
+            .map((item) => ({
+              code: item.code!,
+              severity: item.severity,
+              message: item.message,
+            }))
+        : undefined,
   };
 }
