@@ -1,0 +1,27 @@
+{
+  "name": "@beforesign/view-tx",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test"
+  },
+  "dependencies": {
+    "@beforesign/calldata-parse": "workspace:*",
+    "@beforesign/core": "workspace:*",
+    "@beforesign/json-render-catalog": "workspace:*",
+    "@beforesign/view-calldata": "workspace:*",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@beforesign/test-fixtures": "workspace:*",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
