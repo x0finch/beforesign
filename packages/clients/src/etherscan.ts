@@ -1,5 +1,5 @@
-import { explorerTxUrl } from "@beforesign/core";
 import type { NormalizedTx, OnchainTxMeta } from "@beforesign/core";
+import { explorerTxUrl } from "@beforesign/core";
 import {
   decodeFunctionResult,
   encodeFunctionData,
