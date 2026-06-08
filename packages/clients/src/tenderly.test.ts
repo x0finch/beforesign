@@ -5,7 +5,7 @@ import {
   TENDERLY_SEARCH_NATIVE,
   TENDERLY_SEARCH_SINGLE,
   TX_HASH,
-} from "@beforesign/test-fixtures";
+} from "../test/fixtures/tenderly.ts";
 import { createTenderlyClient } from "./tenderly.ts";
 
 describe("tenderly client", () => {

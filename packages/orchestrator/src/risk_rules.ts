@@ -19,8 +19,7 @@ export function runRiskRules(
       warnings.push({
         code: "unlimitedApproval",
         severity: "destructive",
-        message: "检测到无限授权，请谨慎确认",
-        messageEn: "Unlimited token approval detected",
+        message: "Unlimited token approval detected",
       });
     }
   }
@@ -29,8 +28,7 @@ export function runRiskRules(
     warnings.push({
       code: "approvalForAll",
       severity: "destructive",
-      message: "检测到 setApprovalForAll，将影响该合集下全部 NFT",
-      messageEn: "setApprovalForAll affects all tokens in collection",
+      message: "setApprovalForAll affects all tokens in collection",
     });
   }
 
@@ -40,8 +38,7 @@ export function runRiskRules(
         warnings.push({
           code: "largeNativeTransfer",
           severity: "warning",
-          message: "原生代币转账金额较大",
-          messageEn: "Large native currency transfer",
+          message: "Large native currency transfer",
         });
       }
     } catch {
@@ -57,8 +54,7 @@ export function runRiskRules(
     warnings.push({
       code: "chainMismatch",
       severity: "warning",
-      message: "所选链与交易 chainId 不一致",
-      messageEn: "Selected chain does not match transaction chainId",
+      message: "Selected chain does not match transaction chainId",
     });
   }
 
@@ -66,8 +62,7 @@ export function runRiskRules(
     warnings.push({
       code: "txNotIndexed",
       severity: "info",
-      message: "未在 Blockscout 索引中找到该哈希，请手动选择链",
-      messageEn: "Transaction hash not found in Blockscout index",
+      message: "Transaction hash not found in Tenderly index",
     });
   }
 
@@ -75,8 +70,7 @@ export function runRiskRules(
     warnings.push({
       code: "ambiguousChain",
       severity: "info",
-      message: "多条链上存在匹配，请选择正确链",
-      messageEn: "Multiple chains matched; select the correct one",
+      message: "Multiple chains matched; select the correct one",
     });
   }
 

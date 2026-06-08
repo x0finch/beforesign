@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ParseResult } from "@beforesign/core";
-import { runRiskRules } from "./rules.ts";
+import { runRiskRules } from "./risk_rules.ts";
 
 describe("runRiskRules", () => {
   it("warns on unlimited approval", () => {

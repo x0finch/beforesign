@@ -14,11 +14,9 @@
     "@beforesign/clients": "workspace:*",
     "@beforesign/core": "workspace:*",
     "@beforesign/detect": "workspace:*",
-    "@beforesign/parse": "workspace:*",
-    "@beforesign/risk": "workspace:*"
+    "@beforesign/parse": "workspace:*"
   },
   "devDependencies": {
-    "@beforesign/test-fixtures": "workspace:*",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

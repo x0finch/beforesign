@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { parseCalldata } from "@beforesign/calldata-parse";
 import { validateSpec, type ViewElement } from "@beforesign/json-render-catalog";
-import { CALLDATA_HEX } from "@beforesign/test-fixtures";
+const CALLDATA_HEX =
+  "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000001";
 import { buildCalldataSpec } from "../src/build_calldata_spec.ts";
 import {
   APPROVE_SELECTOR_ABI,

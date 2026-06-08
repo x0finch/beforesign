@@ -42,7 +42,6 @@ pnpm build
 | `@beforesign/json-render-catalog` | json-render 组件 catalog 与 spec helper |
 | `@beforesign/review-typed-data` 等 | ReviewDocument 构建 |
 | `@beforesign/ui-review` | ReviewDocument React 组件 |
-| `@beforesign/risk` | 风险规则 |
 | `@beforesign/clients` | Tenderly / Etherscan / DeBank |
-| `@beforesign/orchestrator` | 编排 |
+| `@beforesign/orchestrator` | 编排（含风险规则 `runRiskRules`） |
 | `@beforesign/web` | 前端 + server functions |

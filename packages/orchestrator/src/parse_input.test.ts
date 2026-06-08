@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { METAMASK_UNSIGNED_JSON, TX_HASH } from "@beforesign/test-fixtures";
+import { METAMASK_UNSIGNED_JSON, TX_HASH } from "../test/fixtures.ts";
 import { parseInput } from "./parse_input.ts";
 
 describe("parseInput", () => {

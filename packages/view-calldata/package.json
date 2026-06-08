@@ -18,7 +18,6 @@
     "@beforesign/json-render-catalog": "workspace:*"
   },
   "devDependencies": {
-    "@beforesign/test-fixtures": "workspace:*",
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "catalog:"

@@ -16,7 +16,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@beforesign/test-fixtures": "workspace:*",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

@@ -4,7 +4,7 @@ import type { ClientsBundle } from "@beforesign/clients";
 import { resolveChainId } from "@beforesign/clients";
 import { detectInputType } from "@beforesign/detect";
 import { canSimulateDebank, parseLocally, parseCalldata } from "@beforesign/parse";
-import { runRiskRules } from "@beforesign/risk";
+import { runRiskRules } from "./risk_rules.ts";
 
 export type ParseInputDeps = ClientsBundle & {
   blockscoutEnabled?: boolean;

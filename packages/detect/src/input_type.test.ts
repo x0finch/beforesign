@@ -6,7 +6,7 @@ import {
   TX_HASH,
   TYPED_DATA_JSON,
   UNSIGNED_TX_HEX,
-} from "@beforesign/test-fixtures";
+} from "../test/fixtures.ts";
 import { validateTypedData } from "viem";
 import { describe, expect, it } from "vitest";
 import { detectInputType } from "./input_type.ts";
