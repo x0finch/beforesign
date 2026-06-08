@@ -1,5 +1,6 @@
 @import "tailwindcss" source("../");
 @import "@beforesign/ui/styles";
+@import "@beforesign/json-render-view/styles";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/inter";
 

@@ -1,3 +1,5 @@
+@source "../src";
+
 /* Nested accordion indent (plan C) — ui Accordion data-slot */
 [data-slot="accordion"] [data-slot="accordion"] {
   margin-inline-start: 1rem;

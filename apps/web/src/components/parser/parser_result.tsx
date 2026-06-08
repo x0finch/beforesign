@@ -7,7 +7,6 @@ import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 import { ParserStatusBar } from "./parser_status_bar.tsx";
 import { ParserRiskStrip } from "./parser_risk_strip.tsx";
-import "@beforesign/json-render-view/styles";
 
 export function ParserResult({
   locale,

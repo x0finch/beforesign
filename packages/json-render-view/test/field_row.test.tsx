@@ -22,9 +22,12 @@ function renderField(overrides: Partial<FieldProps> = {}) {
 }
 
 describe("FieldRow", () => {
-  it("applies whitespace-normal on value cell for wrapping", () => {
+  it("uses a shared label/value grid so values align across rows", () => {
     const { container } = renderField();
-    const valueCell = container.querySelector("td.whitespace-normal");
+    const row = container.firstElementChild;
+    expect(row?.className).toContain("grid");
+    expect(row?.className).toContain("grid-cols-[minmax(6.5rem,30%)_minmax(0,1fr)]");
+    const valueCell = container.querySelector(".whitespace-normal");
     expect(valueCell).toBeTruthy();
   });
 
@@ -34,7 +37,7 @@ describe("FieldRow", () => {
       clamp: true,
       value: "0x" + "ab".repeat(200),
     });
-    const valueBox = container.querySelector("td.whitespace-normal > div");
+    const valueBox = container.querySelector(".whitespace-normal > div");
     expect(valueBox?.className).toContain("font-mono");
     expect(valueBox?.className).toContain("overflow-y-auto");
     expect(valueBox?.className).toContain("max-h-32");
@@ -42,7 +45,7 @@ describe("FieldRow", () => {
 
   it("does not apply mono when prop is false", () => {
     const { container } = renderField({ mono: false, kind: "amount", value: "1" });
-    const valueBox = container.querySelector("td.whitespace-normal > div");
+    const valueBox = container.querySelector(".whitespace-normal > div");
     expect(valueBox?.className).not.toContain("font-mono");
   });
 
