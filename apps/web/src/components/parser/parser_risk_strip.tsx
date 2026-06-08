@@ -29,7 +29,7 @@ export function ParserRiskStrip({
                 : "alert-info"
           }
         >
-          {locale === "en" && w.messageEn ? w.messageEn : w.message}
+          {w.message}
         </div>
       ))}
       {warnings.length > 3 && (

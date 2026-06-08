@@ -12,15 +12,19 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@beforesign/calldata-parse": "workspace:*",
     "@beforesign/core": "workspace:*",
+    "@beforesign/detect": "workspace:*",
+    "@beforesign/json-render-catalog": "workspace:*",
+    "@beforesign/json-render-view": "workspace:*",
     "@beforesign/orchestrator": "workspace:*",
+    "@beforesign/ui": "workspace:*",
+    "@fontsource-variable/geist": "^5.2.9",
+    "@fontsource-variable/inter": "^5.2.8",
     "@tanstack/react-router": "^1.170.11",
     "@tanstack/react-start": "^1.168.19",
     "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.6.0",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -10,6 +10,19 @@ export default defineConfig({
   },
   resolve: {
     tsconfigPaths: true,
+    dedupe: ['@json-render/react', '@json-render/core'],
+  },
+  ssr: {
+    noExternal: [
+      '@json-render/react',
+      '@json-render/core',
+      '@json-render/devtools',
+      '@json-render/devtools-react',
+      '@beforesign/json-render-view',
+      '@beforesign/json-render-catalog',
+      '@beforesign/orchestrator',
+      '@beforesign/clients',
+    ],
   },
   plugins: [
     tailwindcss(),

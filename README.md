@@ -8,7 +8,7 @@
 - TypeScript (strict)，模块内导入使用 `.ts` 扩展名
 - 命名：文件名 `snake_case`；函数/变量 `camelCase`；常量 `UPPER_SNAKE_CASE`；类型 `PascalCase`；领域字段 `camelCase`（ESLint 强制）
 - TanStack Start + Tailwind (`apps/web`)
-- viem + review 包（`@beforesign/review-*`）
+- viem + view 包（`@beforesign/view-*`）
 - Vitest (TDD)
 
 ## 环境变量
@@ -40,8 +40,9 @@ pnpm build
 | `@beforesign/core` | 类型、链配置、Zod schema |
 | `@beforesign/detect` | 输入类型识别 |
 | `@beforesign/json-render-catalog` | json-render 组件 catalog 与 spec helper |
-| `@beforesign/review-typed-data` 等 | ReviewDocument 构建 |
-| `@beforesign/ui-review` | ReviewDocument React 组件 |
+| `@beforesign/json-render-view` | json-render SpecRenderer 与 React registry |
+| `@beforesign/view-calldata` | CalldataCall 树 → json-render spec（`buildCalldataSpec`） |
+| `@beforesign/view-tx` / `view-tx-hash` / `view-typed-data` | 各 input kind → json-render spec |
 | `@beforesign/clients` | Tenderly / Etherscan / DeBank |
 | `@beforesign/orchestrator` | 编排（含风险规则 `runRiskRules`） |
 | `@beforesign/web` | 前端 + server functions |

@@ -1,4 +1,7 @@
 @import "tailwindcss" source("../");
+@import "@beforesign/ui/styles";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/inter";
 
 @layer base {
   :root {
@@ -9,12 +12,12 @@
     --card: #ffffff;
     --primary: #171717;
     --primary-fg: #fafafa;
-    --destructive: #fef2f2;
-    --destructive-fg: #991b1b;
-    --warning: #fffbeb;
-    --warning-fg: #92400e;
-    --info: #eff6ff;
-    --info-fg: #1e40af;
+    --alert-destructive-bg: #fef2f2;
+    --alert-destructive-fg: #991b1b;
+    --alert-warning-bg: #fffbeb;
+    --alert-warning-fg: #92400e;
+    --alert-info-bg: #eff6ff;
+    --alert-info-fg: #1e40af;
   }
 
   .dark {
@@ -25,21 +28,12 @@
     --card: #171717;
     --primary: #fafafa;
     --primary-fg: #171717;
-    --destructive: #450a0a;
-    --destructive-fg: #fecaca;
-    --warning: #422006;
-    --warning-fg: #fde68a;
-    --info: #172554;
-    --info-fg: #bfdbfe;
-  }
-
-  html {
-    color-scheme: light dark;
-  }
-
-  body {
-    background: var(--background);
-    color: var(--foreground);
+    --alert-destructive-bg: #450a0a;
+    --alert-destructive-fg: #fecaca;
+    --alert-warning-bg: #422006;
+    --alert-warning-fg: #fde68a;
+    --alert-info-bg: #172554;
+    --alert-info-fg: #bfdbfe;
   }
 }
 
@@ -51,7 +45,7 @@
     color: var(--foreground);
   }
   .text-muted {
-    color: var(--muted);
+    color: var(--muted-foreground);
   }
   .border-border {
     border-color: var(--border);
@@ -80,7 +74,7 @@
   }
   .btn-ghost {
     @apply rounded-lg px-3 py-2 text-sm;
-    color: var(--muted);
+    color: var(--muted-foreground);
   }
   .btn-ghost:hover {
     color: var(--foreground);
@@ -97,28 +91,19 @@
   }
   .alert-destructive {
     @apply rounded-lg border px-3 py-2 text-sm;
-    background: var(--destructive);
-    color: var(--destructive-fg);
-    border-color: var(--destructive-fg);
+    background: var(--alert-destructive-bg);
+    color: var(--alert-destructive-fg);
+    border-color: var(--alert-destructive-fg);
   }
   .alert-warning {
     @apply rounded-lg border px-3 py-2 text-sm;
-    background: var(--warning);
-    color: var(--warning-fg);
+    background: var(--alert-warning-bg);
+    color: var(--alert-warning-fg);
   }
   .alert-info {
     @apply rounded-lg border px-3 py-2 text-sm;
-    background: var(--info);
-    color: var(--info-fg);
-  }
-  .tab {
-    @apply px-3 py-1.5 text-sm rounded-md;
-    color: var(--muted);
-  }
-  .tab-active {
-    @apply px-3 py-1.5 text-sm rounded-md font-medium;
-    background: var(--border);
-    color: var(--foreground);
+    background: var(--alert-info-bg);
+    color: var(--alert-info-fg);
   }
   .code-block {
     @apply overflow-auto rounded-lg p-3 text-xs font-mono;
@@ -127,7 +112,7 @@
   }
   .text-link {
     @apply underline text-sm;
-    color: var(--info-fg);
+    color: var(--alert-info-fg);
   }
   .animate-in {
     animation: fadeIn 0.2s ease-out;

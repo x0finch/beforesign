@@ -4,6 +4,7 @@ import * as React from "react";
 import { DefaultCatchBoundary } from "~/components/default_catch_boundary.tsx";
 import { NotFound } from "~/components/not_found.tsx";
 import { ThemeProvider } from "~/components/layout/theme_provider.tsx";
+import { TooltipProvider } from "@beforesign/ui/tooltip";
 import appCss from "~/styles/app.css?url";
 
 const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('beforesign-theme');var d=document.documentElement;if(t==='dark'||(t!=='light'&&matchMedia('(prefers-color-scheme:dark)').matches))d.classList.add('dark');else d.classList.remove('dark');}catch(e){}})();`;
@@ -36,7 +37,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="bg-background text-foreground antialiased">
         <ThemeProvider>
-          <div className="mx-auto max-w-3xl min-h-screen px-4 pb-16">{children}</div>
+          <TooltipProvider delay={0}>
+            <div className="mx-auto max-w-3xl min-h-screen px-4 pb-16">{children}</div>
+          </TooltipProvider>
         </ThemeProvider>
         <Scripts />
       </body>

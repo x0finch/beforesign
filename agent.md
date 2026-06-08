@@ -26,3 +26,16 @@
 ### 模块导入
 
 TypeScript 模块内导入带 `.ts` / `.tsx` 扩展名。
+
+## UI 组件（coss / @beforesign/ui）
+
+- 所有 coss 组件集中在 `packages/ui`，消费方通过子路径导入，例如 `import { Button } from "@beforesign/ui/button"`
+- 主题样式：由 `apps/web/src/styles/app.css` 引入 `@import "@beforesign/ui/styles"`
+- **新增组件**（必须在 `packages/ui` 目录执行）：
+
+  ```bash
+  cd packages/ui && npx shadcn@latest add @coss/xxx
+  ```
+
+- 新增后需在 `packages/ui/package.json` 的 `exports` 中补充对应子路径（如 `"./xxx": "./src/components/xxx.tsx"`）
+- 不要在 `apps/web` 安装组件；`components.json` 位于 `packages/ui`

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { normalizeRawInputToJson } from "@beforesign/detect";
 import * as React from "react";
 import { AppHeader } from "~/components/layout/app_header.tsx";
 import { ParserDiscovery } from "~/components/parser/parser_discovery.tsx";
@@ -17,6 +18,7 @@ function HomePage() {
   const [raw, setRaw] = React.useState("");
   const [chainId, setChainId] = React.useState<number | undefined>();
   const [abi, setAbi] = React.useState("");
+  const [signerAddress, setSignerAddress] = React.useState("");
   const [selectedHit, setSelectedHit] = React.useState<string | undefined>();
   const { loading, error, result, parse, clear } = useParse();
 
@@ -24,10 +26,17 @@ function HomePage() {
     result?.discovery?.status === "notFound" || result?.discovery?.status === "ambiguous";
 
   const handleParse = () => {
+    const trimmed = raw.trim();
+    const jsonified = normalizeRawInputToJson(trimmed);
+    const effectiveRaw = jsonified ?? trimmed;
+    if (jsonified && jsonified !== raw) {
+      setRaw(jsonified);
+    }
     void parse({
-      raw: raw.trim(),
+      raw: effectiveRaw,
       chainId,
       abi: abi.trim() || undefined,
+      signerAddress: signerAddress.trim() || undefined,
       selectedDiscoveryHit: selectedHit,
       locale,
     });
@@ -45,6 +54,8 @@ function HomePage() {
         onChainChange={setChainId}
         abi={abi}
         onAbiChange={setAbi}
+        signerAddress={signerAddress}
+        onSignerAddressChange={setSignerAddress}
         chainRequired={chainRequired}
         loading={loading}
         onParse={handleParse}

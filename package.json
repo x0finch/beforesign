@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": ["esbuild"],
+    "overrides": {
+      "@json-render/react": "0.19.0",
+      "@json-render/core": "0.19.0"
+    }
   },
   "scripts": {
     "dev": "pnpm --filter @beforesign/web dev",

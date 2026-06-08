@@ -11,6 +11,8 @@ export function ParserInput({
   onChainChange,
   abi,
   onAbiChange,
+  signerAddress,
+  onSignerAddressChange,
   chainRequired,
   loading,
   onParse,
@@ -23,6 +25,8 @@ export function ParserInput({
   onChainChange: (id: number | undefined) => void;
   abi: string;
   onAbiChange: (v: string) => void;
+  signerAddress: string;
+  onSignerAddressChange: (v: string) => void;
   chainRequired?: boolean;
   loading: boolean;
   onParse: () => void;
@@ -79,11 +83,22 @@ export function ParserInput({
       </div>
       <details className="text-sm">
         <summary className="cursor-pointer text-muted">{t(locale, "advancedAbi")}</summary>
-        <textarea
-          className="input-area font-mono text-xs mt-2 min-h-[80px]"
-          value={abi}
-          onChange={(e) => onAbiChange(e.target.value)}
-        />
+        <div className="mt-2 space-y-3">
+          <label className="block">
+            <span className="text-muted text-xs">{t(locale, "signerAddress")}</span>
+            <input
+              className="input-area font-mono text-xs mt-1"
+              value={signerAddress}
+              onChange={(e) => onSignerAddressChange(e.target.value)}
+              placeholder={t(locale, "signerPlaceholder")}
+            />
+          </label>
+          <textarea
+            className="input-area font-mono text-xs min-h-[80px]"
+            value={abi}
+            onChange={(e) => onAbiChange(e.target.value)}
+          />
+        </div>
       </details>
     </section>
   );
