@@ -20,7 +20,7 @@ describe("spec_helpers", () => {
 
     expect(spec.root).toBe(card.id);
     expect(spec.elements[card.id]?.type).toBe("Card");
-    expect(spec.elements[card.id]?.visible).toBeNull();
+    expect(spec.elements[card.id]?.visible).toBe(true);
   });
 
   it("passes validateSpec for a minimal spec", () => {

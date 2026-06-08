@@ -4,7 +4,7 @@ export type ViewElement = {
   type: string;
   props: Record<string, unknown>;
   children: string[];
-  visible: null;
+  visible: true;
 };
 
 export type ViewSpecInput = {
@@ -35,7 +35,7 @@ export function createElement(
       type,
       props,
       children,
-      visible: null,
+      visible: true,
     },
   };
 }
