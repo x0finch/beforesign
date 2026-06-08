@@ -1,0 +1,6 @@
+/* Nested accordion indent (plan C) — ui Accordion data-slot */
+[data-slot="accordion"] [data-slot="accordion"] {
+  margin-inline-start: 1rem;
+  border-inline-start: 1px solid var(--border);
+  padding-inline-start: 0.75rem;
+}
