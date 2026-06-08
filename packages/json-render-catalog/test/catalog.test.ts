@@ -39,6 +39,8 @@ describe("catalog", () => {
       badge: null,
       badgeVariant: null,
       risk: null,
+      mono: true,
+      clamp: false,
     });
     expect(result.success).toBe(true);
   });
@@ -54,6 +56,8 @@ describe("catalog", () => {
       badge: null,
       badgeVariant: null,
       risk: null,
+      mono: null,
+      clamp: null,
     });
     expect(result.success).toBe(false);
   });

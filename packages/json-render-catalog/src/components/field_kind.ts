@@ -32,6 +32,8 @@ export const fieldPropsSchema = z.object({
   badge: z.string().nullable(),
   badgeVariant: fieldBadgeVariantSchema.nullable(),
   risk: fieldRiskSchema.nullable(),
+  mono: z.boolean().nullable(),
+  clamp: z.boolean().nullable(),
 });
 
 export type FieldProps = z.infer<typeof fieldPropsSchema>;

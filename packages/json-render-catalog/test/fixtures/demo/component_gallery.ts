@@ -45,6 +45,8 @@ export function buildComponentGallerySpec(): Spec {
     badge: null,
     badgeVariant: null,
     risk: null,
+    mono: true,
+    clamp: true,
   });
   const alerts = createElement("AlertList", {
     items: [{ severity: "info", message: "Info alert", code: "info" }],

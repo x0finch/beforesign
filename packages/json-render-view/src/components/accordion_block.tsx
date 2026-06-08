@@ -22,11 +22,11 @@ export function AccordionBlock({
   return (
     <Accordion defaultValue={defaultExpanded ? [id] : []}>
       <AccordionItem value={id} className="border-0">
-        <AccordionTrigger className="items-start py-3">
-          <span className="flex flex-col gap-0.5 text-left">
-            <span>{props.title}</span>
+        <AccordionTrigger className="min-w-0 items-start py-3">
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-left">
+            <span className="break-words">{props.title}</span>
             {props.description ? (
-              <span className="font-normal text-muted-foreground text-xs">
+              <span className="break-all font-normal text-muted-foreground text-xs">
                 {props.description}
               </span>
             ) : null}

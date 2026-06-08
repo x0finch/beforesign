@@ -14,6 +14,8 @@ const nullFieldExtras = {
   badge: null,
   badgeVariant: null,
   risk: null,
+  mono: null,
+  clamp: null,
 } as const;
 
 export function buildSampleCalldataSpec(): Spec {
@@ -55,6 +57,8 @@ export function buildSampleCalldataSpec(): Spec {
     value: "0xa9059cbb",
     ...nullFieldExtras,
     kind: "selector",
+    mono: true,
+    clamp: false,
   });
   const fieldRecipient = createElement("Field", {
     label: "recipient",
@@ -66,6 +70,8 @@ export function buildSampleCalldataSpec(): Spec {
     badge: null,
     badgeVariant: null,
     risk: null,
+    mono: true,
+    clamp: false,
   });
   const fieldAmount = createElement("Field", {
     label: "amount",
@@ -77,6 +83,8 @@ export function buildSampleCalldataSpec(): Spec {
     badge: null,
     badgeVariant: null,
     risk: null,
+    mono: false,
+    clamp: false,
   });
 
   const callChild = createElement("Accordion", {
@@ -94,6 +102,8 @@ export function buildSampleCalldataSpec(): Spec {
     badge: null,
     badgeVariant: null,
     risk: null,
+    mono: false,
+    clamp: false,
   });
 
   card.element.children = [stack.id];

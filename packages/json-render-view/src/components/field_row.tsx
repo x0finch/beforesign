@@ -1,6 +1,5 @@
 import type { FieldProps } from "@beforesign/json-render-catalog";
 import { Badge } from "@beforesign/ui/badge";
-import { ScrollArea } from "@beforesign/ui/scroll-area";
 import { Table, TableBody, TableCell, TableRow } from "@beforesign/ui/table";
 import { cn } from "@beforesign/ui/utils";
 
@@ -9,20 +8,19 @@ export function FieldRow({ props }: { props: FieldProps }) {
   const highlighted = props.highlight === true;
   const destructive = props.risk === "destructive";
 
-  const valueClass = cn(
-    "text-right break-all [overflow-wrap:anywhere]",
-    destructive && "font-medium text-destructive",
-  );
-
-  function renderValue(content: string) {
-    if (props.kind === "hash") {
-      return (
-        <ScrollArea className="max-h-32">
-          <div className={cn("font-mono text-xs leading-relaxed", valueClass)}>{content}</div>
-        </ScrollArea>
-      );
-    }
-    return content;
+  function renderPlainValue(content: string) {
+    return (
+      <div
+        className={cn(
+          "text-right break-all [overflow-wrap:anywhere]",
+          props.clamp === true && "max-h-32 overflow-y-auto overflow-x-hidden",
+          props.mono === true && "font-mono text-xs leading-relaxed",
+          destructive && "font-medium text-destructive",
+        )}
+      >
+        {content}
+      </div>
+    );
   }
 
   const hasRichValue = props.href !== null || props.badge !== null;
@@ -48,17 +46,19 @@ export function FieldRow({ props }: { props: FieldProps }) {
       ) : null}
     </div>
   ) : (
-    renderValue(display)
+    renderPlainValue(display)
   );
 
   return (
-    <Table>
+    <Table className="table-fixed">
       <TableBody>
         <TableRow className={cn(highlighted && "bg-muted/50")}>
-          <TableCell className="w-[40%] font-medium capitalize text-muted-foreground">
+          <TableCell className="w-[40%] align-top font-medium capitalize text-muted-foreground">
             {props.label}
           </TableCell>
-          <TableCell className={cn("w-[60%]", valueClass)}>{valueContent}</TableCell>
+          <TableCell className="w-[60%] min-w-0 align-top whitespace-normal">
+            {valueContent}
+          </TableCell>
         </TableRow>
       </TableBody>
     </Table>
