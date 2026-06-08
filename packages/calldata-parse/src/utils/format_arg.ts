@@ -37,7 +37,9 @@ export function formatArgValue(value: unknown, input?: AbiParameterWithComponent
       });
       return `(${parts.join(", ")})`;
     }
-    return JSON.stringify(value);
+    return JSON.stringify(value, (_key, child) =>
+      typeof child === "bigint" ? child.toString() : child,
+    );
   }
   return String(value);
 }
