@@ -8,7 +8,7 @@
 - TypeScript (strict)，模块内导入使用 `.ts` 扩展名
 - 命名：文件名 `snake_case`；函数/变量 `camelCase`；常量 `UPPER_SNAKE_CASE`；类型 `PascalCase`；领域字段 `camelCase`（ESLint 强制）
 - TanStack Start + Tailwind (`apps/web`)
-- viem (`@beforesign/parse`)
+- viem + review 包（`@beforesign/review-*`）
 - Vitest (TDD)
 
 ## 环境变量
@@ -18,7 +18,7 @@
 ```
 ETHERSCAN_API_KEY=
 DEBANK_ACCESS_KEY=
-BLOCKSCOUT_API_KEY=
+TENDERLY_ACCESS_KEY=
 ```
 
 未配置 Key 时仍可进行本地解析；对应外部能力会降级。
@@ -39,8 +39,10 @@ pnpm build
 |----|------|
 | `@beforesign/core` | 类型、链配置、Zod schema |
 | `@beforesign/detect` | 输入类型识别 |
-| `@beforesign/parse` | viem 解析 |
+| `@beforesign/json-render-catalog` | json-render 组件 catalog 与 spec helper |
+| `@beforesign/review-typed-data` 等 | ReviewDocument 构建 |
+| `@beforesign/ui-review` | ReviewDocument React 组件 |
 | `@beforesign/risk` | 风险规则 |
-| `@beforesign/clients` | Blockscout / Etherscan / DeBank |
+| `@beforesign/clients` | Tenderly / Etherscan / DeBank |
 | `@beforesign/orchestrator` | 编排 |
 | `@beforesign/web` | 前端 + server functions |
