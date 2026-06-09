@@ -24,7 +24,9 @@ export function AiPage({
   const [followUp, setFollowUp] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
 
-  const { loading, error, messages, needsDiscovery, ask, clear } = useAsk();
+  const { loading, error, messages, needsDiscovery, ask, clear, exportContext, sessionId } =
+    useAsk();
+  const [exportError, setExportError] = React.useState<string | null>(null);
 
   const active = messages.length > 0;
 
@@ -36,7 +38,7 @@ export function AiPage({
       setRaw(jsonified);
     }
     void ask({
-      message: effectiveRaw,
+      message: trimmed,
       raw: effectiveRaw,
       locale,
     });
@@ -65,6 +67,13 @@ export function AiPage({
     });
   };
 
+  const handleExportContext = () => {
+    setExportError(null);
+    void exportContext().catch((e) => {
+      setExportError(e instanceof Error ? e.message : "Export failed");
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-[calc(100dvh-6rem)]">
       <AppHeader
@@ -73,13 +82,29 @@ export function AiPage({
         active="ai"
         trailing={
           active ? (
-            <button type="button" className="btn-ghost text-sm" onClick={() => {
-              clear();
-              setFollowUp("");
-              setSelectedHit(undefined);
-            }}>
-              {t(locale, "aiNewChat")}
-            </button>
+            <div className="flex items-center gap-2">
+              {sessionId ? (
+                <button
+                  type="button"
+                  className="btn-ghost text-sm"
+                  onClick={handleExportContext}
+                >
+                  {t(locale, "aiExportContext")}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="btn-ghost text-sm"
+                onClick={() => {
+                  clear();
+                  setFollowUp("");
+                  setSelectedHit(undefined);
+                  setExportError(null);
+                }}
+              >
+                {t(locale, "aiNewChat")}
+              </button>
+            </div>
           ) : null
         }
       />
@@ -131,6 +156,12 @@ export function AiPage({
       {error && (
         <div role="alert" className="alert-destructive mt-4">
           {error}
+        </div>
+      )}
+
+      {exportError && (
+        <div role="alert" className="alert-destructive mt-4">
+          {exportError}
         </div>
       )}
     </div>

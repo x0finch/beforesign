@@ -16,7 +16,8 @@
     "@beforesign/core": "workspace:*",
     "@beforesign/detect": "workspace:*",
     "@beforesign/json-render-catalog": "workspace:*",
-    "zod": "catalog:"
+    "@openai/agents": "^0.11.6",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "typescript": "catalog:",

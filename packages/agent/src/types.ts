@@ -1,5 +1,7 @@
 import type { ParseInput, ParseResult, ViewSpec } from "@beforesign/core";
 import type { DiscoveryResult } from "@beforesign/core";
+import type { MemorySession } from "@openai/agents";
+import type { AgentContextExport } from "./export_agent_context.ts";
 
 export type AskLocale = "zh" | "en";
 
@@ -27,6 +29,8 @@ export type AskSession = {
   messages: ChatMessage[];
   parseResult?: ParseResult;
   lastParseInput?: ParseInput;
+  agentMemory?: MemorySession;
+  lastContextExport?: AgentContextExport;
   createdAt: number;
   updatedAt: number;
 };
@@ -49,6 +53,7 @@ export type AskSseEvent =
   | { type: "assistant_spec"; spec: ViewSpec }
   | { type: "needs_input"; discovery: DiscoveryResult }
   | { type: "done"; sessionId: string }
+  | { type: "context_export"; export: AgentContextExport }
   | { type: "error"; message: string };
 
 export type LlmMessage = {

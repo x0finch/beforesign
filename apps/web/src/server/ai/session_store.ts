@@ -24,6 +24,11 @@ export function getOrCreateSession(sessionId?: string): AskSession {
   return session;
 }
 
+export function getSession(sessionId: string): AskSession | undefined {
+  pruneExpired();
+  return sessions.get(sessionId);
+}
+
 export function deleteSession(sessionId: string) {
   sessions.delete(sessionId);
 }

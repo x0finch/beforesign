@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AiRouteImport } from './routes/ai'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiAiContextRouteImport } from './routes/api/ai/context'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai/ask'
 
 const AiRoute = AiRouteImport.update({
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiContextRoute = ApiAiContextRouteImport.update({
+  id: '/api/ai/context',
+  path: '/api/ai/context',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAiAskRoute = ApiAiAskRouteImport.update({
   id: '/api/ai/ask',
   path: '/api/ai/ask',
@@ -33,30 +39,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ai': typeof AiRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/ai/context': typeof ApiAiContextRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ai': typeof AiRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/ai/context': typeof ApiAiContextRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/ai': typeof AiRoute
   '/api/ai/ask': typeof ApiAiAskRoute
+  '/api/ai/context': typeof ApiAiContextRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ai' | '/api/ai/ask'
+  fullPaths: '/' | '/ai' | '/api/ai/ask' | '/api/ai/context'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ai' | '/api/ai/ask'
-  id: '__root__' | '/' | '/ai' | '/api/ai/ask'
+  to: '/' | '/ai' | '/api/ai/ask' | '/api/ai/context'
+  id: '__root__' | '/' | '/ai' | '/api/ai/ask' | '/api/ai/context'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AiRoute: typeof AiRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
+  ApiAiContextRoute: typeof ApiAiContextRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/context': {
+      id: '/api/ai/context'
+      path: '/api/ai/context'
+      fullPath: '/api/ai/context'
+      preLoaderRoute: typeof ApiAiContextRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/ai/ask': {
       id: '/api/ai/ask'
       path: '/api/ai/ask'
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AiRoute: AiRoute,
   ApiAiAskRoute: ApiAiAskRoute,
+  ApiAiContextRoute: ApiAiContextRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

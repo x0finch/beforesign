@@ -20,7 +20,7 @@ export function extractJsonObject(text: string): unknown | null {
   }
 
   const fence = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  if (fence) {
+  if (fence?.[1]) {
     try {
       return JSON.parse(fence[1].trim());
     } catch {

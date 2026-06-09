@@ -1,5 +1,6 @@
 import type { ParseResult, ViewSpec } from "@beforesign/core";
 import type { DiscoveryResult } from "@beforesign/core";
+import type { AgentContextExport } from "@beforesign/agent";
 import * as React from "react";
 import type { Locale } from "~/lib/i18n.ts";
 
@@ -30,10 +31,25 @@ export type UseAskInput = {
   locale: Locale;
 };
 
+export function downloadAgentContextExport(exportData: AgentContextExport) {
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `agent-context-${exportData.sessionId}-${exportData.exportedAt.replace(/[:.]/g, "-")}.json`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 export function useAsk() {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [sessionId, setSessionId] = React.useState<string | undefined>();
+  const [contextExport, setContextExport] = React.useState<AgentContextExport | null>(
+    null,
+  );
   const [messages, setMessages] = React.useState<AskMessage[]>([]);
   const [parseResult, setParseResult] = React.useState<ParseResult | null>(null);
   const [needsDiscovery, setNeedsDiscovery] = React.useState<DiscoveryResult | null>(
@@ -47,6 +63,7 @@ export function useAsk() {
     setLoading(false);
     setError(null);
     setSessionId(undefined);
+    setContextExport(null);
     setMessages([]);
     setParseResult(null);
     setNeedsDiscovery(null);
@@ -148,6 +165,7 @@ export function useAsk() {
             sessionId?: string;
             message?: string;
             spec?: ViewSpec;
+            export?: AgentContextExport;
           };
 
           switch (event.type) {
@@ -194,6 +212,9 @@ export function useAsk() {
                 ]);
               }
               break;
+            case "context_export":
+              if (event.export) setContextExport(event.export);
+              break;
             case "done":
               if (event.sessionId) setSessionId(event.sessionId);
               break;
@@ -211,15 +232,36 @@ export function useAsk() {
     }
   }, [sessionId]);
 
+  const exportContext = React.useCallback(async () => {
+    if (contextExport) {
+      downloadAgentContextExport(contextExport);
+      return;
+    }
+    if (!sessionId) return;
+
+    const response = await fetch(
+      `/api/ai/context?sessionId=${encodeURIComponent(sessionId)}`,
+    );
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Export failed (${response.status})`);
+    }
+    const exportData = (await response.json()) as AgentContextExport;
+    setContextExport(exportData);
+    downloadAgentContextExport(exportData);
+  }, [contextExport, sessionId]);
+
   return {
     loading,
     error,
     sessionId,
+    contextExport,
     messages,
     parseResult,
     needsDiscovery,
     phase,
     ask,
     clear,
+    exportContext,
   };
 }
