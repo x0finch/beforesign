@@ -1,0 +1,21 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "beforesign",
+	"compatibility_date": "2025-09-24",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"main": "@tanstack/react-start/server-entry",
+  "account_id": "2bce8216267cf76d85fab3ce18abea69",
+  "vars": {
+    "LLM_BASE_URL": "https://api.openai.com/v1",
+    "LLM_MODEL": "gpt-4o-mini",
+  },
+	// Create once: pnpm wrangler kv namespace create SESSIONS
+	"kv_namespaces": [
+		{
+			"binding": "SESSIONS",
+			"id": "bf8ab1d3b3a545c38d5e09056eb78075"
+		}
+	]
+}

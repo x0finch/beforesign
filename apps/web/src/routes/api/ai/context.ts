@@ -1,6 +1,6 @@
 import { buildAgentContextExport } from "@beforesign/agent";
 import { createFileRoute } from "@tanstack/react-router";
-import { getSession } from "~/server/ai/session_store.ts";
+import { getSession, saveSession } from "~/server/ai/session_store.ts";
 
 export const Route = createFileRoute("/api/ai/context")({
   server: {
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/ai/context")({
           });
         }
 
-        const session = getSession(sessionId);
+        const session = await getSession(sessionId);
         if (!session) {
           return new Response(JSON.stringify({ error: "Session not found" }), {
             status: 404,
@@ -39,6 +39,7 @@ export const Route = createFileRoute("/api/ai/context")({
         );
         session.lastContextExport = exportData;
         session.updatedAt = Date.now();
+        await saveSession(session);
 
         return new Response(JSON.stringify(exportData, null, 2), {
           headers: {

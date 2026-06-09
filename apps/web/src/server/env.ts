@@ -1,23 +1,43 @@
+import { env as cloudflareEnv } from "cloudflare:workers";
+
+type EnvSource = Record<string, string | undefined>;
+
+function readEnv(source: EnvSource, key: string): string | undefined {
+  const value = source[key]?.trim();
+  return value || undefined;
+}
+
+function getEnvSource(): EnvSource {
+  const cf = cloudflareEnv as unknown as EnvSource;
+  return new Proxy(cf, {
+    get(target, prop: string) {
+      return target[prop] ?? process.env[prop];
+    },
+  });
+}
+
 export function getApiKeys() {
+  const source = getEnvSource();
   return {
-    etherscanApiKey: process.env.ETHERSCAN_API_KEY ?? "",
-    debankAccessKey: process.env.DEBANK_ACCESS_KEY ?? "",
-    tenderlyAccessKey: process.env.TENDERLY_ACCESS_KEY ?? "",
+    etherscanApiKey: readEnv(source, "ETHERSCAN_API_KEY") ?? "",
+    debankAccessKey: readEnv(source, "DEBANK_ACCESS_KEY") ?? "",
+    tenderlyAccessKey: readEnv(source, "TENDERLY_ACCESS_KEY") ?? "",
   };
 }
 
 export function getLlmConfig():
   | { apiKey: string; baseUrl?: string; model: string }
   | undefined {
-  const apiKey = process.env.LLM_API_KEY?.trim();
+  const source = getEnvSource();
+  const apiKey = readEnv(source, "LLM_API_KEY");
   if (!apiKey) return undefined;
   return {
     apiKey,
-    baseUrl: process.env.LLM_BASE_URL?.trim() || undefined,
-    model: process.env.LLM_MODEL?.trim() || "gpt-4o-mini",
+    baseUrl: readEnv(source, "LLM_BASE_URL"),
+    model: readEnv(source, "LLM_MODEL") ?? "gpt-4o-mini",
   };
 }
 
 export function isLlmConfigured(): boolean {
-  return Boolean(process.env.LLM_API_KEY?.trim());
+  return Boolean(readEnv(getEnvSource(), "LLM_API_KEY"));
 }

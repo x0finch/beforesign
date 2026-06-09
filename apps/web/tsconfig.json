@@ -1,6 +1,7 @@
 {
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
   "compilerOptions": {
+    "types": ["@cloudflare/workers-types"],
     "strict": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
