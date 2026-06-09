@@ -26,8 +26,9 @@ describe("runBeforeSignAsk fallback", () => {
     expect(events.some((e) => e.type === "context_export")).toBe(true);
     expect(events.at(-1)?.type).toBe("done");
     expect(events.at(-2)?.type).toBe("context_export");
+    expect(events.some((e) => e.type === "assistant_spec")).toBe(false);
     expect(
-      events.some((e) => e.type === "assistant_spec") || events.some((e) => e.type === "error"),
+      events.some((e) => e.type === "parse_result") || events.some((e) => e.type === "error"),
     ).toBe(true);
   });
 });

@@ -5,7 +5,6 @@ import type { BeforeSignRunContext } from "./run_context.ts";
 import {
   runBuildViewAction,
   runDetectInputAction,
-  runGetFactsAction,
   runParseCalldataAction,
 } from "./tool_actions.ts";
 
@@ -53,20 +52,8 @@ export const parseCalldataTool = tool({
   },
 });
 
-export const getFactsTool = tool({
-  name: "get_facts",
-  description: "Read parsed facts from the current session (summary, fields, warnings).",
-  parameters: z.object({}),
-  execute: async (_args, runContext) => {
-    const { session, normalized } = ctx(runContext);
-    const result = runGetFactsAction(session, normalized);
-    return result.message;
-  },
-});
-
 export const beforeSignTools = [
   detectInputTool,
   buildViewTool,
   parseCalldataTool,
-  getFactsTool,
 ];

@@ -6,12 +6,9 @@ import {
   buildUserTurn,
   captureAgentContextExport,
 } from "./export_agent_context.ts";
-import { generateRespond } from "./generate_respond.ts";
 import { normalizeAskInput, type NormalizedAskInput } from "./normalize_ask_input.ts";
 import { createRunner } from "./runner_config.ts";
 import type { BeforeSignRunContext, LlmRuntimeConfig } from "./run_context.ts";
-import { resolveAssistantSpec } from "./assistant_spec.ts";
-import { createMessageId } from "./session_state.ts";
 import {
   runBuildViewAction,
   runDetectInputAction,
@@ -95,14 +92,9 @@ async function* runFallbackPipeline(
       summary: detect.summary,
     });
     if (!detect.ok) {
-      const spec = resolveAssistantSpec(
-        zh ? "无法识别输入格式。" : "Unrecognized input.",
-        input.locale,
-      );
-      yield { type: "assistant_spec", spec };
       yield* emitSessionEnd(session, normalized, {
-        type: "done",
-        sessionId: session.id,
+        type: "error",
+        message: detect.message,
       });
       return;
     }
@@ -128,11 +120,6 @@ async function* runFallbackPipeline(
   }
 
   if (built.discovery) {
-    const pick =
-      zh
-        ? "在多条链上找到了匹配交易，请选择正确的链。"
-        : "Multiple chains matched. Select the correct chain.";
-    yield { type: "assistant_spec", spec: resolveAssistantSpec(pick, input.locale) };
     yield* emitSessionEnd(session, normalized, {
       type: "done",
       sessionId: session.id,
@@ -148,8 +135,6 @@ async function* runFallbackPipeline(
     return;
   }
 
-  const fallback = session.parseResult?.summary ?? input.message;
-  yield { type: "assistant_spec", spec: resolveAssistantSpec(fallback, input.locale) };
   yield* emitSessionEnd(session, normalized, {
     type: "done",
     sessionId: session.id,
@@ -240,11 +225,6 @@ export async function* runBeforeSignAsk(
   }
 
   if (stopAfterDiscovery) {
-    const pick =
-      input.locale === "zh"
-        ? "在多条链上找到了匹配交易，请在下方选择正确的链后再继续。"
-        : "Multiple chains matched. Select the correct chain below to continue.";
-    yield { type: "assistant_spec", spec: resolveAssistantSpec(pick, input.locale) };
     yield* emitSessionEnd(session, normalized, {
       type: "done",
       sessionId: session.id,
@@ -252,25 +232,8 @@ export async function* runBeforeSignAsk(
     return;
   }
 
-  yield { type: "status", phase: "thinking" };
-
-  try {
-    const spec = await generateRespond(llm, session, input);
-    session.messages.push({
-      id: createMessageId(),
-      role: "assistant",
-      content: "",
-      spec,
-      createdAt: Date.now(),
-    });
-    session.updatedAt = Date.now();
-    yield { type: "assistant_spec", spec };
-    yield* emitSessionEnd(session, normalized, {
-      type: "done",
-      sessionId: session.id,
-    });
-  } catch (e) {
-    const message = e instanceof Error ? e.message : "respond failed";
-    yield* emitSessionEnd(session, normalized, { type: "error", message });
-  }
+  yield* emitSessionEnd(session, normalized, {
+    type: "done",
+    sessionId: session.id,
+  });
 }

@@ -80,6 +80,12 @@ export function buildTxHashFields(ctx: TxHashFieldContext): FieldDescriptorInput
 
 export function buildTxHashSummary(ctx: TxHashFieldContext): string {
   if (ctx.tx && ctx.onchain) {
+    const txData = ctx.tx.data;
+    const hasContractData = Boolean(txData && txData !== "0x");
+    const hasEthValue = Boolean(ctx.tx.value && ctx.tx.value !== "0");
+    if (hasContractData && !hasEthValue) {
+      return "On-chain contract call: verify hash, chain, and callee";
+    }
     return "On-chain transaction: verify hash, chain, and counterparties";
   }
   if (ctx.discovery?.status === "ambiguous") {

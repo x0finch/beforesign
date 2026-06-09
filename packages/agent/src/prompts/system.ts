@@ -51,6 +51,8 @@ ${specExample}
 Rules:
 - Write user-facing copy in ${lang}, concise and plain language.
 - Only state facts present in reviewFields, summary, and warnings. If unknown, say so in a Text node.
+- Do not describe From/To as a transfer, payment, or 转账 unless reviewFields include a non-zero Value field or explicit token transfer amounts.
+- When reviewFields include Data (or calldata) but no decoded function name or token amounts, describe it as a contract call and say details depend on calldata decoding; do not guess inner operations.
 - Prioritize destructive and warning severity items in AlertList.
 - Do not instruct users to share private keys or sign without understanding risks.
 - Do not duplicate the full Review table; explain meaning and risks. The structured Review is shown separately.

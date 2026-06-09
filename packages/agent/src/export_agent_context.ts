@@ -2,10 +2,9 @@ import type { AgentInputItem } from "@openai/agents";
 import { buildFactsContext, summarizeAssistantSpec } from "./context_builder.ts";
 import { getAgentMemorySession } from "./beforesign_session.ts";
 import { buildBeforeSignInstructions } from "./prompts/beforesign_instructions.ts";
-import { buildSystemPrompt } from "./prompts/system.ts";
 import { beforeSignTools } from "./sdk_tools.ts";
 import type { NormalizedAskInput } from "./normalize_ask_input.ts";
-import type { AskInput, AskLocale, AskSession } from "./types.ts";
+import type { AskLocale, AskSession } from "./types.ts";
 
 export type AgentContextExport = {
   exportedAt: string;
@@ -43,10 +42,6 @@ export type AgentContextExport = {
     lastParseInput?: AskSession["lastParseInput"];
   };
   agentMemoryItems: AgentInputItem[];
-  respondPreview: {
-    system: string;
-    messages: Array<{ role: "system" | "user" | "assistant"; content: string }>;
-  };
 };
 
 export function buildTurnPreamble(
@@ -70,39 +65,6 @@ export function buildUserTurn(
   normalized: NormalizedAskInput,
 ): string {
   return `${buildTurnPreamble(session, normalized)}\n\n${normalized.message}`;
-}
-
-export function buildRespondPreview(
-  session: AskSession,
-  input: AskInput,
-): AgentContextExport["respondPreview"] {
-  const facts = buildFactsContext(session.parseResult);
-  const system = buildSystemPrompt(input.locale);
-
-  const history = session.messages
-    .filter((m) => m.role === "user" || m.role === "assistant")
-    .slice(-10)
-    .map((m) => ({
-      role: m.role as "user" | "assistant",
-      content:
-        m.role === "assistant" && m.spec
-          ? summarizeAssistantSpec(m.spec)
-          : m.content,
-    }));
-
-  const userContent =
-    input.locale === "zh"
-      ? `用户问题：${input.message}\n\n解析事实：\n${facts}`
-      : `User question: ${input.message}\n\nParsed facts:\n${facts}`;
-
-  return {
-    system,
-    messages: [
-      { role: "system", content: system },
-      ...history.slice(0, -1),
-      { role: "user", content: userContent },
-    ],
-  };
 }
 
 function serializeMemoryItems(items: AgentInputItem[]): AgentInputItem[] {
@@ -170,7 +132,6 @@ export async function buildAgentContextExport(
       ...(session.lastParseInput ? { lastParseInput: session.lastParseInput } : {}),
     },
     agentMemoryItems: serializeMemoryItems(memoryItems),
-    respondPreview: buildRespondPreview(session, normalized),
   };
 }
 

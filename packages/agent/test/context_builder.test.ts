@@ -32,6 +32,31 @@ describe("context_builder", () => {
     expect(facts).not.toContain("viewSpec:");
   });
 
+  it("truncates long Data hex in review fields", () => {
+    const longData = `0x${"ab".repeat(200)}`;
+    const facts = buildFactsContext({
+      kind: "txHash",
+      summary: "On-chain contract call",
+      warnings: [],
+      raw: "0xabc",
+      view: {
+        title: "Transaction",
+        summary: "On-chain contract call",
+        spec: {
+          root: "field-1",
+          elements: {
+            "field-1": {
+              type: "Field",
+              props: { label: "Data", value: longData, displayValue: null, kind: "hash" },
+            },
+          },
+        },
+      },
+    });
+    expect(facts).toContain("200 bytes, truncated");
+    expect(facts).not.toContain(longData);
+  });
+
   it("getParseFacts returns summary path", () => {
     const facts = getParseFacts(
       {

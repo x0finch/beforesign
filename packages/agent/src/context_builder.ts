@@ -5,6 +5,14 @@ type SpecElement = {
   props?: Record<string, unknown>;
 };
 
+function formatFieldValueForFacts(label: string, value: string): string {
+  if (label === "Data" && value.startsWith("0x") && value.length > 66) {
+    const byteLen = (value.length - 2) / 2;
+    return `${value.slice(0, 66)}… (${byteLen} bytes, truncated)`;
+  }
+  return value;
+}
+
 export function summarizeViewSpec(spec: ViewSpec): string {
   const lines: string[] = [];
 
@@ -16,7 +24,8 @@ export function summarizeViewSpec(spec: ViewSpec): string {
 
     if (typed.type === "Field") {
       const label = String(props.label ?? "");
-      const value = String(props.displayValue ?? props.value ?? "");
+      const rawValue = String(props.displayValue ?? props.value ?? "");
+      const value = formatFieldValueForFacts(label, rawValue);
       if (label) lines.push(`${label}: ${value}`);
       continue;
     }

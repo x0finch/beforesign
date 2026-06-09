@@ -4,7 +4,7 @@ import { normalizeAskInput } from "../src/normalize_ask_input.ts";
 import { createEmptySession } from "../src/session_state.ts";
 
 describe("buildAgentContextExport", () => {
-  it("includes agent config, turn preamble, and respond preview", async () => {
+  it("includes agent config, turn preamble, and parse facts", async () => {
     const session = createEmptySession();
     session.messages.push({
       id: "m1",
@@ -28,14 +28,12 @@ describe("buildAgentContextExport", () => {
       "detect_input",
       "build_view",
       "parse_calldata",
-      "get_facts",
     ]);
     expect(snapshot.turn.message).toBe("What is this tx?");
     expect(snapshot.turn.normalized.detectedKind).not.toBe("unknown");
     expect(snapshot.turn.preamble).toContain("Parse target:");
     expect(snapshot.turn.userTurn).toContain("What is this tx?");
     expect(snapshot.session.chatMessages).toHaveLength(1);
-    expect(snapshot.respondPreview.system).toContain("BeforeSign");
-    expect(snapshot.respondPreview.messages.at(-1)?.role).toBe("user");
+    expect(snapshot.session.parseFacts).toBeDefined();
   });
 });

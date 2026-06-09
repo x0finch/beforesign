@@ -1,10 +1,12 @@
 import { assembleParseResult, type AiPipelineDeps } from "@beforesign/ai-pipeline";
 import { detectInputType } from "@beforesign/detect";
-import { buildFactsContext, getParseFacts } from "./context_builder.ts";
 import type { NormalizedAskInput } from "./normalize_ask_input.ts";
 import { buildParseInputFromAsk } from "./session_state.ts";
 import type { AskSession, AskSseEvent } from "./types.ts";
-import { extractCalldataSource } from "./tools/extract_calldata.ts";
+import {
+  canDrillIntoCalldata,
+  extractCalldataSource,
+} from "./tools/extract_calldata.ts";
 
 export type ToolActionResult = {
   ok: boolean;
@@ -36,6 +38,32 @@ function shouldRebuildParse(normalized: NormalizedAskInput, session: AskSession)
   if (normalized.selectedDiscoveryHit && session.lastParseInput) return true;
   if (normalized.chainId !== undefined && session.lastParseInput) return true;
   return false;
+}
+
+function buildViewMessagePayload(
+  session: AskSession,
+  base: Record<string, unknown>,
+  locale: NormalizedAskInput["locale"],
+): Record<string, unknown> {
+  const payload = { ...base };
+  if (canDrillIntoCalldata(session.parseResult)) {
+    payload.calldataDrillRecommended = true;
+    payload.calldataDrillReason =
+      locale === "zh"
+        ? "交易含合约 Data，需 parse_calldata 解码。"
+        : "Transaction has contract Data; run parse_calldata to decode.";
+  }
+  return payload;
+}
+
+async function maybeAutoDrillCalldata(
+  session: AskSession,
+  normalized: NormalizedAskInput,
+  deps: AiPipelineDeps,
+  emit: (event: AskSseEvent) => void,
+): Promise<ToolActionResult | undefined> {
+  if (!canDrillIntoCalldata(session.parseResult)) return undefined;
+  return runParseCalldataAction(session, normalized, deps, emit);
 }
 
 function ensureParseInput(session: AskSession, normalized: NormalizedAskInput): void {
@@ -157,18 +185,26 @@ export async function runBuildViewAction(
 
   const needsRebuild = shouldRebuildParse(normalized, session);
   if (!needsRebuild && session.parseResult) {
+    const drill = await maybeAutoDrillCalldata(session, normalized, deps, emit);
     const title = session.parseResult.view?.title ?? session.parseResult.summary;
-    return {
-      ok: true,
-      message: JSON.stringify({
+    const payload = buildViewMessagePayload(
+      session,
+      {
         kind: session.parseResult.kind,
         summary: session.parseResult.summary,
+        title,
         cached: true,
+        ...(drill?.ok ? { autoDrilled: true } : {}),
         hint:
           normalized.locale === "zh"
-            ? "已有相同 parse 结果；若要解析新输入或 drill calldata，请换 target 或 parse_calldata。"
-            : "Cached parse result; use a new target or parse_calldata to drill.",
-      }),
+            ? "已有相同 parse 结果；若要解析新输入，请换 target。"
+            : "Cached parse result; use a new target to parse different input.",
+      },
+      normalized.locale,
+    );
+    return {
+      ok: true,
+      message: JSON.stringify(payload),
       summary: title,
     };
   }
@@ -194,14 +230,22 @@ export async function runBuildViewAction(
       };
     }
 
+    const drill = await maybeAutoDrillCalldata(session, normalized, deps, emit);
+    const payload = buildViewMessagePayload(
+      session,
+      {
+        kind: session.parseResult.kind,
+        summary: session.parseResult.summary,
+        title: session.parseResult.view?.title ?? session.parseResult.summary,
+        ...(drill?.ok ? { autoDrilled: true } : {}),
+      },
+      normalized.locale,
+    );
+
     return {
       ok: true,
-      message: JSON.stringify({
-        kind: result.kind,
-        summary: result.summary,
-        title,
-      }),
-      summary: title,
+      message: JSON.stringify(payload),
+      summary: session.parseResult.view?.title ?? session.parseResult.summary,
     };
   } catch (e) {
     const message = e instanceof Error ? e.message : "build_view failed";
@@ -267,28 +311,6 @@ export async function runParseCalldataAction(
     const message = e instanceof Error ? e.message : "parse_calldata failed";
     return { ok: false, message, summary: message };
   }
-}
-
-export function runGetFactsAction(
-  session: AskSession,
-  normalized: NormalizedAskInput,
-): ToolActionResult {
-  if (!session.parseResult) {
-    return {
-      ok: false,
-      message:
-        normalized.locale === "zh"
-          ? "尚无 parseResult。请先 build_view。"
-          : "No parseResult yet. Run build_view first.",
-    };
-  }
-
-  const facts = getParseFacts(session.parseResult) || buildFactsContext(session.parseResult);
-  return {
-    ok: true,
-    message: facts,
-    summary: session.parseResult.summary,
-  };
 }
 
 export { askInputFromNormalized };
