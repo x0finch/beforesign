@@ -21,6 +21,8 @@ export default defineConfig({
       '@beforesign/json-render-view',
       '@beforesign/json-render-catalog',
       '@beforesign/orchestrator',
+      '@beforesign/ai-pipeline',
+      '@beforesign/agent',
       '@beforesign/clients',
     ],
   },

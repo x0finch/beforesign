@@ -125,4 +125,50 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    files: ["apps/web/src/routes/api/**/*.ts"],
+    rules: {
+      "@typescript-eslint/naming-convention": [
+        "error",
+        { selector: "import", format: null },
+        {
+          selector: "objectLiteralMethod",
+          filter: { regex: "^(GET|POST|PUT|DELETE|PATCH)$", match: true },
+          format: null,
+        },
+        {
+          selector: "objectLiteralProperty",
+          filter: {
+            regex: "^(Content-Type|Cache-Control|Connection)$",
+            match: true,
+          },
+          format: null,
+        },
+      ],
+    },
+  },
+  {
+    files: [
+      "apps/web/src/routes/ai.tsx",
+      "apps/web/src/routes/api/ai/**/*.ts",
+      "apps/web/src/components/ai/**/*.tsx",
+      "apps/web/src/server/ai/**/*.ts",
+      "apps/web/src/hooks/use_ask.ts",
+      "packages/agent/**/*.ts",
+      "packages/ai-pipeline/src/**/*.ts",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@beforesign/orchestrator",
+              message: "/ai path must not import orchestrator; use @beforesign/ai-pipeline.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 );

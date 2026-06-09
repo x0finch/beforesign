@@ -57,6 +57,12 @@ importers:
 
   apps/web:
     dependencies:
+      '@beforesign/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
+      '@beforesign/ai-pipeline':
+        specifier: workspace:*
+        version: link:../../packages/ai-pipeline
       '@beforesign/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -127,6 +133,68 @@ importers:
       vite:
         specifier: ^8.0.14
         version: 8.0.16(@types/node@22.19.19)(esbuild@0.27.7)(jiti@2.7.0)
+
+  packages/agent:
+    dependencies:
+      '@beforesign/ai-pipeline':
+        specifier: workspace:*
+        version: link:../ai-pipeline
+      '@beforesign/core':
+        specifier: workspace:*
+        version: link:../core
+      '@beforesign/detect':
+        specifier: workspace:*
+        version: link:../detect
+      '@beforesign/json-render-catalog':
+        specifier: workspace:*
+        version: link:../json-render-catalog
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.6(@types/node@22.19.19)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))
+
+  packages/ai-pipeline:
+    dependencies:
+      '@beforesign/clients':
+        specifier: workspace:*
+        version: link:../clients
+      '@beforesign/core':
+        specifier: workspace:*
+        version: link:../core
+      '@beforesign/detect':
+        specifier: workspace:*
+        version: link:../detect
+      '@beforesign/view-calldata':
+        specifier: workspace:*
+        version: link:../view-calldata
+      '@beforesign/view-tx':
+        specifier: workspace:*
+        version: link:../view-tx
+      '@beforesign/view-tx-hash':
+        specifier: workspace:*
+        version: link:../view-tx-hash
+      '@beforesign/view-typed-data':
+        specifier: workspace:*
+        version: link:../view-typed-data
+      viem:
+        specifier: 'catalog:'
+        version: 2.52.0(typescript@5.9.3)(zod@4.4.3)
+    devDependencies:
+      '@beforesign/orchestrator':
+        specifier: workspace:*
+        version: link:../orchestrator
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 3.2.6(@types/node@22.19.19)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))
 
   packages/calldata-parse:
     dependencies:

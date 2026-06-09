@@ -16,6 +16,8 @@
     "@beforesign/detect": "workspace:*",
     "@beforesign/json-render-catalog": "workspace:*",
     "@beforesign/json-render-view": "workspace:*",
+    "@beforesign/agent": "workspace:*",
+    "@beforesign/ai-pipeline": "workspace:*",
     "@beforesign/orchestrator": "workspace:*",
     "@beforesign/ui": "workspace:*",
     "@fontsource-variable/geist": "^5.2.9",

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { normalizeRawInputToJson } from "@beforesign/detect";
 import * as React from "react";
 import { AppHeader } from "~/components/layout/app_header.tsx";
@@ -45,7 +45,7 @@ function HomePage() {
 
   return (
     <div className="space-y-6">
-      <AppHeader locale={locale} onLocaleChange={setLocale} />
+      <AppHeader locale={locale} onLocaleChange={setLocale} active="parse" />
 
       <ParserInput
         locale={locale}
@@ -91,7 +91,18 @@ function HomePage() {
       )}
 
       {result && result.view?.discovery?.status !== "ambiguous" && (
-        <ParserResult locale={locale} result={result} />
+        <>
+          <div className="flex justify-end">
+            <Link
+              to="/ai"
+              search={{ raw }}
+              className="text-sm text-muted hover:text-foreground underline-offset-2 hover:underline"
+            >
+              {t(locale, "aiFromParser")}
+            </Link>
+          </div>
+          <ParserResult locale={locale} result={result} />
+        </>
       )}
     </div>
   );

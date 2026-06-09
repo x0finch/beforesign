@@ -1,0 +1,30 @@
+{
+  "name": "@beforesign/ai-pipeline",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@beforesign/clients": "workspace:*",
+    "@beforesign/core": "workspace:*",
+    "@beforesign/detect": "workspace:*",
+    "@beforesign/view-calldata": "workspace:*",
+    "@beforesign/view-tx": "workspace:*",
+    "@beforesign/view-tx-hash": "workspace:*",
+    "@beforesign/view-typed-data": "workspace:*",
+    "viem": "catalog:"
+  },
+  "devDependencies": {
+    "@beforesign/orchestrator": "workspace:*",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -5,4 +5,6 @@ export default defineWorkspace([
   "packages/detect",
   "packages/clients",
   "packages/orchestrator",
+  "packages/ai-pipeline",
+  "packages/agent",
 ]);

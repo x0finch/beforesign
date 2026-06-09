@@ -1,0 +1,25 @@
+{
+  "name": "@beforesign/agent",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@beforesign/ai-pipeline": "workspace:*",
+    "@beforesign/core": "workspace:*",
+    "@beforesign/detect": "workspace:*",
+    "@beforesign/json-render-catalog": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

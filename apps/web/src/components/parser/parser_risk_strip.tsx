@@ -2,13 +2,11 @@ import type { ParseResult } from "@beforesign/core";
 import * as React from "react";
 import type { Locale } from "~/lib/i18n.ts";
 
-export function ParserRiskStrip({
-  locale,
-  result,
-}: {
+export function ParserRiskStrip(props: {
   locale: Locale;
   result: ParseResult;
 }) {
+  const { result } = props;
   const [expanded, setExpanded] = React.useState(false);
   const warnings = result.warnings;
   if (warnings.length === 0) return null;
