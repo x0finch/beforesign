@@ -31,7 +31,7 @@ export const detectInputTool = tool({
 export const buildViewTool = tool({
   name: "build_view",
   description:
-    "Build the structured review view (ParseResult + json-render spec). Fetches on-chain data for tx hashes.",
+    "Build the structured review view (json-render spec) for the current parse target. Fetches on-chain data for tx hashes. Returns spec only; does not decode contract Data—call parse_calldata separately when the spec shows non-empty calldata.",
   parameters: z.object({}),
   execute: async (_args, runContext) => {
     const { session, normalized, deps, emit } = ctx(runContext);
@@ -43,7 +43,7 @@ export const buildViewTool = tool({
 export const parseCalldataTool = tool({
   name: "parse_calldata",
   description:
-    "Decode contract calldata from the Data field of the current transaction view (txHash/signedTx/unsignedTx).",
+    "Decode contract calldata from the Data field after build_view. Call when parseResult is txHash/signedTx/unsignedTx and the view spec has non-empty contract Data (0x with more than just 0x). Not needed for plain ETH transfers.",
   parameters: z.object({}),
   execute: async (_args, runContext) => {
     const { session, normalized, deps, emit } = ctx(runContext);

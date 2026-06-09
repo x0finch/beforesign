@@ -1,9 +1,10 @@
 export {
   buildAgentContextExport,
-  buildTurnPreamble,
   buildUserTurn,
   captureAgentContextExport,
+  flattenMemoryItems,
   type AgentContextExport,
+  type ConversationEntry,
 } from "./export_agent_context.ts";
 export { createBeforeSignAgent } from "./beforesign_agent.ts";
 export {
@@ -11,7 +12,16 @@ export {
   parseAssistantSpec,
   resolveAssistantSpec,
 } from "./assistant_spec.ts";
-export { getAgentMemorySession } from "./beforesign_session.ts";
+export {
+  extractLatestSpecFromConversation,
+  parseResultFromSpec,
+} from "./conversation_spec.ts";
+export {
+  getAgentMemorySession,
+  isOpenAIConversationId,
+  syncOpenAIConversationId,
+} from "./beforesign_session.ts";
+export { beforeSignSessionInputCallback } from "./session_input_callback.ts";
 export { buildFactsContext, getParseFacts, summarizeAssistantSpec } from "./context_builder.ts";
 export { generateRespond } from "./generate_respond.ts";
 export { normalizeAskInput, type NormalizedAskInput } from "./normalize_ask_input.ts";

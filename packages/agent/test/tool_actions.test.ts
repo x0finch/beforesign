@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { AiPipelineDeps } from "@beforesign/ai-pipeline";
 import { normalizeAskInput } from "../src/normalize_ask_input.ts";
 import { createEmptySession } from "../src/session_state.ts";
-import { runBuildViewAction } from "../src/tool_actions.ts";
+import { runBuildViewAction, runParseCalldataAction } from "../src/tool_actions.ts";
 
 const FIXTURE_TX_HASH =
   "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852";
@@ -65,7 +65,7 @@ function mockDeps(): AiPipelineDeps {
 }
 
 describe("runBuildViewAction", () => {
-  it("auto-drills calldata after tx hash view and returns autoDrilled", async () => {
+  it("returns transaction view spec only without auto-drilling calldata", async () => {
     const session = createEmptySession();
     const normalized = normalizeAskInput({
       message: FIXTURE_TX_HASH,
@@ -80,8 +80,34 @@ describe("runBuildViewAction", () => {
 
     expect(result.ok).toBe(true);
     const payload = JSON.parse(result.message);
-    expect(payload.autoDrilled).toBe(true);
+    expect(payload.spec).toBeDefined();
+    expect(payload.spec).toEqual(session.parseResult?.view?.spec);
+    expect(session.parseResult?.kind).toBe("txHash");
+    expect(events.filter((event) => event.type === "parse_result").length).toBe(1);
+  });
+});
+
+describe("runParseCalldataAction", () => {
+  it("decodes calldata after build_view when called separately", async () => {
+    const session = createEmptySession();
+    const normalized = normalizeAskInput({
+      message: FIXTURE_TX_HASH,
+      raw: FIXTURE_TX_HASH,
+      locale: "en",
+    });
+    const deps = mockDeps();
+    const events: Array<{ type: string }> = [];
+    const emit = (event: { type: string }) => {
+      events.push(event);
+    };
+
+    await runBuildViewAction(session, normalized, deps, emit);
+    const result = await runParseCalldataAction(session, normalized, deps, emit);
+
+    expect(result.ok).toBe(true);
     expect(session.parseResult?.kind).toBe("calldata");
     expect(events.filter((event) => event.type === "parse_result").length).toBe(2);
+    const payload = JSON.parse(result.message);
+    expect(payload.spec).toEqual(session.parseResult?.view?.spec);
   });
 });

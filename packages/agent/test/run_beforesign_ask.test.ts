@@ -5,16 +5,19 @@ import { createEmptySession } from "../src/session_state.ts";
 
 const deps = {} as AiPipelineDeps;
 
-describe("runBeforeSignAsk fallback", () => {
-  it("builds view without LLM when raw is present", async () => {
+const FIXTURE_TX_HASH =
+  "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852";
+
+describe("runBeforeSignAsk", () => {
+  it("errors when LLM is not configured", async () => {
     const session = createEmptySession();
 
     const events = [];
     for await (const event of runBeforeSignAsk({
       session,
       input: {
-        message: "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852",
-        raw: "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852",
+        message: FIXTURE_TX_HASH,
+        raw: FIXTURE_TX_HASH,
         locale: "en",
       },
       deps,
@@ -22,13 +25,8 @@ describe("runBeforeSignAsk fallback", () => {
       events.push(event);
     }
 
-    expect(events.some((e) => e.type === "timeline")).toBe(true);
-    expect(events.some((e) => e.type === "context_export")).toBe(true);
-    expect(events.at(-1)?.type).toBe("done");
-    expect(events.at(-2)?.type).toBe("context_export");
-    expect(events.some((e) => e.type === "assistant_spec")).toBe(false);
-    expect(
-      events.some((e) => e.type === "parse_result") || events.some((e) => e.type === "error"),
-    ).toBe(true);
+    expect(events).toEqual([
+      { type: "error", message: "LLM is not configured. Set LLM_API_KEY." },
+    ]);
   });
 });

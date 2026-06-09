@@ -1,21 +1,128 @@
 import { describe, expect, it } from "vitest";
-import { buildAgentContextExport } from "../src/export_agent_context.ts";
+import {
+  buildAgentContextExport,
+  buildUserTurn,
+  flattenMemoryItems,
+} from "../src/export_agent_context.ts";
 import { normalizeAskInput } from "../src/normalize_ask_input.ts";
 import { createEmptySession } from "../src/session_state.ts";
 
-describe("buildAgentContextExport", () => {
-  it("includes agent config, turn preamble, and parse facts", async () => {
+const TX_HASH =
+  "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852";
+
+describe("buildUserTurn", () => {
+  it("sends only raw when user pastes pure hex", () => {
     const session = createEmptySession();
-    session.messages.push({
-      id: "m1",
-      role: "user",
-      content: "What is this tx?",
-      createdAt: Date.now(),
+    const normalized = normalizeAskInput({
+      message: TX_HASH,
+      raw: TX_HASH,
+      locale: "zh",
     });
+
+    expect(buildUserTurn(session, normalized)).toBe(TX_HASH);
+    expect(buildUserTurn(session, normalized)).not.toContain("User message:");
+    expect(buildUserTurn(session, normalized)).not.toContain("Parse target:");
+  });
+
+  it("sends only message when natural language differs from parse target", () => {
+    const session = createEmptySession();
+    const normalized = normalizeAskInput({
+      message: "What is this tx?",
+      raw: TX_HASH,
+      locale: "en",
+    });
+
+    expect(buildUserTurn(session, normalized)).toBe("What is this tx?");
+  });
+
+  it("sends only message for follow-up without parse target", () => {
+    const session = createEmptySession();
+    const normalized = normalizeAskInput({
+      message: "继续解析data",
+      locale: "zh",
+    });
+
+    expect(buildUserTurn(session, normalized)).toBe("继续解析data");
+  });
+});
+
+describe("flattenMemoryItems", () => {
+  it("flattens user, merged tool call/result, and assistant messages", () => {
+    const conversation = flattenMemoryItems([
+      { type: "message", role: "user", content: TX_HASH },
+      {
+        type: "function_call",
+        callId: "call_1",
+        name: "build_view",
+        arguments: "{}",
+      },
+      {
+        type: "function_call_result",
+        name: "build_view",
+        callId: "call_1",
+        status: "completed",
+        output: {
+          type: "text",
+          text: '{"spec":{"root":"root","elements":{}}}',
+        },
+      },
+      {
+        type: "message",
+        role: "assistant",
+        status: "completed",
+        content: [{ type: "output_text", text: "Done." }],
+      },
+    ]);
+
+    expect(conversation).toEqual([
+      { role: "user", content: TX_HASH },
+      {
+        role: "tool",
+        name: "build_view",
+        arguments: "{}",
+        output: '{"spec":{"root":"root","elements":{}}}',
+        status: "completed",
+      },
+      { role: "assistant", content: "Done." },
+    ]);
+  });
+
+  it("truncates long hex in tool output", () => {
+    const longHex = `0x${"ab".repeat(120)}`;
+    const conversation = flattenMemoryItems([
+      {
+        type: "function_call_result",
+        name: "build_view",
+        callId: "call_1",
+        status: "completed",
+        output: { type: "text", text: longHex },
+      },
+    ]);
+
+    expect(conversation[0]).toMatchObject({ role: "tool" });
+    expect((conversation[0] as { output: string }).output).toContain("bytes)");
+    expect((conversation[0] as { output: string }).output.length).toBeLessThan(longHex.length);
+  });
+});
+
+describe("buildAgentContextExport", () => {
+  it("exports conversation with system prompt only", async () => {
+    const session = createEmptySession();
+    session.parseResult = {
+      kind: "txHash",
+      summary: "Ethereum transaction",
+      warnings: [],
+      view: {
+        title: "Transaction",
+        summary: "Ethereum transaction",
+        spec: { root: "root", elements: {} },
+        chainId: 1,
+      },
+    };
 
     const normalized = normalizeAskInput({
       message: "What is this tx?",
-      raw: "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852",
+      raw: TX_HASH,
       locale: "en",
     });
 
@@ -23,17 +130,30 @@ describe("buildAgentContextExport", () => {
 
     expect(snapshot.sessionId).toBe(session.id);
     expect(snapshot.locale).toBe("en");
-    expect(snapshot.agent.name).toBe("BeforeSign");
-    expect(snapshot.agent.tools.map((tool) => tool.name)).toEqual([
-      "detect_input",
-      "build_view",
-      "parse_calldata",
-    ]);
-    expect(snapshot.turn.message).toBe("What is this tx?");
-    expect(snapshot.turn.normalized.detectedKind).not.toBe("unknown");
-    expect(snapshot.turn.preamble).toContain("Parse target:");
-    expect(snapshot.turn.userTurn).toContain("What is this tx?");
-    expect(snapshot.session.chatMessages).toHaveLength(1);
-    expect(snapshot.session.parseFacts).toBeDefined();
+    expect(snapshot.conversation[0]).toEqual({
+      role: "system",
+      content: expect.stringContaining("BeforeSign Agent"),
+    });
+    expect(snapshot.conversation).toHaveLength(1);
+    expect(snapshot).not.toHaveProperty("turn");
+    expect(snapshot).not.toHaveProperty("parseResult");
+    expect(snapshot).not.toHaveProperty("agent");
+    expect(snapshot).not.toHaveProperty("session");
+    expect(snapshot).not.toHaveProperty("agentMemoryItems");
+  });
+
+  it("prepends system before memory conversation", async () => {
+    const session = createEmptySession();
+    const normalized = normalizeAskInput({
+      message: TX_HASH,
+      raw: TX_HASH,
+      locale: "zh",
+    });
+
+    const snapshot = await buildAgentContextExport(session, normalized);
+
+    expect(snapshot.conversation[0]?.role).toBe("system");
+    expect(snapshot).not.toHaveProperty("turn");
+    expect(snapshot).not.toHaveProperty("parseResult");
   });
 });

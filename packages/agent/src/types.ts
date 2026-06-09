@@ -1,7 +1,8 @@
 import type { ParseInput, ParseResult, ViewSpec } from "@beforesign/core";
 import type { DiscoveryResult } from "@beforesign/core";
-import type { MemorySession } from "@openai/agents";
+import type { Session } from "@openai/agents";
 import type { AgentContextExport } from "./export_agent_context.ts";
+import type { NormalizedAskInput } from "./normalize_ask_input.ts";
 
 export type AskLocale = "zh" | "en";
 
@@ -29,7 +30,10 @@ export type AskSession = {
   messages: ChatMessage[];
   parseResult?: ParseResult;
   lastParseInput?: ParseInput;
-  agentMemory?: MemorySession;
+  agentMemory?: Session;
+  /** OpenAI Conversations API id (`conv_*`), distinct from client `session.id` UUID. */
+  openaiConversationId?: string;
+  lastNormalizedInput?: NormalizedAskInput;
   lastContextExport?: AgentContextExport;
   createdAt: number;
   updatedAt: number;
@@ -50,6 +54,7 @@ export type AskSseEvent =
   | { type: "tool"; name: string }
   | { type: "parse_result"; result: ParseResult }
   | { type: "delta"; text: string }
+  | { type: "assistant_text"; content: string }
   | { type: "assistant_spec"; spec: ViewSpec }
   | { type: "needs_input"; discovery: DiscoveryResult }
   | { type: "done"; sessionId: string }

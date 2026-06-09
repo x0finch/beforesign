@@ -1,3 +1,4 @@
+import { buildAgentContextExport } from "@beforesign/agent";
 import { createFileRoute } from "@tanstack/react-router";
 import { getSession } from "~/server/ai/session_store.ts";
 
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/api/ai/context")({
           });
         }
 
-        if (!session.lastContextExport) {
+        if (!session.lastNormalizedInput) {
           return new Response(
             JSON.stringify({ error: "No context export for this session yet" }),
             {
@@ -32,7 +33,14 @@ export const Route = createFileRoute("/api/ai/context")({
           );
         }
 
-        return new Response(JSON.stringify(session.lastContextExport, null, 2), {
+        const exportData = await buildAgentContextExport(
+          session,
+          session.lastNormalizedInput,
+        );
+        session.lastContextExport = exportData;
+        session.updatedAt = Date.now();
+
+        return new Response(JSON.stringify(exportData, null, 2), {
           headers: {
             "Content-Type": "application/json",
             "Content-Disposition": `attachment; filename="agent-context-${sessionId}.json"`,

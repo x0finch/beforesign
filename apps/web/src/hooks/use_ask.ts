@@ -1,6 +1,10 @@
 import type { ParseResult, ViewSpec } from "@beforesign/core";
 import type { DiscoveryResult } from "@beforesign/core";
-import type { AgentContextExport } from "@beforesign/agent";
+import {
+  extractLatestSpecFromConversation,
+  parseResultFromSpec,
+  type AgentContextExport,
+} from "@beforesign/agent";
 import * as React from "react";
 import type { Locale } from "~/lib/i18n.ts";
 
@@ -18,6 +22,7 @@ export type TimelineEntry =
 export type AskMessage =
   | { id: string; kind: "user"; content: string }
   | { id: string; kind: "assistant"; spec: ViewSpec }
+  | { id: string; kind: "assistant_text"; content: string }
   | { id: string; kind: "timeline"; entry: TimelineEntry }
   | { id: string; kind: "artifact"; result: ParseResult };
 
@@ -165,6 +170,7 @@ export function useAsk() {
             sessionId?: string;
             message?: string;
             spec?: ViewSpec;
+            content?: string;
             export?: AgentContextExport;
           };
 
@@ -212,8 +218,28 @@ export function useAsk() {
                 ]);
               }
               break;
+            case "assistant_text":
+              if (event.content) {
+                setMessages((prev) => [
+                  ...prev,
+                  {
+                    id: crypto.randomUUID(),
+                    kind: "assistant_text",
+                    content: event.content!,
+                  },
+                ]);
+              }
+              break;
             case "context_export":
-              if (event.export) setContextExport(event.export);
+              if (event.export) {
+                setContextExport(event.export);
+                const spec = extractLatestSpecFromConversation(
+                  event.export.conversation,
+                );
+                if (spec) {
+                  setParseResult(parseResultFromSpec(spec));
+                }
+              }
               break;
             case "done":
               if (event.sessionId) setSessionId(event.sessionId);

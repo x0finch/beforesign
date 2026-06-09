@@ -3,6 +3,7 @@ import type { AskMessage } from "~/hooks/use_ask.ts";
 import type { Locale } from "~/lib/i18n.ts";
 import { AiArtifactPanel } from "./ai_artifact_panel.tsx";
 import { AiAssistantMessage } from "./ai_assistant_message.tsx";
+import { AiAssistantTextMessage } from "./ai_assistant_text_message.tsx";
 import { AiTimelineEntry } from "./ai_timeline_entry.tsx";
 import { AiUserMessage } from "./ai_user_message.tsx";
 
@@ -48,6 +49,9 @@ export function AiMessageList({
         }
         if (msg.kind === "assistant") {
           return <AiAssistantMessage key={msg.id} spec={msg.spec} />;
+        }
+        if (msg.kind === "assistant_text") {
+          return <AiAssistantTextMessage key={msg.id} content={msg.content} />;
         }
         if (msg.kind === "artifact") {
           return (

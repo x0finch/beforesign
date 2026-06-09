@@ -1,137 +1,167 @@
 import type { AgentInputItem } from "@openai/agents";
-import { buildFactsContext, summarizeAssistantSpec } from "./context_builder.ts";
-import { getAgentMemorySession } from "./beforesign_session.ts";
-import { buildBeforeSignInstructions } from "./prompts/beforesign_instructions.ts";
-import { beforeSignTools } from "./sdk_tools.ts";
 import type { NormalizedAskInput } from "./normalize_ask_input.ts";
+import { buildBeforeSignInstructions } from "./prompts/beforesign_instructions.ts";
 import type { AskLocale, AskSession } from "./types.ts";
+
+export type ConversationEntry =
+  | { role: "system"; content: string }
+  | { role: "user"; content: string }
+  | { role: "assistant"; content: string }
+  | {
+      role: "tool";
+      name: string;
+      arguments?: string;
+      output?: string;
+      status?: string;
+    };
 
 export type AgentContextExport = {
   exportedAt: string;
   sessionId: string;
   locale: AskLocale;
-  agent: {
-    name: string;
-    instructions: string;
-    tools: Array<{ name: string; description: string }>;
-  };
-  turn: {
-    message: string;
-    raw?: string;
-    normalized: {
-      detectedKind: NormalizedAskInput["detectedKind"];
-      parseTargetSource: NormalizedAskInput["parseTargetSource"];
-      chainId?: number;
-      selectedDiscoveryHit?: string;
-    };
-    preamble: string;
-    userTurn: string;
-  };
-  session: {
-    chatMessages: Array<{
-      role: string;
-      content: string;
-      createdAt: number;
-    }>;
-    parseFacts: string;
-    parseResult?: {
-      kind: string;
-      summary: string;
-      title?: string;
-    };
-    lastParseInput?: AskSession["lastParseInput"];
-  };
-  agentMemoryItems: AgentInputItem[];
+  conversation: ConversationEntry[];
 };
 
-export function buildTurnPreamble(
-  session: AskSession,
-  normalized: NormalizedAskInput,
-): string {
-  const lines = [
-    `User message: ${normalized.message}`,
-    normalized.raw
-      ? `Parse target: ${normalized.raw} (kind=${normalized.detectedKind}, source=${normalized.parseTargetSource})`
-      : "Parse target: none in this message",
-    session.parseResult
-      ? `Session parseResult: kind=${session.parseResult.kind}, title=${session.parseResult.view?.title ?? session.parseResult.summary}`
-      : "Session parseResult: none",
-  ];
-  return lines.join("\n");
-}
+type ToolConversationEntry = Extract<ConversationEntry, { role: "tool" }>;
 
 export function buildUserTurn(
-  session: AskSession,
+  _session: AskSession,
   normalized: NormalizedAskInput,
 ): string {
-  return `${buildTurnPreamble(session, normalized)}\n\n${normalized.message}`;
+  const message = normalized.message.trim();
+  const raw = normalized.raw?.trim();
+
+  if (raw && message === raw) return raw;
+  return message;
 }
 
-function serializeMemoryItems(items: AgentInputItem[]): AgentInputItem[] {
-  try {
-    return structuredClone(items);
-  } catch {
-    return JSON.parse(JSON.stringify(items)) as AgentInputItem[];
+function truncateLongHex(value: string): string {
+  if (!value.startsWith("0x") || value.length <= 200) return value;
+  const byteLen = (value.length - 2) / 2;
+  return `${value.slice(0, 66)}…${value.slice(-8)} (${byteLen} bytes)`;
+}
+
+function extractToolOutput(output: unknown): string {
+  if (typeof output === "string") return truncateLongHex(output);
+  if (output && typeof output === "object" && "text" in output) {
+    const text = (output as { text?: unknown }).text;
+    if (typeof text === "string") return truncateLongHex(text);
   }
+  try {
+    return truncateLongHex(JSON.stringify(output));
+  } catch {
+    return String(output);
+  }
+}
+
+function extractToolArguments(argumentsValue: unknown): string {
+  if (typeof argumentsValue === "string") return argumentsValue;
+  try {
+    return JSON.stringify(argumentsValue ?? {});
+  } catch {
+    return String(argumentsValue ?? "{}");
+  }
+}
+
+function extractAssistantContent(content: unknown): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+
+  return content
+    .map((part) => {
+      if (!part || typeof part !== "object") return "";
+      const typed = part as { type?: string; text?: string };
+      if (typed.type === "output_text" || typed.type === "text") {
+        return typed.text ?? "";
+      }
+      return "";
+    })
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+export function flattenMemoryItems(items: AgentInputItem[]): ConversationEntry[] {
+  const conversation: ConversationEntry[] = [];
+  const toolsByCallId = new Map<string, ToolConversationEntry>();
+
+  for (const item of items) {
+    const typed = item as Record<string, unknown>;
+
+    if (typed.type === "function_call") {
+      const callId = String(typed.callId ?? "");
+      const toolEntry: ToolConversationEntry = {
+        role: "tool",
+        name: String(typed.name ?? "tool"),
+        arguments: extractToolArguments(typed.arguments),
+      };
+      if (callId) {
+        toolsByCallId.set(callId, toolEntry);
+      }
+      conversation.push(toolEntry);
+      continue;
+    }
+
+    if (typed.type === "function_call_result") {
+      const callId = String(typed.callId ?? "");
+      const output = extractToolOutput(typed.output);
+      const status = typed.status ? String(typed.status) : undefined;
+      const existing = callId ? toolsByCallId.get(callId) : undefined;
+
+      if (existing) {
+        existing.output = output;
+        if (status) existing.status = status;
+      } else {
+        conversation.push({
+          role: "tool",
+          name: String(typed.name ?? "tool"),
+          ...(status ? { status } : {}),
+          output,
+        });
+      }
+      continue;
+    }
+
+    if (typed.type !== "message") continue;
+
+    if (typed.role === "user" && typeof typed.content === "string") {
+      conversation.push({
+        role: "user",
+        content: truncateLongHex(typed.content),
+      });
+      continue;
+    }
+
+    if (typed.role === "assistant") {
+      const content = extractAssistantContent(typed.content);
+      if (content) {
+        conversation.push({ role: "assistant", content });
+      }
+    }
+  }
+
+  return conversation;
 }
 
 export async function buildAgentContextExport(
   session: AskSession,
   normalized: NormalizedAskInput,
 ): Promise<AgentContextExport> {
-  const memorySession = session.agentMemory ?? getAgentMemorySession(session);
-  const memoryItems = await memorySession.getItems();
-  const preamble = buildTurnPreamble(session, normalized);
-  const parseFacts = buildFactsContext(session.parseResult);
+  const memoryItems = session.agentMemory
+    ? await session.agentMemory.getItems()
+    : [];
 
   return {
     exportedAt: new Date().toISOString(),
     sessionId: session.id,
     locale: normalized.locale,
-    agent: {
-      name: "BeforeSign",
-      instructions: buildBeforeSignInstructions(normalized.locale),
-      tools: beforeSignTools.map((toolDef) => ({
-        name: toolDef.name,
-        description: toolDef.description,
-      })),
-    },
-    turn: {
-      message: normalized.message,
-      ...(normalized.raw ? { raw: normalized.raw } : {}),
-      normalized: {
-        detectedKind: normalized.detectedKind,
-        parseTargetSource: normalized.parseTargetSource,
-        ...(normalized.chainId !== undefined ? { chainId: normalized.chainId } : {}),
-        ...(normalized.selectedDiscoveryHit
-          ? { selectedDiscoveryHit: normalized.selectedDiscoveryHit }
-          : {}),
+    conversation: [
+      {
+        role: "system",
+        content: buildBeforeSignInstructions(normalized.locale),
       },
-      preamble,
-      userTurn: buildUserTurn(session, normalized),
-    },
-    session: {
-      chatMessages: session.messages.map((m) => ({
-        role: m.role,
-        content:
-          m.role === "assistant" && m.spec
-            ? summarizeAssistantSpec(m.spec)
-            : m.content,
-        createdAt: m.createdAt,
-      })),
-      parseFacts,
-      ...(session.parseResult
-        ? {
-            parseResult: {
-              kind: session.parseResult.kind,
-              summary: session.parseResult.summary,
-              title: session.parseResult.view?.title,
-            },
-          }
-        : {}),
-      ...(session.lastParseInput ? { lastParseInput: session.lastParseInput } : {}),
-    },
-    agentMemoryItems: serializeMemoryItems(memoryItems),
+      ...flattenMemoryItems(memoryItems),
+    ],
   };
 }
 
@@ -139,6 +169,7 @@ export async function captureAgentContextExport(
   session: AskSession,
   normalized: NormalizedAskInput,
 ): Promise<AgentContextExport> {
+  session.lastNormalizedInput = normalized;
   const snapshot = await buildAgentContextExport(session, normalized);
   session.lastContextExport = snapshot;
   session.updatedAt = Date.now();

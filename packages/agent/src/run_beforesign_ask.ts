@@ -1,7 +1,11 @@
 import type { AiPipelineDeps } from "@beforesign/ai-pipeline";
 import type { RunItemStreamEvent, RunStreamEvent } from "@openai/agents";
 import { createBeforeSignAgent } from "./beforesign_agent.ts";
-import { getAgentMemorySession } from "./beforesign_session.ts";
+import {
+  getAgentMemorySession,
+  syncOpenAIConversationId,
+} from "./beforesign_session.ts";
+import { beforeSignSessionInputCallback } from "./session_input_callback.ts";
 import {
   buildUserTurn,
   captureAgentContextExport,
@@ -9,11 +13,13 @@ import {
 import { normalizeAskInput, type NormalizedAskInput } from "./normalize_ask_input.ts";
 import { createRunner } from "./runner_config.ts";
 import type { BeforeSignRunContext, LlmRuntimeConfig } from "./run_context.ts";
-import {
-  runBuildViewAction,
-  runDetectInputAction,
-} from "./tool_actions.ts";
 import type { AskInput, AskSession, AskSseEvent, TimelineEntry } from "./types.ts";
+
+function llmNotConfiguredMessage(locale: AskInput["locale"]): string {
+  return locale === "zh"
+    ? "未配置 LLM。请设置 LLM_API_KEY 环境变量。"
+    : "LLM is not configured. Set LLM_API_KEY.";
+}
 
 export type RunBeforeSignAskOptions = {
   session: AskSession;
@@ -34,6 +40,18 @@ async function* emitSessionEnd(
 
 function* emitTimeline(entry: TimelineEntry): Generator<AskSseEvent> {
   yield { type: "timeline", entry };
+}
+
+function extractAssistantMessageText(item: RunItemStreamEvent["item"]): string | undefined {
+  if (item.type !== "message_output_item") return undefined;
+  const raw = item.rawItem as {
+    content?: Array<{ type?: string; text?: string }>;
+  };
+  const parts = raw.content
+    ?.filter((part) => part.type === "output_text" || part.type === "text")
+    .map((part) => part.text)
+    .filter(Boolean);
+  return parts?.join("\n").trim() || undefined;
 }
 
 function extractReasoningText(item: RunItemStreamEvent["item"]): string | undefined {
@@ -59,86 +77,25 @@ function extractToolName(item: RunItemStreamEvent["item"]): string | undefined {
 }
 
 function summarizeToolOutput(output: unknown): string {
-  if (typeof output === "string") return output.slice(0, 120);
+  const raw =
+    typeof output === "string"
+      ? output
+      : (() => {
+          try {
+            return JSON.stringify(output);
+          } catch {
+            return String(output);
+          }
+        })();
+
   try {
-    return JSON.stringify(output).slice(0, 120);
+    const parsed = JSON.parse(raw) as { spec?: unknown };
+    if (parsed.spec) return "spec";
   } catch {
-    return String(output).slice(0, 120);
-  }
-}
-
-async function* runFallbackPipeline(
-  options: RunBeforeSignAskOptions,
-): AsyncGenerator<AskSseEvent> {
-  const { session, input, deps } = options;
-  const normalized = normalizeAskInput(input);
-  const zh = input.locale === "zh";
-  const events: AskSseEvent[] = [];
-  const emit = (event: AskSseEvent) => {
-    events.push(event);
-  };
-
-  if (normalized.raw?.trim()) {
-    yield* emitTimeline({
-      kind: "thought",
-      text: zh ? "未配置 LLM，先识别输入类型。" : "No LLM configured; detecting input type.",
-    });
-    yield* emitTimeline({ kind: "tool", name: "detect_input", status: "running" });
-    const detect = runDetectInputAction(session, normalized);
-    yield* emitTimeline({
-      kind: "tool",
-      name: "detect_input",
-      status: detect.ok ? "done" : "error",
-      summary: detect.summary,
-    });
-    if (!detect.ok) {
-      yield* emitSessionEnd(session, normalized, {
-        type: "error",
-        message: detect.message,
-      });
-      return;
-    }
+    // not JSON tool payload
   }
 
-  yield* emitTimeline({
-    kind: "thought",
-    text: zh ? "构建审查视图。" : "Building review view.",
-  });
-  yield* emitTimeline({ kind: "tool", name: "build_view", status: "running" });
-  const built = await runBuildViewAction(session, normalized, deps, emit);
-  yield* emitTimeline({
-    kind: "tool",
-    name: "build_view",
-    status: built.ok ? "done" : "error",
-    summary: built.summary,
-  });
-
-  for (const event of events) {
-    if (event.type === "parse_result" || event.type === "needs_input") {
-      yield event;
-    }
-  }
-
-  if (built.discovery) {
-    yield* emitSessionEnd(session, normalized, {
-      type: "done",
-      sessionId: session.id,
-    });
-    return;
-  }
-
-  if (!built.ok) {
-    yield* emitSessionEnd(session, normalized, {
-      type: "error",
-      message: built.message,
-    });
-    return;
-  }
-
-  yield* emitSessionEnd(session, normalized, {
-    type: "done",
-    sessionId: session.id,
-  });
+  return raw.slice(0, 120);
 }
 
 export async function* runBeforeSignAsk(
@@ -147,14 +104,14 @@ export async function* runBeforeSignAsk(
   const { session, input, deps, llm } = options;
   const normalized = normalizeAskInput(input);
 
-  if (!llm) {
-    yield* runFallbackPipeline({ session, input, deps, llm });
+  if (!llm?.apiKey) {
+    yield { type: "error", message: llmNotConfiguredMessage(input.locale) };
     return;
   }
 
   const agent = createBeforeSignAgent(input.locale);
   const runner = createRunner(llm);
-  const memorySession = getAgentMemorySession(session);
+  const memorySession = getAgentMemorySession(session, llm);
   const pendingEvents: AskSseEvent[] = [];
   let stopAfterDiscovery = false;
 
@@ -175,10 +132,13 @@ export async function* runBeforeSignAsk(
 
   const stream = await runner.run(agent, userTurn, {
     session: memorySession,
+    sessionInputCallback: beforeSignSessionInputCallback,
     context: runContext,
     stream: true,
     maxTurns: 10,
   });
+
+  let assistantTextEmitted = false;
 
   for await (const event of stream as AsyncIterable<RunStreamEvent>) {
     while (pendingEvents.length > 0) {
@@ -215,10 +175,28 @@ export async function* runBeforeSignAsk(
         status: "done",
         summary: summarizeToolOutput(output),
       });
+      continue;
+    }
+
+    if (itemEvent.name === "message_output_created") {
+      const text = extractAssistantMessageText(itemEvent.item);
+      if (text) {
+        assistantTextEmitted = true;
+        yield { type: "assistant_text", content: text };
+      }
     }
   }
 
   await stream.completed;
+
+  if (!assistantTextEmitted) {
+    const finalText =
+      typeof stream.finalOutput === "string" ? stream.finalOutput.trim() : "";
+    if (finalText) {
+      yield { type: "assistant_text", content: finalText };
+    }
+  }
+  await syncOpenAIConversationId(session, memorySession);
 
   while (pendingEvents.length > 0) {
     yield pendingEvents.shift()!;
