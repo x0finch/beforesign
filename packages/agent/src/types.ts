@@ -31,19 +31,18 @@ export type AskSession = {
   updatedAt: number;
 };
 
-export type AgentStepKey = "think" | "detect" | "parse" | "explain" | "context";
-
-export type AgentStepStatus = "running" | "done" | "error";
+export type TimelineEntry =
+  | { kind: "thought"; text: string }
+  | {
+      kind: "tool";
+      name: string;
+      status: "running" | "done" | "error";
+      summary?: string;
+    };
 
 export type AskSseEvent =
   | { type: "status"; phase: "detecting" | "building_view" | "thinking" }
-  | {
-      type: "step";
-      key: AgentStepKey;
-      status: AgentStepStatus;
-      label: string;
-      detail?: string;
-    }
+  | { type: "timeline"; entry: TimelineEntry }
   | { type: "tool"; name: string }
   | { type: "parse_result"; result: ParseResult }
   | { type: "delta"; text: string }

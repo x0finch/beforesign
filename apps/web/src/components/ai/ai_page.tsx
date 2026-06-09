@@ -24,15 +24,7 @@ export function AiPage({
   const [followUp, setFollowUp] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
 
-  const {
-    loading,
-    error,
-    messages,
-    needsDiscovery,
-    ask,
-    clear,
-    toggleActivity,
-  } = useAsk();
+  const { loading, error, messages, needsDiscovery, ask, clear } = useAsk();
 
   const active = messages.length > 0;
 
@@ -112,7 +104,7 @@ export function AiPage({
               locale={locale}
               messages={messages}
               listRef={listRef}
-              onToggleActivity={toggleActivity}
+              loading={loading}
             />
             {needsDiscovery && (
               <div className="mt-4">

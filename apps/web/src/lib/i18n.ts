@@ -40,10 +40,6 @@ const messages = {
     aiLlmMissing: "未配置 LLM（LLM_API_KEY）。仍可解析，但无智能解读。",
     aiViewArtifact: "查看解析结果",
     aiFromParser: "用 AI 解读",
-    aiStepThinking: "思考中…",
-    aiActivityDone: "已完成 {count} 步",
-    aiActivityExpand: "点击展开",
-    aiActivityCollapse: "点击收起",
   },
   en: {
     tagline: "Understand before you sign",
@@ -84,10 +80,6 @@ const messages = {
     aiLlmMissing: "LLM not configured (LLM_API_KEY). Parsing works without AI narration.",
     aiViewArtifact: "Parsed result",
     aiFromParser: "Ask AI",
-    aiStepThinking: "Thinking…",
-    aiActivityDone: "Completed {count} steps",
-    aiActivityExpand: "Expand",
-    aiActivityCollapse: "Collapse",
   },
 } as const;
 

@@ -2,21 +2,22 @@ import type { ParseResult, ViewSpec } from "@beforesign/core";
 import type { DiscoveryResult } from "@beforesign/core";
 import * as React from "react";
 import type { Locale } from "~/lib/i18n.ts";
-import { t } from "~/lib/i18n.ts";
 
 export type AskPhase = "idle" | "detecting" | "building_view" | "thinking";
 
-export type AgentStep = {
-  key: string;
-  status: "running" | "done" | "error";
-  label: string;
-  detail?: string;
-};
+export type TimelineEntry =
+  | { kind: "thought"; text: string }
+  | {
+      kind: "tool";
+      name: string;
+      status: "running" | "done" | "error";
+      summary?: string;
+    };
 
 export type AskMessage =
   | { id: string; kind: "user"; content: string }
   | { id: string; kind: "assistant"; spec: ViewSpec }
-  | { id: string; kind: "activity"; steps: AgentStep[]; collapsed: boolean }
+  | { id: string; kind: "timeline"; entry: TimelineEntry }
   | { id: string; kind: "artifact"; result: ParseResult };
 
 export type UseAskInput = {
@@ -28,37 +29,6 @@ export type UseAskInput = {
   selectedDiscoveryHit?: string;
   locale: Locale;
 };
-
-function upsertStep(steps: AgentStep[], step: AgentStep): AgentStep[] {
-  const index = steps.findIndex((item) => item.key === step.key);
-  if (index >= 0) {
-    const next = [...steps];
-    next[index] = step;
-    return next;
-  }
-  return [...steps, step];
-}
-
-function finalizeActivitySteps(steps: AgentStep[]): AgentStep[] {
-  return steps.map((step) =>
-    step.status === "running" ? { ...step, status: "done" as const } : step,
-  );
-}
-
-function collapseActivityMessages(
-  messages: AskMessage[],
-  activityId: string,
-): AskMessage[] {
-  return messages.map((message) =>
-    message.id === activityId && message.kind === "activity"
-      ? {
-          ...message,
-          steps: finalizeActivitySteps(message.steps),
-          collapsed: true,
-        }
-      : message,
-  );
-}
 
 export function useAsk() {
   const [loading, setLoading] = React.useState(false);
@@ -94,37 +64,33 @@ export function useAsk() {
     setPhase("detecting");
 
     const userId = crypto.randomUUID();
-    const activityId = crypto.randomUUID();
 
     setMessages((prev) => [
       ...prev,
       { id: userId, kind: "user", content: input.message },
-      {
-        id: activityId,
-        kind: "activity",
-        steps: [
-          {
-            key: "think",
-            status: "running",
-            label: t(input.locale, "aiStepThinking"),
-          },
-        ],
-        collapsed: false,
-      },
     ]);
 
-    const applyStep = (step: AgentStep) => {
+    let lastTimelineId: string | null = null;
+
+    const appendTimeline = (entry: TimelineEntry) => {
+      const id = crypto.randomUUID();
+      lastTimelineId = id;
+      setMessages((prev) => [...prev, { id, kind: "timeline", entry }]);
+    };
+
+    const patchLastTimeline = (entry: TimelineEntry) => {
+      const targetId = lastTimelineId;
+      if (!targetId) {
+        appendTimeline(entry);
+        return;
+      }
       setMessages((prev) =>
         prev.map((message) =>
-          message.id === activityId && message.kind === "activity"
-            ? { ...message, steps: upsertStep(message.steps, step) }
+          message.id === targetId && message.kind === "timeline"
+            ? { ...message, entry }
             : message,
         ),
       );
-    };
-
-    const finishActivity = () => {
-      setMessages((prev) => collapseActivityMessages(prev, activityId));
     };
 
     try {
@@ -176,10 +142,7 @@ export function useAsk() {
           const event = JSON.parse(json) as {
             type: string;
             phase?: AskPhase;
-            key?: string;
-            status?: AgentStep["status"];
-            label?: string;
-            detail?: string;
+            entry?: TimelineEntry;
             result?: ParseResult;
             discovery?: DiscoveryResult;
             sessionId?: string;
@@ -191,14 +154,20 @@ export function useAsk() {
             case "status":
               if (event.phase) setPhase(event.phase);
               break;
-            case "step":
-              if (event.key && event.status && event.label) {
-                applyStep({
-                  key: event.key,
-                  status: event.status,
-                  label: event.label,
-                  detail: event.detail,
-                });
+            case "timeline":
+              if (event.entry) {
+                if (event.entry.kind === "tool" && event.entry.status === "done") {
+                  patchLastTimeline(event.entry);
+                  lastTimelineId = null;
+                } else if (event.entry.kind === "tool" && event.entry.status === "error") {
+                  patchLastTimeline(event.entry);
+                  lastTimelineId = null;
+                } else if (event.entry.kind === "tool" && event.entry.status === "running") {
+                  appendTimeline(event.entry);
+                } else {
+                  lastTimelineId = null;
+                  appendTimeline(event.entry);
+                }
               }
               break;
             case "parse_result":
@@ -218,7 +187,6 @@ export function useAsk() {
               if (event.discovery) setNeedsDiscovery(event.discovery);
               break;
             case "assistant_spec":
-              finishActivity();
               if (event.spec) {
                 setMessages((prev) => [
                   ...prev,
@@ -227,34 +195,21 @@ export function useAsk() {
               }
               break;
             case "done":
-              finishActivity();
               if (event.sessionId) setSessionId(event.sessionId);
               break;
             case "error":
-              finishActivity();
               throw new Error(event.message ?? "Ask failed");
           }
         }
       }
     } catch (e) {
       if (controller.signal.aborted) return;
-      finishActivity();
       setError(e instanceof Error ? e.message : "Ask failed");
     } finally {
       setLoading(false);
       setPhase("idle");
     }
   }, [sessionId]);
-
-  const toggleActivity = React.useCallback((activityId: string) => {
-    setMessages((prev) =>
-      prev.map((message) =>
-        message.id === activityId && message.kind === "activity"
-          ? { ...message, collapsed: !message.collapsed }
-          : message,
-      ),
-    );
-  }, []);
 
   return {
     loading,
@@ -266,6 +221,5 @@ export function useAsk() {
     phase,
     ask,
     clear,
-    toggleActivity,
   };
 }
