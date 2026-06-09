@@ -3,6 +3,7 @@ import {
   Runner,
   setDefaultOpenAIKey,
   setOpenAIAPI,
+  setTracingExportApiKey,
 } from "@openai/agents";
 import type { LlmRuntimeConfig } from "./run_context.ts";
 
@@ -16,6 +17,7 @@ export function createRunner(config: LlmRuntimeConfig): Runner {
 
   setOpenAIAPI("chat_completions");
   setDefaultOpenAIKey(config.apiKey);
+  setTracingExportApiKey(config.apiKey);
   configuredKey = config.apiKey;
 
   runner = new Runner({
