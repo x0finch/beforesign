@@ -22,7 +22,7 @@ export function FieldRow({ props }: { props: FieldProps }) {
     );
   }
 
-  const hasRichValue = props.href !== null || props.badge !== null;
+  const hasRichValue = Boolean(props.href) || Boolean(props.badge);
 
   const valueContent = hasRichValue ? (
     <div className="flex min-w-0 flex-wrap items-center gap-2">

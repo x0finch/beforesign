@@ -6,18 +6,6 @@ import {
   resetElementIds,
 } from "../../src/spec_helpers.ts";
 
-const nullFieldExtras = {
-  displayValue: null,
-  kind: null,
-  highlight: null,
-  href: null,
-  badge: null,
-  badgeVariant: null,
-  risk: null,
-  mono: null,
-  clamp: null,
-} as const;
-
 export function buildSampleCalldataSpec(): Spec {
   resetElementIds();
 
@@ -44,7 +32,6 @@ export function buildSampleCalldataSpec(): Spec {
   });
   const section = createElement("Section", {
     title: "Calldata",
-    description: null,
   });
 
   const callRoot = createElement("Accordion", {
@@ -55,7 +42,6 @@ export function buildSampleCalldataSpec(): Spec {
   const fieldSelector = createElement("Field", {
     label: "Selector",
     value: "0xa9059cbb",
-    ...nullFieldExtras,
     kind: "selector",
     mono: true,
     clamp: false,
@@ -65,11 +51,6 @@ export function buildSampleCalldataSpec(): Spec {
     value: "0x0000000000000000000000000000000000000001",
     displayValue: "0x0000…0001",
     kind: "address",
-    highlight: null,
-    href: null,
-    badge: null,
-    badgeVariant: null,
-    risk: null,
     mono: true,
     clamp: false,
   });
@@ -78,11 +59,6 @@ export function buildSampleCalldataSpec(): Spec {
     value: "1000000",
     displayValue: "1 USDC",
     kind: "amount",
-    highlight: null,
-    href: null,
-    badge: null,
-    badgeVariant: null,
-    risk: null,
     mono: false,
     clamp: false,
   });
@@ -97,11 +73,6 @@ export function buildSampleCalldataSpec(): Spec {
     value: "500000",
     displayValue: "0.5 USDC",
     kind: "amount",
-    highlight: null,
-    href: null,
-    badge: null,
-    badgeVariant: null,
-    risk: null,
     mono: false,
     clamp: false,
   });

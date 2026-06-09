@@ -38,13 +38,8 @@ export function buildComponentGallerySpec(): Spec {
   const field = createElement("Field", {
     label: "Example field",
     value: "0xabc",
-    displayValue: null,
     kind: "hash",
     highlight: true,
-    href: null,
-    badge: null,
-    badgeVariant: null,
-    risk: null,
     mono: true,
     clamp: true,
   });

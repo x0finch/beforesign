@@ -8,7 +8,7 @@ export type AlertSeverity = z.infer<typeof alertSeveritySchema>;
 export const alertItemSchema = z.object({
   severity: alertSeveritySchema,
   message: z.string(),
-  code: z.string().nullable(),
+  code: z.string().optional(),
 });
 
 export type AlertItem = z.infer<typeof alertItemSchema>;

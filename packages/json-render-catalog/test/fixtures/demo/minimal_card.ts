@@ -17,7 +17,6 @@ export function buildMinimalCardSpec(): Spec {
   const card = createElement("Card", {
     title: "Hello",
     description: "Minimal json-render spec",
-    badge: null,
   });
   const text = createElement("Text", {
     content: "A single Card with one Text child.",

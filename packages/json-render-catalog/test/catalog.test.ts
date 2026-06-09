@@ -28,36 +28,32 @@ describe("catalog", () => {
     expect(catalog.prompt().length).toBeGreaterThan(100);
   });
 
-  it("parses valid Field props", () => {
+  it("parses compact Field props without omitted keys", () => {
     const result = fieldPropsSchema.safeParse({
       label: "Recipient",
       value: "0xabc",
-      displayValue: null,
       kind: "address",
       highlight: true,
-      href: null,
-      badge: null,
-      badgeVariant: null,
-      risk: null,
       mono: true,
       clamp: false,
     });
     expect(result.success).toBe(true);
   });
 
+  it("rejects explicit null on optional Field props", () => {
+    const result = fieldPropsSchema.safeParse({
+      label: "Recipient",
+      value: "0xabc",
+      href: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects invalid Field kind", () => {
     const result = fieldPropsSchema.safeParse({
       label: "Recipient",
       value: "0xabc",
-      displayValue: null,
       kind: "invalid",
-      highlight: null,
-      href: null,
-      badge: null,
-      badgeVariant: null,
-      risk: null,
-      mono: null,
-      clamp: null,
     });
     expect(result.success).toBe(false);
   });
@@ -69,11 +65,19 @@ describe("catalog", () => {
     expect(result.success).toBe(true);
   });
 
+  it("rejects explicit null alert code", () => {
+    const result = alertItemSchema.safeParse({
+      severity: "warning",
+      message: "nope",
+      code: null,
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects invalid alert severity", () => {
     const result = alertItemSchema.safeParse({
       severity: "critical",
       message: "nope",
-      code: null,
     });
     expect(result.success).toBe(false);
   });
@@ -89,7 +93,6 @@ describe("catalog", () => {
 
   it("rejects Accordion without title", () => {
     const result = accordionPropsSchema.safeParse({
-      description: null,
       defaultExpanded: false,
     });
     expect(result.success).toBe(false);

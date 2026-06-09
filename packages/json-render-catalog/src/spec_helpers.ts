@@ -1,4 +1,5 @@
 import type { Spec } from "@json-render/core";
+import { omitNullishProps } from "./compact_spec.ts";
 
 export type ViewElement = {
   type: string;
@@ -33,7 +34,7 @@ export function createElement(
     id,
     element: {
       type,
-      props,
+      props: omitNullishProps(props),
       children,
       visible: true,
     },

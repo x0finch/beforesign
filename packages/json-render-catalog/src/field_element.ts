@@ -4,28 +4,16 @@ import { createElement, type ViewElement } from "./spec_helpers.ts";
 export type FieldDescriptorInput = {
   label: string;
   value: string;
-  displayValue?: string | null;
-  kind?: FieldKind | null;
-  highlight?: boolean | null;
-  href?: string | null;
-  badge?: string | null;
+  displayValue?: string;
+  kind?: FieldKind;
+  highlight?: boolean;
+  href?: string;
+  badge?: string;
   badgeVariant?: FieldProps["badgeVariant"];
   risk?: FieldProps["risk"];
-  mono?: boolean | null;
-  clamp?: boolean | null;
+  mono?: boolean;
+  clamp?: boolean;
 };
-
-const nullFieldExtras = {
-  displayValue: null,
-  kind: null,
-  highlight: null,
-  href: null,
-  badge: null,
-  badgeVariant: null,
-  risk: null,
-  mono: null,
-  clamp: null,
-} as const;
 
 export function fieldPresentation(kind: FieldKind | null | undefined): {
   mono: boolean;
@@ -45,25 +33,28 @@ export function fieldPresentation(kind: FieldKind | null | undefined): {
 export function createFieldElement(
   descriptor: FieldDescriptorInput,
 ): { id: string; element: ViewElement } {
-  const kind = descriptor.kind ?? null;
+  const kind = descriptor.kind;
   const presentation =
-    descriptor.mono !== undefined && descriptor.mono !== null
+    descriptor.mono !== undefined
       ? { mono: descriptor.mono, clamp: descriptor.clamp === true }
       : fieldPresentation(kind);
 
-  return createElement("Field", {
+  const props: Record<string, unknown> = {
     label: descriptor.label,
     value: descriptor.value,
-    displayValue: descriptor.displayValue ?? null,
-    kind,
-    highlight: descriptor.highlight ?? null,
-    href: descriptor.href ?? null,
-    badge: descriptor.badge ?? null,
-    badgeVariant: descriptor.badgeVariant ?? null,
-    risk: descriptor.risk ?? null,
     mono: presentation.mono,
     clamp: presentation.clamp,
-  });
+  };
+
+  if (descriptor.displayValue !== undefined) props.displayValue = descriptor.displayValue;
+  if (kind !== undefined) props.kind = kind;
+  if (descriptor.highlight !== undefined) props.highlight = descriptor.highlight;
+  if (descriptor.href !== undefined) props.href = descriptor.href;
+  if (descriptor.badge !== undefined) props.badge = descriptor.badge;
+  if (descriptor.badgeVariant !== undefined) props.badgeVariant = descriptor.badgeVariant;
+  if (descriptor.risk !== undefined) props.risk = descriptor.risk;
+
+  return createElement("Field", props);
 }
 
 export function createFieldElements(
@@ -71,5 +62,3 @@ export function createFieldElements(
 ): Array<{ id: string; element: ViewElement }> {
   return descriptors.map((descriptor) => createFieldElement(descriptor));
 }
-
-export { nullFieldExtras };

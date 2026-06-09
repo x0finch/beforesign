@@ -7,13 +7,7 @@ function renderField(overrides: Partial<FieldProps> = {}) {
   const props: FieldProps = {
     label: "Recipient",
     value: "0x0000000000000000000000000000000000000000",
-    displayValue: null,
     kind: "address",
-    highlight: null,
-    href: null,
-    badge: null,
-    badgeVariant: null,
-    risk: null,
     mono: true,
     clamp: false,
     ...overrides,
@@ -52,5 +46,12 @@ describe("FieldRow", () => {
   it("renders display value", () => {
     renderField({ displayValue: "0x0000…0000" });
     expect(screen.getByText("0x0000…0000")).toBeTruthy();
+  });
+
+  it("uses plain layout when href and badge are omitted", () => {
+    const { container } = renderField();
+    const valueBox = container.querySelector(".whitespace-normal > div");
+    expect(valueBox?.className).toContain("break-all");
+    expect(container.querySelector(".flex.flex-wrap")).toBeNull();
   });
 });

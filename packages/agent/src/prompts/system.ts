@@ -5,7 +5,7 @@ const specExample = `{
   "elements": {
     "card-1": {
       "type": "Card",
-      "props": { "title": "解读", "description": "简要说明这笔交易在做什么", "badge": null },
+      "props": { "title": "解读", "description": "简要说明这笔交易在做什么" },
       "children": ["stack-1"],
       "visible": true
     },
@@ -24,7 +24,7 @@ const specExample = `{
     "alerts-1": {
       "type": "AlertList",
       "props": {
-        "items": [{ "severity": "warning", "message": "需要用户注意的风险", "code": null }]
+        "items": [{ "severity": "warning", "message": "需要用户注意的风险" }]
       },
       "children": [],
       "visible": true
@@ -43,7 +43,7 @@ Output format:
 - Use components: Card, Stack, Section, Text, AlertList, Badge, Divider. Prefer Text for explanations; use AlertList only for warnings from the facts.
 - Every element needs: type, props, children (array), visible: true.
 - Root Card title should be "${cardTitle}".
-- Nullable props use null (e.g. badge: null, description: null).
+- Omit optional props when unused. Do not emit null values.
 
 Example shape:
 ${specExample}

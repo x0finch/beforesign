@@ -4,6 +4,7 @@ export type { FieldProps, FieldKind } from "./components/field_kind.ts";
 export type { AlertListProps, AlertItem } from "./components/alert_severity.ts";
 export type { Spec, SpecValidationIssues } from "@json-render/core";
 export { validateSpec } from "@json-render/core";
+export { omitNullishProps } from "./compact_spec.ts";
 export {
   appendElements,
   buildSpec,
@@ -18,6 +19,5 @@ export {
   createFieldElement,
   createFieldElements,
   fieldPresentation,
-  nullFieldExtras,
   type FieldDescriptorInput,
 } from "./field_element.ts";

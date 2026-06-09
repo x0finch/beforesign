@@ -12,15 +12,15 @@ export const coreComponentDefinitions = {
   Card: {
     props: z.object({
       title: z.string(),
-      description: z.string().nullable(),
-      badge: z.string().nullable(),
+      description: z.string().optional(),
+      badge: z.string().optional(),
     }),
     slots: ["default"],
     description: "Titled container with optional description and badge",
   },
   Stack: {
     props: z.object({
-      gap: gapSchema.nullable(),
+      gap: gapSchema.optional(),
     }),
     slots: ["default"],
     description: "Vertical stack of child elements",
@@ -28,7 +28,7 @@ export const coreComponentDefinitions = {
   Section: {
     props: z.object({
       title: z.string(),
-      description: z.string().nullable(),
+      description: z.string().optional(),
     }),
     slots: ["default"],
     description: "Grouped section with a heading",
@@ -36,8 +36,8 @@ export const coreComponentDefinitions = {
   Accordion: {
     props: z.object({
       title: z.string(),
-      description: z.string().nullable(),
-      defaultExpanded: z.boolean().nullable(),
+      description: z.string().optional(),
+      defaultExpanded: z.boolean().optional(),
     }),
     slots: ["default"],
     description: "Collapsible block; toggle expand/collapse in registry",
@@ -45,7 +45,7 @@ export const coreComponentDefinitions = {
   Text: {
     props: z.object({
       content: z.string(),
-      variant: textVariantSchema.nullable(),
+      variant: textVariantSchema.optional(),
     }),
     description: "Text paragraph or caption",
   },
@@ -60,7 +60,7 @@ export const coreComponentDefinitions = {
   Badge: {
     props: z.object({
       label: z.string(),
-      variant: badgeVariantSchema.nullable(),
+      variant: badgeVariantSchema.optional(),
     }),
     description: "Inline badge label",
   },

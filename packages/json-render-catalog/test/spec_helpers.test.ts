@@ -13,22 +13,19 @@ describe("spec_helpers", () => {
     resetElementIds();
     const card = createElement("Card", {
       title: "Title",
-      description: null,
-      badge: null,
     });
     const spec = buildSpec(card.id, { [card.id]: card.element });
 
     expect(spec.root).toBe(card.id);
     expect(spec.elements[card.id]?.type).toBe("Card");
     expect(spec.elements[card.id]?.visible).toBe(true);
+    expect(spec.elements[card.id]?.props).toEqual({ title: "Title" });
   });
 
   it("passes validateSpec for a minimal spec", () => {
     resetElementIds();
     const card = createElement("Card", {
       title: "Title",
-      description: null,
-      badge: null,
     });
     const spec = buildSpec(card.id, { [card.id]: card.element });
     expect(validateSpec(spec).valid).toBe(true);
