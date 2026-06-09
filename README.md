@@ -1,6 +1,6 @@
 # BeforeSign
 
-签名之前，先看懂链上输入。粘贴交易 hex/JSON、calldata、EIP-712 或交易哈希，自动识别并解析。
+签名之前，先看懂链上输入。打开首页 AI 助手，粘贴交易 hex/JSON、calldata、EIP-712 或交易哈希，自动识别并解读。
 
 ## 技术栈
 
@@ -44,5 +44,6 @@ pnpm build
 | `@beforesign/view-calldata` | CalldataCall 树 → json-render spec（`buildCalldataSpec`） |
 | `@beforesign/view-tx` / `view-tx-hash` / `view-typed-data` | 各 input kind → json-render spec |
 | `@beforesign/clients` | Tenderly / Etherscan / DeBank |
-| `@beforesign/orchestrator` | 编排（含风险规则 `runRiskRules`） |
-| `@beforesign/web` | 前端 + server functions |
+| `@beforesign/ai-pipeline` | AI / agent 解析管线 |
+| `@beforesign/agent` | OpenAI Agents SDK 驱动的 AI 助手 |
+| `@beforesign/web` | 前端 + server functions（首页为 AI 助手） |

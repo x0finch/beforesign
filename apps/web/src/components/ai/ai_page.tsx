@@ -79,7 +79,6 @@ export function AiPage({
       <AppHeader
         locale={locale}
         onLocaleChange={onLocaleChange}
-        active="ai"
         trailing={
           active ? (
             <div className="flex items-center gap-2">

@@ -9,16 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AiRouteImport } from './routes/ai'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAiContextRouteImport } from './routes/api/ai/context'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai/ask'
 
-const AiRoute = AiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,47 +31,36 @@ const ApiAiAskRoute = ApiAiAskRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/ai': typeof AiRoute
   '/api/ai/ask': typeof ApiAiAskRoute
   '/api/ai/context': typeof ApiAiContextRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/ai': typeof AiRoute
   '/api/ai/ask': typeof ApiAiAskRoute
   '/api/ai/context': typeof ApiAiContextRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/ai': typeof AiRoute
   '/api/ai/ask': typeof ApiAiAskRoute
   '/api/ai/context': typeof ApiAiContextRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/ai' | '/api/ai/ask' | '/api/ai/context'
+  fullPaths: '/' | '/api/ai/ask' | '/api/ai/context'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/ai' | '/api/ai/ask' | '/api/ai/context'
-  id: '__root__' | '/' | '/ai' | '/api/ai/ask' | '/api/ai/context'
+  to: '/' | '/api/ai/ask' | '/api/ai/context'
+  id: '__root__' | '/' | '/api/ai/ask' | '/api/ai/context'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AiRoute: typeof AiRoute
   ApiAiAskRoute: typeof ApiAiAskRoute
   ApiAiContextRoute: typeof ApiAiContextRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/ai': {
-      id: '/ai'
-      path: '/ai'
-      fullPath: '/ai'
-      preLoaderRoute: typeof AiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -104,7 +87,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AiRoute: AiRoute,
   ApiAiAskRoute: ApiAiAskRoute,
   ApiAiContextRoute: ApiAiContextRoute,
 }

@@ -20,7 +20,6 @@ export default defineConfig({
       '@json-render/devtools-react',
       '@beforesign/json-render-view',
       '@beforesign/json-render-catalog',
-      '@beforesign/orchestrator',
       '@beforesign/ai-pipeline',
       '@beforesign/agent',
       '@beforesign/clients',

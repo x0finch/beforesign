@@ -23,7 +23,6 @@
     "viem": "catalog:"
   },
   "devDependencies": {
-    "@beforesign/orchestrator": "workspace:*",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

@@ -15,8 +15,7 @@
     "test": "pnpm -r run test",
     "test:watch": "pnpm -r --parallel run test:watch",
     "lint": "pnpm -r run lint",
-    "typecheck": "pnpm -r run typecheck",
-    "check:ai-boundary": "bash scripts/check-ai-no-orchestrator.sh"
+    "typecheck": "pnpm -r run typecheck"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",

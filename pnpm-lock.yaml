@@ -75,9 +75,6 @@ importers:
       '@beforesign/json-render-view':
         specifier: workspace:*
         version: link:../../packages/json-render-view
-      '@beforesign/orchestrator':
-        specifier: workspace:*
-        version: link:../../packages/orchestrator
       '@beforesign/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -189,9 +186,6 @@ importers:
         specifier: 'catalog:'
         version: 2.52.0(typescript@5.9.3)(zod@4.4.3)
     devDependencies:
-      '@beforesign/orchestrator':
-        specifier: workspace:*
-        version: link:../orchestrator
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -321,40 +315,6 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      vitest:
-        specifier: 'catalog:'
-        version: 3.2.6(@types/node@22.19.19)(jiti@2.7.0)(jsdom@26.1.0)(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))
-
-  packages/orchestrator:
-    dependencies:
-      '@beforesign/clients':
-        specifier: workspace:*
-        version: link:../clients
-      '@beforesign/core':
-        specifier: workspace:*
-        version: link:../core
-      '@beforesign/detect':
-        specifier: workspace:*
-        version: link:../detect
-      '@beforesign/view-calldata':
-        specifier: workspace:*
-        version: link:../view-calldata
-      '@beforesign/view-tx':
-        specifier: workspace:*
-        version: link:../view-tx
-      '@beforesign/view-tx-hash':
-        specifier: workspace:*
-        version: link:../view-tx-hash
-      '@beforesign/view-typed-data':
-        specifier: workspace:*
-        version: link:../view-typed-data
-      viem:
-        specifier: 'catalog:'
-        version: 2.52.0(typescript@5.9.3)(zod@4.4.3)
-    devDependencies:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

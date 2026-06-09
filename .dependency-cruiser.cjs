@@ -20,7 +20,7 @@ module.exports = {
       name: "clients-no-parse",
       severity: "error",
       from: { path: "^packages/clients" },
-      to: { path: "^packages/(parse|detect|orchestrator)" },
+      to: { path: "^packages/(parse|detect)" },
     },
   ],
   options: {
