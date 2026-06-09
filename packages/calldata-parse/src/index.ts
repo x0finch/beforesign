@@ -16,13 +16,15 @@ export { decodeLayer, selectorOnlyNode } from "./decode_layer.ts";
 export { isCalldataLike } from "./is_calldata_like.ts";
 export { findBySelector, parseCalldata, walkLeaves } from "./parse_calldata.ts";
 export { knownWrapperAbi, resolveLayerAbi } from "./resolve_layer_abi.ts";
+export { argFieldId, argFieldLabel, arrayElementLabel } from "./utils/arg_field.ts";
 export {
   buildArgChildLinks,
   childLinkKey,
   formatSourcePathLabel,
   normalizeHex,
   parseSourcePath,
-  resolveSourcePath
+  resolveSourcePath,
+  resolveViewNodePath
 } from "./resolve_source_path.ts";
 export type { ResolvedSourcePath } from "./resolve_source_path.ts";
 export { sourcePathFromSegments } from "./source_path.ts";

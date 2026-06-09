@@ -6,6 +6,7 @@ import {
   formatSourcePathLabel,
   normalizeHex,
   resolveSourcePath,
+  resolveViewNodePath,
 } from "../src/resolve_source_path.ts";
 import { PARSE_FIXTURE_CASES } from "./fixtures/index.ts";
 import { buildOptions } from "./helpers/serialize_tree.ts";
@@ -60,6 +61,29 @@ describe("buildArgChildLinks", () => {
 
     expect(links.get(childLinkKey("0", tree.children[0]?.wrapper))).toBe(tree.children[0]);
     expect(links.get(childLinkKey("0", tree.children[1]?.wrapper))).toBe(tree.children[1]);
+  });
+});
+
+describe("resolveViewNodePath", () => {
+  it("matches multiSend childLinkKey paths", async () => {
+    const fixture = PARSE_FIXTURE_CASES.find((item) => item.name === "safeMultisend");
+    const tree = await parseCalldata(fixture!.input, buildOptions(fixture!));
+    const links = buildArgChildLinks(tree);
+
+    expect(resolveViewNodePath(undefined, tree.children[0]!, 0)).toBe("0#0");
+    expect(resolveViewNodePath(undefined, tree.children[1]!, 1)).toBe("0#1");
+    expect(links.get("0#0")).toBe(tree.children[0]);
+    expect(links.get("0#1")).toBe(tree.children[1]);
+  });
+
+  it("composes nested unwrap paths under parent path", async () => {
+    const fixture = PARSE_FIXTURE_CASES.find((item) => item.name === "safeExec");
+    const tree = await parseCalldata(fixture!.input, buildOptions(fixture!));
+    const inner = tree.children[0]!;
+    expect(resolveViewNodePath(undefined, inner, 0)).toBe("2");
+    if (inner.children[0]) {
+      expect(resolveViewNodePath("2", inner.children[0], 0)).toBe("2/0");
+    }
   });
 });
 

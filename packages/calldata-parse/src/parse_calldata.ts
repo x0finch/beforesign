@@ -24,6 +24,17 @@ function buildDecodedInputs(layer: CalldataCall): Array<{ name: string; type: st
   return layer.args.map((arg) => ({ name: arg.name, type: arg.type }));
 }
 
+function isDecodedFunctionCall(node: CalldataCall): boolean {
+  return node.functionName !== undefined && node.args.length > 0;
+}
+
+function shouldAttachUnwrapChild(payload: UnwrapPayload, child: CalldataCall): boolean {
+  if (payload.wrapper.kind === "generic.bytes") {
+    return isDecodedFunctionCall(child);
+  }
+  return true;
+}
+
 async function applyUnwrappers(
   layer: CalldataCall,
   opts: ParseCalldataOptions,
@@ -45,12 +56,18 @@ async function applyUnwrappers(
 
     if (payloads.length === 0) continue;
 
-    layer.children = await Promise.all(
-      payloads.map(async (payload) => {
-        const child = await parseInternal(payload.data, opts, depth + 1, session, payload.target);
-        return mergeWrapperMeta(child, payload);
-      }),
-    );
+    const children = (
+      await Promise.all(
+        payloads.map(async (payload) => {
+          const child = await parseInternal(payload.data, opts, depth + 1, session, payload.target);
+          return mergeWrapperMeta(child, payload);
+        }),
+      )
+    ).filter((child, index) => shouldAttachUnwrapChild(payloads[index]!, child));
+
+    if (children.length === 0) continue;
+
+    layer.children = children;
 
     const label = layer.functionName ?? layer.selector;
     layer.summary = `${label} → ${layer.children.length} inner call(s)`;

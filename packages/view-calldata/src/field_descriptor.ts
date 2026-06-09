@@ -1,4 +1,9 @@
 import type { CalldataArg, CalldataCall } from "@beforesign/calldata-parse";
+import {
+  argFieldId,
+  argFieldLabel,
+  resolveViewNodePath,
+} from "@beforesign/calldata-parse";
 import type { FieldProps } from "@beforesign/json-render-catalog";
 
 type FieldKind = NonNullable<FieldProps["kind"]>;
@@ -58,10 +63,14 @@ function fieldDescriptor(
   };
 }
 
-function argToField(id: string, arg: CalldataArg): ViewFieldDescriptor {
+function argToField(
+  id: string,
+  arg: CalldataArg,
+  argIndex: number,
+): ViewFieldDescriptor {
   const rawValue = formatArgValue(arg.value);
   const displayValue = arg.displayValue !== rawValue ? arg.displayValue : null;
-  return fieldDescriptor(id, arg.name || "arg", rawValue || arg.displayValue, {
+  return fieldDescriptor(id, argFieldLabel(arg, argIndex), rawValue || arg.displayValue, {
     displayValue,
     kind: kindForArgType(arg.type),
   });
@@ -73,7 +82,7 @@ export function idPrefix(path: string | undefined): string {
 
 function fieldsForNode(node: CalldataCall, path: string | undefined): ViewFieldDescriptor[] {
   const prefix = idPrefix(path);
-  return node.args.map((arg) => argToField(`${prefix}.args.${arg.name || "arg"}`, arg));
+  return node.args.map((arg, index) => argToField(argFieldId(prefix, index), arg, index));
 }
 
 function collectCallNode(node: CalldataCall, path: string | undefined): ViewCallNode {
@@ -81,9 +90,7 @@ function collectCallNode(node: CalldataCall, path: string | undefined): ViewCall
 
   for (let i = 0; i < node.children.length; i += 1) {
     const child = node.children[i]!;
-    const childPath =
-      child.wrapper?.sourcePath ?? (path !== undefined ? `${path}/${i}` : String(i));
-    children.push(collectCallNode(child, childPath));
+    children.push(collectCallNode(child, resolveViewNodePath(path, child, i)));
   }
 
   return {
@@ -126,3 +133,5 @@ export function applyNodeFieldOverrides(
     children: node.children.map((child) => applyNodeFieldOverrides(child, overrides)),
   };
 }
+
+export { argFieldId, argFieldLabel };

@@ -52,10 +52,10 @@ export function FieldRow({ props }: { props: FieldProps }) {
     <div
       className={cn(
         "grid grid-cols-[minmax(6.5rem,30%)_minmax(0,1fr)] items-start gap-x-3",
-        highlighted && "rounded-md bg-muted/50",
+        highlighted && "rounded-md bg-muted/50 px-3",
       )}
     >
-      <div className="py-2.5 font-medium capitalize text-muted-foreground">{props.label}</div>
+      <div className="py-2.5 font-medium text-muted-foreground">{props.label}</div>
       <div className="min-w-0 py-2.5 whitespace-normal">{valueContent}</div>
     </div>
   );

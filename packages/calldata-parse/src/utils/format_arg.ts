@@ -44,10 +44,6 @@ export function formatArgValue(value: unknown, input?: AbiParameterWithComponent
   return String(value);
 }
 
-export function fallbackArgName(index: number): string {
-  return `arg$${index}`;
-}
-
 export function mapAbiComponents(
   components: readonly AbiParameterWithComponents[],
 ): import("../types.ts").CalldataArgComponent[] {

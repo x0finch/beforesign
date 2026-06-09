@@ -9,6 +9,7 @@ import {
   MOCK_SELECTOR_ABI,
   TRANSFER_SELECTOR_ABI,
 } from "./helpers/mock_abi.ts";
+import { userMultiSendCalldata } from "../../calldata-parse/test/fixtures/inputs.ts";
 
 const safeExecCalldata =
   "0x6a761202000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb480000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001c00000000000000000000000000000000000000000000000000000000000000044a9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" as const;
@@ -73,6 +74,30 @@ function findAccordionByTitle(
   return specElements(spec).find(
     (element) => element.type === "Accordion" && pattern.test(element.props.title as string),
   );
+}
+
+function findElementId(
+  spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"],
+  element: ViewElement,
+): string | undefined {
+  return Object.entries(specElementMap(spec)).find(([, candidate]) => candidate === element)?.[0];
+}
+
+function descendantFields(
+  spec: Awaited<ReturnType<typeof buildCalldataSpec>>["spec"],
+  rootId: string,
+): ViewElement[] {
+  const elements = specElementMap(spec);
+  const walk = (id: string): ViewElement[] => {
+    const element = elements[id];
+    if (!element) return [];
+    const fields: ViewElement[] = element.type === "Field" ? [element] : [];
+    for (const childId of element.children) {
+      fields.push(...walk(childId));
+    }
+    return fields;
+  };
+  return walk(rootId);
 }
 
 function findFieldIdByLabel(
@@ -216,5 +241,49 @@ describe("buildCalldataSpec", () => {
     );
     expect(contractField?.props.value).toBe(contractAddress);
     expect(contractField?.props.highlight).toBe(true);
+  });
+
+  it("builds user multiSend with three inner calls and distinct unnamed arg values", async () => {
+    const result = await buildCalldataSpec({ raw: userMultiSendCalldata }, mockClients());
+
+    expect(validateSpec(result.spec as never).valid).toBe(true);
+
+    const rootAccordion = findAccordionByTitle(result.spec, /multiSend|0x8d80ff0a/i);
+    expect(rootAccordion).toBeTruthy();
+
+    const innerAccordions = specElements(result.spec).filter(
+      (element) =>
+        element.type === "Accordion" &&
+        /0xbd86e508|0xbf6213e4|0x0087b83f/.test(element.props.title as string),
+    );
+    expect(innerAccordions).toHaveLength(3);
+
+    const redeemAccordion = findAccordionByTitle(result.spec, /0xbf6213e4/);
+    const claimAccordion = findAccordionByTitle(result.spec, /0x0087b83f/);
+    expect(redeemAccordion).toBeTruthy();
+    expect(claimAccordion).toBeTruthy();
+
+    const claimAccordionId = findElementId(result.spec, claimAccordion!);
+    expect(claimAccordionId).toBeTruthy();
+
+    const claimArgFields = descendantFields(result.spec, claimAccordionId!).filter(
+      (element) => /^#\d+ /.test(element.props.label as string),
+    );
+    expect(claimArgFields.length).toBeGreaterThanOrEqual(3);
+
+    const claimValues = new Set(claimArgFields.map((field) => field.props.value as string));
+    expect(claimValues.size).toBe(claimArgFields.length);
+
+    const claimLabels = claimArgFields.map((field) => field.props.label as string);
+    expect(claimLabels).toContain("#0 bytes32");
+    expect(claimLabels).toContain("#1 address");
+    expect(claimLabels).toContain("#2 uint128");
+
+    const redeemAccordionId = findElementId(result.spec, redeemAccordion!);
+    expect(redeemAccordionId).toBeTruthy();
+    const redeemLabels = descendantFields(result.spec, redeemAccordionId!).map(
+      (field) => field.props.label as string,
+    );
+    expect(redeemLabels.some((label) => /^bytes32\[\d+\]$/.test(label))).toBe(true);
   });
 });

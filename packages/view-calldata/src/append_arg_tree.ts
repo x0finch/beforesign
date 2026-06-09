@@ -3,7 +3,7 @@ import type {
   CalldataArgComponent,
   CalldataCall,
 } from "@beforesign/calldata-parse";
-import { buildArgChildLinks } from "@beforesign/calldata-parse";
+import { argFieldId, argFieldLabel, arrayElementLabel, buildArgChildLinks } from "@beforesign/calldata-parse";
 import { createElement, type ViewElement } from "@beforesign/json-render-catalog";
 import type { ViewCallNode, ViewFieldDescriptor } from "./field_descriptor.ts";
 import { formatArgValue, idPrefix } from "./field_descriptor.ts";
@@ -66,6 +66,10 @@ function appendInlineField(
 
 function isTupleArrayType(type: string): boolean {
   return type.includes("tuple") && type.endsWith("[]");
+}
+
+function shouldExpandArrayArg(arg: CalldataArg): boolean {
+  return Array.isArray(arg.value) && !isTupleArrayType(arg.type);
 }
 
 function findChildNode(parent: ViewCallNode, call: CalldataCall): ViewCallNode | undefined {
@@ -189,26 +193,30 @@ function appendArgNode(
 ): string[] {
   const path = String(argIndex);
   const childIds: string[] = [];
+  const prefix = idPrefix(parent.path);
   const fieldsById = new Map(parent.fields.map((field) => [field.id, field]));
-  const fieldId = `${idPrefix(parent.path)}.args.${arg.name || "arg"}`;
+  const fieldId = argFieldId(prefix, argIndex);
+  const expandArray = shouldExpandArrayArg(arg);
 
   if (isTupleArrayType(arg.type)) {
     childIds.push(...appendTupleArray(parent, arg, path, links, appendCallNode, entries));
     return childIds;
   }
 
-  const descriptor = fieldsById.get(fieldId);
-  if (descriptor) {
-    childIds.push(appendFieldDescriptor(descriptor, entries));
-  } else {
-    childIds.push(
-      appendInlineField(
-        arg.name || "arg",
-        formatArgValue(arg.value) || arg.displayValue,
-        kindForArgType(arg.type),
-        entries,
-      ),
-    );
+  if (!expandArray) {
+    const descriptor = fieldsById.get(fieldId);
+    if (descriptor) {
+      childIds.push(appendFieldDescriptor(descriptor, entries));
+    } else {
+      childIds.push(
+        appendInlineField(
+          argFieldLabel(arg, argIndex),
+          formatArgValue(arg.value) || arg.displayValue,
+          kindForArgType(arg.type),
+          entries,
+        ),
+      );
+    }
   }
 
   const hasMultiSendEntries = parent.call.children.some(
@@ -225,13 +233,13 @@ function appendArgNode(
     }
   }
 
-  if (Array.isArray(arg.value) && !isTupleArrayType(arg.type)) {
+  if (expandArray) {
     for (let index = 0; index < arg.value.length; index += 1) {
       const itemPath = `${path}/${index}`;
-      const item = arg.value[index];
+      const item = (arg.value as unknown[])[index];
       childIds.push(
         appendInlineField(
-          `[${index}]`,
+          arrayElementLabel(arg.type, index),
           formatArgValue(item),
           kindForArgType(arg.type),
           entries,

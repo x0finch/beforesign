@@ -1,4 +1,5 @@
 import type { CalldataArg, CalldataArgComponent, CalldataCall } from "./types.ts";
+import { argFieldLabel } from "./utils/arg_field.ts";
 
 export type ResolvedSourcePath = {
   arg: CalldataArg;
@@ -61,6 +62,20 @@ export function resolveSourcePath(
   return { arg, value: current, pathSegments: segments };
 }
 
+/** View-tree path for a child; must stay in sync with buildArgChildLinks keys. */
+export function resolveViewNodePath(
+  parentPath: string | undefined,
+  child: CalldataCall,
+  siblingIndex: number,
+): string {
+  const wrapper = child.wrapper;
+  if (wrapper?.sourcePath !== undefined) {
+    const key = childLinkKey(wrapper.sourcePath, wrapper);
+    return parentPath !== undefined ? `${parentPath}/${key}` : key;
+  }
+  return parentPath !== undefined ? `${parentPath}/${siblingIndex}` : String(siblingIndex);
+}
+
 /** Link key for a child under its parent arg tree. */
 export function childLinkKey(sourcePath: string, wrapper?: CalldataCall["wrapper"]): string {
   if (wrapper?.kind === "safe.multiSend" && wrapper.index !== undefined) {
@@ -95,7 +110,7 @@ export function formatSourcePathLabel(parent: CalldataCall, sourcePath: string):
   const arg = parent.args[segments[0] ?? -1];
   if (!arg) return sourcePath;
 
-  const parts: string[] = [arg.name || `arg${segments[0]}`];
+  const parts: string[] = [argFieldLabel(arg, segments[0] ?? 0)];
   let components: CalldataArgComponent[] | undefined = arg.components;
   let current: unknown = arg.value;
 

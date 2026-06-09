@@ -10,11 +10,7 @@ const APPROVAL_SELECTORS = new Set([
   "0xa22cb465",
 ]);
 
-const ALLOWANCE_ARG_IDS = [
-  "calldata.args.amount",
-  "calldata.args.value",
-  "calldata.args.approved",
-];
+const ALLOWANCE_ARG_NAMES = ["amount", "value", "approved"] as const;
 
 export class ApprovalProfile extends CalldataProfile {
   readonly id = "approval" as const;
@@ -41,27 +37,28 @@ export class ApprovalProfile extends CalldataProfile {
     ctx: CalldataViewContext,
     fields: ViewFieldDescriptor[],
   ): Map<string, Partial<ViewFieldDescriptor>> {
-    void ctx;
     const highlight = this.highlightIds(fields, [
-      "calldata.args.spender",
-      "calldata.args.operator",
-      ...ALLOWANCE_ARG_IDS,
+      ...this.rootArgFieldIdsByNames(ctx, ["spender", "operator", ...ALLOWANCE_ARG_NAMES]),
     ]);
 
     const labels = new Map<string, Partial<ViewFieldDescriptor>>();
-    for (const id of ALLOWANCE_ARG_IDS) {
-      if (fields.some((field) => field.id === id)) {
+    for (const name of ALLOWANCE_ARG_NAMES) {
+      const id = this.rootArgFieldId(ctx, name);
+      if (id && fields.some((field) => field.id === id)) {
         labels.set(id, { label: "Allowance" });
       }
     }
-    if (fields.some((field) => field.id === "calldata.args.spender")) {
-      labels.set("calldata.args.spender", { label: "Spender" });
+    const spenderId = this.rootArgFieldId(ctx, "spender");
+    if (spenderId && fields.some((field) => field.id === spenderId)) {
+      labels.set(spenderId, { label: "Spender" });
     }
-    if (fields.some((field) => field.id === "calldata.args.operator")) {
-      labels.set("calldata.args.operator", { label: "Operator" });
+    const operatorId = this.rootArgFieldId(ctx, "operator");
+    if (operatorId && fields.some((field) => field.id === operatorId)) {
+      labels.set(operatorId, { label: "Operator" });
     }
 
-    const allowanceId = this.firstExistingFieldId(fields, ALLOWANCE_ARG_IDS);
+    const allowanceIds = this.rootArgFieldIdsByNames(ctx, [...ALLOWANCE_ARG_NAMES]);
+    const allowanceId = this.firstExistingFieldId(fields, allowanceIds);
     const allowance = allowanceId
       ? fields.find((field) => field.id === allowanceId)
       : undefined;
@@ -90,7 +87,8 @@ export class ApprovalProfile extends CalldataProfile {
       ];
     }
 
-    const allowanceId = this.firstExistingFieldId(fields, ALLOWANCE_ARG_IDS);
+    const allowanceIds = this.rootArgFieldIdsByNames(ctx, [...ALLOWANCE_ARG_NAMES]);
+    const allowanceId = this.firstExistingFieldId(fields, allowanceIds);
     const allowance = allowanceId
       ? fields.find((field) => field.id === allowanceId)
       : undefined;

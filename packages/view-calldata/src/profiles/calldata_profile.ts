@@ -1,9 +1,11 @@
 import type { AlertItem } from "@beforesign/json-render-catalog";
+import { argFieldId } from "@beforesign/calldata-parse";
 import type { ViewCallNode, ViewFieldDescriptor } from "../field_descriptor.ts";
 import {
   applyNodeFieldOverrides,
   collectCallTree,
   flattenFieldDescriptors,
+  idPrefix,
 } from "../field_descriptor.ts";
 import type { CalldataScenarioId, CalldataViewContext } from "./context.ts";
 
@@ -94,6 +96,25 @@ export abstract class CalldataProfile {
   protected firstExistingFieldId(fields: ViewFieldDescriptor[], ids: string[]): string | undefined {
     const idSet = new Set(fields.map((field) => field.id));
     return ids.find((id) => idSet.has(id));
+  }
+
+  protected rootArgFieldId(ctx: CalldataViewContext, argName: string): string | undefined {
+    const index = ctx.tree.args.findIndex((arg) => arg.name === argName);
+    if (index < 0) return undefined;
+    return argFieldId(idPrefix(undefined), index);
+  }
+
+  protected rootArgFieldIdsByNames(ctx: CalldataViewContext, names: string[]): string[] {
+    return names.flatMap((name) => {
+      const id = this.rootArgFieldId(ctx, name);
+      return id ? [id] : [];
+    });
+  }
+
+  protected argFieldIdByName(node: ViewCallNode, argName: string): string | undefined {
+    const index = node.call.args.findIndex((arg) => arg.name === argName);
+    if (index < 0) return undefined;
+    return argFieldId(idPrefix(node.path), index);
   }
 
   protected rootArgIds(fields: ViewFieldDescriptor[]): string[] {

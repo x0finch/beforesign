@@ -5,6 +5,8 @@ import { parseCalldata, findBySelector, walkLeaves } from "../src/parse_calldata
 import { PARSE_FIXTURE_CASES } from "./fixtures/index.ts";
 import {
   erc20TransferAbi,
+  forwardBytesAbi,
+  forwardCalldata,
   innerTransferCalldata,
   RECIPIENT,
   safeExecCalldata,
@@ -53,6 +55,12 @@ describe("edge cases", () => {
     expect(tree.children).toHaveLength(1);
     expect(tree.children[0]?.selector).toBe("0xa9059cbb");
     expect(tree.children[0]?.functionName).toBeUndefined();
+  });
+
+  it("drops generic.bytes children that fail ABI decode", async () => {
+    const tree = await parseCalldata(forwardCalldata, { abi: forwardBytesAbi });
+    expect(tree.functionName).toBe("forward");
+    expect(tree.children).toEqual([]);
   });
 
   it("walkLeaves returns only leaf nodes", async () => {

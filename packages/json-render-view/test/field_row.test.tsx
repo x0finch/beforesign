@@ -54,4 +54,9 @@ describe("FieldRow", () => {
     expect(valueBox?.className).toContain("break-all");
     expect(container.querySelector(".flex.flex-wrap")).toBeNull();
   });
+
+  it("adds horizontal padding on highlighted rows", () => {
+    const { container } = renderField({ highlight: true });
+    expect(container.firstElementChild?.className).toContain("px-3");
+  });
 });

@@ -16,7 +16,7 @@ const output = {
   "functionName": "forward",
   "signature": "forward(bytes)",
   "signatureWithNames": "forward(bytes data)",
-  "summary": "forward → 1 inner call(s)",
+  "summary": "Call forward",
   "args": [
     {
       "name": "data",
@@ -25,20 +25,7 @@ const output = {
       "value": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000002"
     }
   ],
-  "children": [
-    {
-      "raw": "0xa9059cbb000000000000000000000000d8da6bf26964af9d7eed9e03e53415d37aa960450000000000000000000000000000000000000000000000000000000000000002",
-      "selector": "0xa9059cbb",
-      "depth": 1,
-      "summary": "Unknown method (0xa9059cbb)",
-      "wrapper": {
-        "kind": "generic.bytes",
-        "sourcePath": "0"
-      },
-      "args": [],
-      "children": []
-    }
-  ]
+  "children": []
 } satisfies SerializableCalldataCall;
 
 export const genericBytesFixture: ParseFixture = {
