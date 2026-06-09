@@ -142,14 +142,7 @@ export function buildFieldDescriptor(opts: {
     group: opts.group,
     label: opts.label ?? fieldLabel(opts.group, opts.fieldName, opts.pathLabel),
     value,
-    displayValue: displayValue ?? null,
+    ...(displayValue ? { displayValue } : {}),
     kind,
-    highlight: null,
-    href: null,
-    badge: null,
-    badgeVariant: null,
-    risk: null,
-    mono: null,
-    clamp: null,
   };
 }

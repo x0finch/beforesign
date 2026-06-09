@@ -30,17 +30,22 @@ export function buildTxHashFields(ctx: TxHashFieldContext): FieldDescriptorInput
       value: String(chainId),
       displayValue: formatChainName(chainId, chainName),
       kind: "chainId",
-      href: href ?? null,
-      badge: badge ?? null,
-      badgeVariant: status && badge ? statusBadgeVariant(status) : null,
+      ...(href ? { href } : {}),
+      ...(badge
+        ? {
+            badge,
+            ...(status ? { badgeVariant: statusBadgeVariant(status) } : {}),
+          }
+        : {}),
     });
   }
 
   if (timestamp) {
+    const displayValue = formatTimestamp(timestamp);
     fields.push({
       label: "Timestamp",
       value: timestamp,
-      displayValue: formatTimestamp(timestamp) ?? null,
+      ...(displayValue ? { displayValue } : {}),
       kind: "timestamp",
     });
   }
@@ -54,10 +59,11 @@ export function buildTxHashFields(ctx: TxHashFieldContext): FieldDescriptorInput
   }
 
   if (ctx.tx?.value && ctx.tx.value !== "0") {
+    const displayValue = formatEthValue(ctx.tx.value);
     fields.push({
       label: "Value",
       value: ctx.tx.value,
-      displayValue: formatEthValue(ctx.tx.value) ?? null,
+      ...(displayValue ? { displayValue } : {}),
       kind: "amount",
     });
   }
@@ -66,7 +72,7 @@ export function buildTxHashFields(ctx: TxHashFieldContext): FieldDescriptorInput
     fields.push({
       label: "Data",
       value: txData,
-      displayValue: txData === "0x" ? "0x (empty)" : null,
+      ...(txData === "0x" ? { displayValue: "0x (empty)" } : {}),
       kind: txData === "0x" ? "text" : "hash",
     });
   }

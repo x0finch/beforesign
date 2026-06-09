@@ -73,9 +73,8 @@ export function buildTxFields(
       value: String(merged.chainId),
       displayValue: formatChainName(merged.chainId),
       kind: "chainId",
-      href: href ?? null,
-      badge: badge ?? null,
-      badgeVariant: badgeVariant ?? null,
+      ...(href ? { href } : {}),
+      ...(badge ? { badge, ...(badgeVariant ? { badgeVariant } : {}) } : {}),
     });
   }
 
@@ -88,10 +87,11 @@ export function buildTxFields(
   }
 
   if (merged.value && merged.value !== "0") {
+    const displayValue = formatEthValue(merged.value);
     fields.push({
       label: "Value",
       value: merged.value,
-      displayValue: formatEthValue(merged.value) ?? null,
+      ...(displayValue ? { displayValue } : {}),
       kind: "amount",
     });
   }
@@ -100,7 +100,7 @@ export function buildTxFields(
     fields.push({
       label: "Data",
       value: txData,
-      displayValue: txData === "0x" ? "0x (empty)" : null,
+      ...(txData === "0x" ? { displayValue: "0x (empty)" } : {}),
       kind: txData === "0x" ? "text" : "hash",
     });
   }

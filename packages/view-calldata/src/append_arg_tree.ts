@@ -234,9 +234,10 @@ function appendArgNode(
   }
 
   if (expandArray) {
-    for (let index = 0; index < arg.value.length; index += 1) {
+    const items = arg.value as unknown[];
+    for (let index = 0; index < items.length; index += 1) {
       const itemPath = `${path}/${index}`;
-      const item = (arg.value as unknown[])[index];
+      const item = items[index];
       childIds.push(
         appendInlineField(
           arrayElementLabel(arg.type, index),
