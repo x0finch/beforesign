@@ -1,50 +1,58 @@
-import { buildAgentContextExport } from "@beforesign/agent";
+import {
+  buildAgentContextExport,
+  createEmptySession,
+  getAgentMemorySession,
+  isOpenAIConversationId,
+} from "@beforesign/agent";
 import { createFileRoute } from "@tanstack/react-router";
-import { getSession, saveSession } from "~/server/ai/session_store.ts";
+import { createLlmFromEnv } from "~/server/ai/llm.ts";
 
 export const Route = createFileRoute("/api/ai/context")({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url);
-        const sessionId = url.searchParams.get("sessionId");
-        if (!sessionId) {
-          return new Response(JSON.stringify({ error: "sessionId is required" }), {
+        const conversationId = url.searchParams.get("conversationId");
+        const locale = url.searchParams.get("locale");
+
+        if (!conversationId) {
+          return new Response(JSON.stringify({ error: "conversationId is required" }), {
             status: 400,
             headers: { "Content-Type": "application/json" },
           });
         }
 
-        const session = await getSession(sessionId);
-        if (!session) {
-          return new Response(JSON.stringify({ error: "Session not found" }), {
-            status: 404,
+        if (!isOpenAIConversationId(conversationId)) {
+          return new Response(JSON.stringify({ error: "Invalid conversationId" }), {
+            status: 400,
             headers: { "Content-Type": "application/json" },
           });
         }
 
-        if (!session.lastNormalizedInput) {
-          return new Response(
-            JSON.stringify({ error: "No context export for this session yet" }),
-            {
-              status: 404,
-              headers: { "Content-Type": "application/json" },
-            },
-          );
+        if (locale !== "zh" && locale !== "en") {
+          return new Response(JSON.stringify({ error: "locale is required (zh or en)" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
         }
 
-        const exportData = await buildAgentContextExport(
-          session,
-          session.lastNormalizedInput,
-        );
-        session.lastContextExport = exportData;
-        session.updatedAt = Date.now();
-        await saveSession(session);
+        const llm = createLlmFromEnv();
+        if (!llm?.apiKey) {
+          return new Response(JSON.stringify({ error: "LLM is not configured" }), {
+            status: 503,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const session = createEmptySession(conversationId);
+        getAgentMemorySession(session, llm);
+
+        const exportData = await buildAgentContextExport(session, locale, llm);
 
         return new Response(JSON.stringify(exportData, null, 2), {
           headers: {
             "Content-Type": "application/json",
-            "Content-Disposition": `attachment; filename="agent-context-${sessionId}.json"`,
+            "Content-Disposition": `attachment; filename="agent-context-${conversationId}.json"`,
           },
         });
       },

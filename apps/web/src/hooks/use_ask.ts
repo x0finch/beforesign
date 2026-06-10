@@ -6,6 +6,11 @@ import {
   type AgentContextExport,
 } from "@beforesign/agent";
 import * as React from "react";
+import type { ConversationHydration } from "~/types/conversation.ts";
+import {
+  hydrateConversationToMessages,
+  inferLastRawFromConversation,
+} from "~/lib/hydrate_conversation.ts";
 import type { Locale } from "~/lib/i18n.ts";
 
 export type AskPhase = "idle" | "detecting" | "building_view" | "thinking";
@@ -36,6 +41,14 @@ export type UseAskInput = {
   locale: Locale;
 };
 
+export type UseAskOptions = {
+  conversationId?: string;
+  hydration?: ConversationHydration;
+  isHydrating?: boolean;
+  onConversationId?: (conversationId: string) => void;
+  locale: Locale;
+};
+
 export function downloadAgentContextExport(exportData: AgentContextExport) {
   const blob = new Blob([JSON.stringify(exportData, null, 2)], {
     type: "application/json",
@@ -43,15 +56,20 @@ export function downloadAgentContextExport(exportData: AgentContextExport) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `agent-context-${exportData.sessionId}-${exportData.exportedAt.replace(/[:.]/g, "-")}.json`;
+  anchor.download = `agent-context-${exportData.conversationId}-${exportData.exportedAt.replace(/[:.]/g, "-")}.json`;
   anchor.click();
   URL.revokeObjectURL(url);
 }
 
-export function useAsk() {
+export function useAsk({
+  conversationId,
+  hydration,
+  isHydrating = false,
+  onConversationId,
+  locale,
+}: UseAskOptions) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [sessionId, setSessionId] = React.useState<string | undefined>();
   const [contextExport, setContextExport] = React.useState<AgentContextExport | null>(
     null,
   );
@@ -62,18 +80,75 @@ export function useAsk() {
   );
   const [phase, setPhase] = React.useState<AskPhase>("idle");
   const abortRef = React.useRef<AbortController | null>(null);
+  const lastRawRef = React.useRef<string | undefined>(undefined);
+  const [knownConversationId, setKnownConversationId] = React.useState<
+    string | undefined
+  >(conversationId);
+  const seededHydrationRef = React.useRef<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    if (conversationId) {
+      setKnownConversationId(conversationId);
+    }
+  }, [conversationId]);
+
+  React.useEffect(() => {
+    if (!hydration) return;
+    if (messages.length > 0) return;
+    if (seededHydrationRef.current === hydration.conversationId) return;
+
+    const hydratedMessages = hydrateConversationToMessages(hydration.conversation);
+    if (hydratedMessages.length > 0) {
+      setMessages(hydratedMessages);
+    }
+
+    const spec = extractLatestSpecFromConversation(hydration.conversation);
+    if (spec) {
+      setParseResult(parseResultFromSpec(spec));
+    }
+
+    const inferredRaw = inferLastRawFromConversation(hydration.conversation);
+    if (inferredRaw) {
+      lastRawRef.current = inferredRaw;
+    }
+
+    seededHydrationRef.current = hydration.conversationId;
+  }, [hydration, messages.length]);
+
+  const activeConversationId = conversationId ?? knownConversationId;
 
   const clear = React.useCallback(() => {
     abortRef.current?.abort();
     setLoading(false);
     setError(null);
-    setSessionId(undefined);
     setContextExport(null);
     setMessages([]);
     setParseResult(null);
     setNeedsDiscovery(null);
     setPhase("idle");
+    lastRawRef.current = undefined;
+    setKnownConversationId(undefined);
+    seededHydrationRef.current = undefined;
   }, []);
+
+  const ensureConversationId = React.useCallback(async (): Promise<string> => {
+    if (activeConversationId) return activeConversationId;
+
+    const response = await fetch("/api/ai/conversation", { method: "POST" });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || `Failed to create conversation (${response.status})`);
+    }
+
+    const data = (await response.json()) as { conversationId?: string };
+    if (!data.conversationId) {
+      throw new Error("Missing conversationId in create response");
+    }
+
+    setKnownConversationId(data.conversationId);
+    onConversationId?.(data.conversationId);
+    return data.conversationId;
+  }, [activeConversationId, onConversationId]);
 
   const ask = React.useCallback(async (input: UseAskInput) => {
     abortRef.current?.abort();
@@ -84,6 +159,22 @@ export function useAsk() {
     setError(null);
     setNeedsDiscovery(null);
     setPhase("detecting");
+
+    let requestConversationId: string;
+    try {
+      requestConversationId = await ensureConversationId();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create conversation");
+      setLoading(false);
+      setPhase("idle");
+      return;
+    }
+
+    const trimmedRaw = input.raw?.trim();
+    if (trimmedRaw) {
+      lastRawRef.current = trimmedRaw;
+    }
+    const effectiveRaw = trimmedRaw ?? lastRawRef.current;
 
     const userId = crypto.randomUUID();
 
@@ -122,9 +213,9 @@ export function useAsk() {
         method: "POST",
         headers,
         body: JSON.stringify({
-          sessionId,
+          conversationId: requestConversationId,
           message: input.message,
-          raw: input.raw,
+          raw: effectiveRaw,
           chainId: input.chainId,
           abi: input.abi,
           signerAddress: input.signerAddress,
@@ -167,7 +258,7 @@ export function useAsk() {
             entry?: TimelineEntry;
             result?: ParseResult;
             discovery?: DiscoveryResult;
-            sessionId?: string;
+            conversationId?: string;
             message?: string;
             spec?: ViewSpec;
             content?: string;
@@ -242,7 +333,9 @@ export function useAsk() {
               }
               break;
             case "done":
-              if (event.sessionId) setSessionId(event.sessionId);
+              if (event.conversationId) {
+                setKnownConversationId(event.conversationId);
+              }
               break;
             case "error":
               throw new Error(event.message ?? "Ask failed");
@@ -256,18 +349,20 @@ export function useAsk() {
       setLoading(false);
       setPhase("idle");
     }
-  }, [sessionId]);
+  }, [ensureConversationId]);
 
   const exportContext = React.useCallback(async () => {
     if (contextExport) {
       downloadAgentContextExport(contextExport);
       return;
     }
-    if (!sessionId) return;
+    if (!activeConversationId) return;
 
-    const response = await fetch(
-      `/api/ai/context?sessionId=${encodeURIComponent(sessionId)}`,
-    );
+    const params = new URLSearchParams({
+      conversationId: activeConversationId,
+      locale,
+    });
+    const response = await fetch(`/api/ai/context?${params.toString()}`);
     if (!response.ok) {
       const text = await response.text();
       throw new Error(text || `Export failed (${response.status})`);
@@ -275,12 +370,13 @@ export function useAsk() {
     const exportData = (await response.json()) as AgentContextExport;
     setContextExport(exportData);
     downloadAgentContextExport(exportData);
-  }, [contextExport, sessionId]);
+  }, [contextExport, activeConversationId, locale]);
 
   return {
     loading,
     error,
-    sessionId,
+    isHydrating,
+    conversationId: activeConversationId,
     contextExport,
     messages,
     parseResult,

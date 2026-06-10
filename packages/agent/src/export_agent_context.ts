@@ -1,7 +1,9 @@
 import type { AgentInputItem } from "@openai/agents";
 import type { NormalizedAskInput } from "./normalize_ask_input.ts";
+import { loadConversationEntries } from "./load_conversation.ts";
 import { buildBeforeSignInstructions } from "./prompts/beforesign_instructions.ts";
 import type { AskLocale, AskSession } from "./types.ts";
+import type { LlmRuntimeConfig } from "./run_context.ts";
 
 export type ConversationEntry =
   | { role: "system"; content: string }
@@ -17,7 +19,7 @@ export type ConversationEntry =
 
 export type AgentContextExport = {
   exportedAt: string;
-  sessionId: string;
+  conversationId: string;
   locale: AskLocale;
   conversation: ConversationEntry[];
 };
@@ -145,20 +147,19 @@ export function flattenMemoryItems(items: AgentInputItem[]): ConversationEntry[]
 
 export async function buildAgentContextExport(
   session: AskSession,
-  normalized: NormalizedAskInput,
+  locale: AskLocale,
+  llm: LlmRuntimeConfig,
 ): Promise<AgentContextExport> {
-  const memoryItems = session.agentMemory
-    ? await session.agentMemory.getItems()
-    : [];
+  const memoryItems = await loadConversationEntries(session, llm);
 
   return {
     exportedAt: new Date().toISOString(),
-    sessionId: session.id,
-    locale: normalized.locale,
+    conversationId: session.id,
+    locale,
     conversation: [
       {
         role: "system",
-        content: buildBeforeSignInstructions(normalized.locale),
+        content: buildBeforeSignInstructions(locale),
       },
       ...flattenMemoryItems(memoryItems),
     ],
@@ -167,11 +168,8 @@ export async function buildAgentContextExport(
 
 export async function captureAgentContextExport(
   session: AskSession,
-  normalized: NormalizedAskInput,
+  locale: AskLocale,
+  llm: LlmRuntimeConfig,
 ): Promise<AgentContextExport> {
-  session.lastNormalizedInput = normalized;
-  const snapshot = await buildAgentContextExport(session, normalized);
-  session.lastContextExport = snapshot;
-  session.updatedAt = Date.now();
-  return snapshot;
+  return buildAgentContextExport(session, locale, llm);
 }

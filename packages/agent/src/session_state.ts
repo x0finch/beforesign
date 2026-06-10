@@ -1,38 +1,10 @@
 import type { ParseInput } from "@beforesign/core";
-import type { AskSession, ChatMessage } from "./types.ts";
-
-export function createSessionId(): string {
-  return crypto.randomUUID();
-}
-
-export function createMessageId(): string {
-  return crypto.randomUUID();
-}
+import type { AskSession } from "./types.ts";
 
 export function createEmptySession(id?: string): AskSession {
-  const now = Date.now();
   return {
-    id: id ?? createSessionId(),
-    messages: [],
-    createdAt: now,
-    updatedAt: now,
+    id: id ?? "",
   };
-}
-
-export function appendMessage(
-  session: AskSession,
-  role: ChatMessage["role"],
-  content: string,
-): ChatMessage {
-  const message: ChatMessage = {
-    id: createMessageId(),
-    role,
-    content,
-    createdAt: Date.now(),
-  };
-  session.messages.push(message);
-  session.updatedAt = Date.now();
-  return message;
 }
 
 export function buildParseInputFromAsk(

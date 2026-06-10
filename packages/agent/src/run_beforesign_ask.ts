@@ -6,10 +6,7 @@ import {
   syncOpenAIConversationId,
 } from "./beforesign_session.ts";
 import { beforeSignSessionInputCallback } from "./session_input_callback.ts";
-import {
-  buildUserTurn,
-  captureAgentContextExport,
-} from "./export_agent_context.ts";
+import { buildUserTurn } from "./export_agent_context.ts";
 import { normalizeAskInput, type NormalizedAskInput } from "./normalize_ask_input.ts";
 import { createRunner } from "./runner_config.ts";
 import type { BeforeSignRunContext, LlmRuntimeConfig } from "./run_context.ts";
@@ -28,13 +25,7 @@ export type RunBeforeSignAskOptions = {
   llm?: LlmRuntimeConfig;
 };
 
-async function* emitSessionEnd(
-  session: AskSession,
-  normalized: NormalizedAskInput,
-  terminal: AskSseEvent,
-): AsyncGenerator<AskSseEvent> {
-  const snapshot = await captureAgentContextExport(session, normalized);
-  yield { type: "context_export", export: snapshot };
+function* emitSessionEnd(terminal: AskSseEvent): Generator<AskSseEvent> {
   yield terminal;
 }
 
@@ -203,15 +194,15 @@ export async function* runBeforeSignAsk(
   }
 
   if (stopAfterDiscovery) {
-    yield* emitSessionEnd(session, normalized, {
+    yield* emitSessionEnd({
       type: "done",
-      sessionId: session.id,
+      conversationId: session.id,
     });
     return;
   }
 
-  yield* emitSessionEnd(session, normalized, {
+  yield* emitSessionEnd({
     type: "done",
-    sessionId: session.id,
+    conversationId: session.id,
   });
 }

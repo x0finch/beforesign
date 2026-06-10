@@ -1,6 +1,5 @@
 declare namespace Cloudflare {
   interface Env {
-    SESSIONS: KVNamespace;
     LLM_API_KEY?: string;
     LLM_BASE_URL?: string;
     LLM_MODEL?: string;

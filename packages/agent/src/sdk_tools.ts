@@ -22,8 +22,7 @@ export const detectInputTool = tool({
     "Detect the InputKind of the parse target (tx hash, calldata, typed data, signed/unsigned tx). Optional when kind is already known.",
   parameters: z.object({}),
   execute: async (_args, runContext) => {
-    const { session, normalized } = ctx(runContext);
-    const result = runDetectInputAction(session, normalized);
+    const result = runDetectInputAction(ctx(runContext));
     return result.message;
   },
 });
@@ -34,8 +33,7 @@ export const buildViewTool = tool({
     "Build the structured review view (json-render spec) for the current parse target. Fetches on-chain data for tx hashes. Returns spec only; does not decode contract Data—call parse_calldata separately when the spec shows non-empty calldata.",
   parameters: z.object({}),
   execute: async (_args, runContext) => {
-    const { session, normalized, deps, emit } = ctx(runContext);
-    const result = await runBuildViewAction(session, normalized, deps, emit);
+    const result = await runBuildViewAction(ctx(runContext));
     return result.message;
   },
 });
@@ -43,17 +41,12 @@ export const buildViewTool = tool({
 export const parseCalldataTool = tool({
   name: "parse_calldata",
   description:
-    "Decode contract calldata from the Data field after build_view. Call when parseResult is txHash/signedTx/unsignedTx and the view spec has non-empty contract Data (0x with more than just 0x). Not needed for plain ETH transfers.",
+    "Decode contract calldata from the Data field after build_view in the same run. Call when the build_view spec shows non-empty contract Data (0x with length > 2, not just 0x). Not needed for plain ETH transfers (data is 0x).",
   parameters: z.object({}),
   execute: async (_args, runContext) => {
-    const { session, normalized, deps, emit } = ctx(runContext);
-    const result = await runParseCalldataAction(session, normalized, deps, emit);
+    const result = await runParseCalldataAction(ctx(runContext));
     return result.message;
   },
 });
 
-export const beforeSignTools = [
-  detectInputTool,
-  buildViewTool,
-  parseCalldataTool,
-];
+export const beforeSignTools = [detectInputTool, buildViewTool, parseCalldataTool];

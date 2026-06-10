@@ -1,7 +1,7 @@
 import { normalizeRawInputToJson } from "@beforesign/detect";
 import * as React from "react";
 import { AppHeader } from "~/components/layout/app_header.tsx";
-import { useAsk } from "~/hooks/use_ask.ts";
+import type { useAsk } from "~/hooks/use_ask.ts";
 import type { Locale } from "~/lib/i18n.ts";
 import { t } from "~/lib/i18n.ts";
 import { AiComposerBottom } from "./ai_composer_bottom.tsx";
@@ -10,25 +10,40 @@ import { AiDiscoveryCard } from "./ai_discovery_card.tsx";
 import { AiEmptyState } from "./ai_empty_state.tsx";
 import { AiMessageList } from "./ai_message_list.tsx";
 
+export type UseAskReturn = ReturnType<typeof useAsk>;
+
 export function AiPage({
   locale,
   onLocaleChange,
   initialRaw,
+  ask,
+  onNewChat,
 }: {
   locale: Locale;
   onLocaleChange: (l: Locale) => void;
   initialRaw?: string;
+  ask: UseAskReturn;
+  onNewChat: () => void;
 }) {
   const [raw, setRaw] = React.useState(initialRaw ?? "");
   const [selectedHit, setSelectedHit] = React.useState<string | undefined>();
   const [followUp, setFollowUp] = React.useState("");
   const listRef = React.useRef<HTMLDivElement>(null);
 
-  const { loading, error, messages, needsDiscovery, ask, clear, exportContext, sessionId } =
-    useAsk();
+  const {
+    loading,
+    error,
+    isHydrating,
+    messages,
+    needsDiscovery,
+    ask: sendAsk,
+    clear,
+    exportContext,
+    conversationId: activeConversationId,
+  } = ask;
   const [exportError, setExportError] = React.useState<string | null>(null);
 
-  const active = messages.length > 0;
+  const active = messages.length > 0 || isHydrating;
 
   const handleFirstAsk = () => {
     const trimmed = raw.trim();
@@ -37,7 +52,7 @@ export function AiPage({
     if (jsonified && jsonified !== raw) {
       setRaw(jsonified);
     }
-    void ask({
+    void sendAsk({
       message: trimmed,
       raw: effectiveRaw,
       locale,
@@ -48,7 +63,7 @@ export function AiPage({
     const text = followUp.trim();
     if (!text) return;
     setFollowUp("");
-    void ask({
+    void sendAsk({
       message: text,
       selectedDiscoveryHit: selectedHit,
       locale,
@@ -56,7 +71,7 @@ export function AiPage({
   };
 
   const handleDiscoveryContinue = () => {
-    void ask({
+    void sendAsk({
       message:
         locale === "zh"
           ? `选择链：${selectedHit ?? ""}`
@@ -74,6 +89,14 @@ export function AiPage({
     });
   };
 
+  const handleNewChat = () => {
+    clear();
+    setFollowUp("");
+    setSelectedHit(undefined);
+    setExportError(null);
+    onNewChat();
+  };
+
   return (
     <div className="flex flex-col min-h-[calc(100dvh-6rem)]">
       <AppHeader
@@ -82,7 +105,7 @@ export function AiPage({
         trailing={
           active ? (
             <div className="flex items-center gap-2">
-              {sessionId ? (
+              {activeConversationId ? (
                 <button
                   type="button"
                   className="btn-ghost text-sm"
@@ -94,12 +117,7 @@ export function AiPage({
               <button
                 type="button"
                 className="btn-ghost text-sm"
-                onClick={() => {
-                  clear();
-                  setFollowUp("");
-                  setSelectedHit(undefined);
-                  setExportError(null);
-                }}
+                onClick={handleNewChat}
               >
                 {t(locale, "aiNewChat")}
               </button>
@@ -107,6 +125,13 @@ export function AiPage({
           ) : null
         }
       />
+
+      {isHydrating && messages.length === 0 && (
+        <div className="mt-4 space-y-3 animate-pulse" aria-busy="true">
+          <div className="h-10 rounded-lg bg-muted max-w-[85%]" />
+          <div className="h-24 rounded-lg bg-muted max-w-full" />
+        </div>
+      )}
 
       {!active && (
         <div className="space-y-4 mt-4">

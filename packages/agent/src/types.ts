@@ -1,13 +1,12 @@
-import type { ParseInput, ParseResult, ViewSpec } from "@beforesign/core";
+import type { ParseResult, ViewSpec } from "@beforesign/core";
 import type { DiscoveryResult } from "@beforesign/core";
 import type { Session } from "@openai/agents";
 import type { AgentContextExport } from "./export_agent_context.ts";
-import type { NormalizedAskInput } from "./normalize_ask_input.ts";
 
 export type AskLocale = "zh" | "en";
 
 export type AskInput = {
-  sessionId?: string;
+  conversationId?: string;
   message: string;
   raw?: string;
   chainId?: number;
@@ -17,26 +16,10 @@ export type AskInput = {
   locale: AskLocale;
 };
 
-export type ChatMessage = {
-  id: string;
-  role: "user" | "assistant" | "status";
-  content: string;
-  spec?: ViewSpec;
-  createdAt: number;
-};
-
 export type AskSession = {
+  /** OpenAI Conversations id (`conv_*`); empty until first turn syncs. */
   id: string;
-  messages: ChatMessage[];
-  parseResult?: ParseResult;
-  lastParseInput?: ParseInput;
   agentMemory?: Session;
-  /** OpenAI Conversations API id (`conv_*`), distinct from client `session.id` UUID. */
-  openaiConversationId?: string;
-  lastNormalizedInput?: NormalizedAskInput;
-  lastContextExport?: AgentContextExport;
-  createdAt: number;
-  updatedAt: number;
 };
 
 export type TimelineEntry =
@@ -57,7 +40,7 @@ export type AskSseEvent =
   | { type: "assistant_text"; content: string }
   | { type: "assistant_spec"; spec: ViewSpec }
   | { type: "needs_input"; discovery: DiscoveryResult }
-  | { type: "done"; sessionId: string }
+  | { type: "done"; conversationId: string }
   | { type: "context_export"; export: AgentContextExport }
   | { type: "error"; message: string };
 

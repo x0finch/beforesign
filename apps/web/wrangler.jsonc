@@ -10,12 +10,5 @@
   "vars": {
     "LLM_BASE_URL": "https://api.openai.com/v1",
     "LLM_MODEL": "gpt-4o-mini",
-  },
-	// Create once: pnpm wrangler kv namespace create SESSIONS
-	"kv_namespaces": [
-		{
-			"binding": "SESSIONS",
-			"id": "bf8ab1d3b3a545c38d5e09056eb78075"
-		}
-	]
+  }
 }

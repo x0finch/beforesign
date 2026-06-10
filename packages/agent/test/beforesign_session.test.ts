@@ -27,8 +27,7 @@ describe("getAgentMemorySession", () => {
   });
 
   it("reuses stored conv id on follow-up turns", () => {
-    const session = createEmptySession();
-    session.openaiConversationId = "conv_follow_up";
+    const session = createEmptySession("conv_follow_up");
 
     const memory = getAgentMemorySession(session, {
       apiKey: "test-key",

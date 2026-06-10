@@ -17,9 +17,7 @@ export function getAgentMemorySession(
 
   if (!session.agentMemory) {
     session.agentMemory = new OpenAIConversationsSession({
-      ...(isOpenAIConversationId(session.openaiConversationId)
-        ? { conversationId: session.openaiConversationId }
-        : {}),
+      ...(isOpenAIConversationId(session.id) ? { conversationId: session.id } : {}),
       apiKey: llm.apiKey,
       baseURL: llm.baseUrl,
     });
@@ -27,7 +25,7 @@ export function getAgentMemorySession(
   return session.agentMemory;
 }
 
-/** Persist OpenAI `conv_*` id on AskSession for follow-up turns and session rehydration. */
+/** Write OpenAI `conv_*` id onto AskSession for client routing. */
 export async function syncOpenAIConversationId(
   session: AskSession,
   memorySession: Session,
@@ -35,6 +33,6 @@ export async function syncOpenAIConversationId(
   if (!(memorySession instanceof OpenAIConversationsSession)) return;
   const conversationId = await memorySession.getSessionId();
   if (isOpenAIConversationId(conversationId)) {
-    session.openaiConversationId = conversationId;
+    session.id = conversationId;
   }
 }

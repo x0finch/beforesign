@@ -1,9 +1,10 @@
-import { assembleParseResult, type AiPipelineDeps } from "@beforesign/ai-pipeline";
-import type { ParseResult } from "@beforesign/core";
+import { assembleParseResult } from "@beforesign/ai-pipeline";
+import type { ParseInput, ParseResult } from "@beforesign/core";
 import { detectInputType } from "@beforesign/detect";
 import type { NormalizedAskInput } from "./normalize_ask_input.ts";
+import type { BeforeSignRunContext } from "./run_context.ts";
 import { buildParseInputFromAsk } from "./session_state.ts";
-import type { AskSession, AskSseEvent } from "./types.ts";
+import type { AskSseEvent } from "./types.ts";
 import { extractCalldataSource } from "./tools/extract_calldata.ts";
 
 function specToolMessage(result: ParseResult): string {
@@ -20,10 +21,21 @@ export type ToolActionResult = {
   ok: boolean;
   message: string;
   summary?: string;
-  discovery?: NonNullable<
-    NonNullable<AskSession["parseResult"]>["view"]
-  >["discovery"];
+  discovery?: NonNullable<NonNullable<ParseResult["view"]>["discovery"]>;
 };
+
+function buildParseInputFromNormalized(normalized: NormalizedAskInput): ParseInput | undefined {
+  const raw = normalized.raw?.trim();
+  if (!raw) return undefined;
+  return buildParseInputFromAsk({
+    raw,
+    chainId: normalized.chainId,
+    abi: normalized.abi,
+    signerAddress: normalized.signerAddress,
+    selectedDiscoveryHit: normalized.selectedDiscoveryHit,
+    locale: normalized.locale,
+  });
+}
 
 function askInputFromNormalized(normalized: NormalizedAskInput) {
   return {
@@ -37,63 +49,10 @@ function askInputFromNormalized(normalized: NormalizedAskInput) {
   };
 }
 
-function shouldRebuildParse(normalized: NormalizedAskInput, session: AskSession): boolean {
-  const raw = normalized.raw?.trim();
-  if (raw) {
-    const previous = session.lastParseInput?.raw?.trim();
-    if (!previous || raw !== previous) return true;
-  }
-  if (normalized.selectedDiscoveryHit && session.lastParseInput) return true;
-  if (normalized.chainId !== undefined && session.lastParseInput) return true;
-  return false;
-}
-
-function ensureParseInput(session: AskSession, normalized: NormalizedAskInput): void {
-  const raw = normalized.raw?.trim();
-  const previousRaw = session.lastParseInput?.raw?.trim();
-
-  if (raw && (!previousRaw || raw !== previousRaw)) {
-    session.lastParseInput = buildParseInputFromAsk({
-      raw,
-      chainId: normalized.chainId ?? session.lastParseInput?.chainId,
-      abi: normalized.abi ?? session.lastParseInput?.abi,
-      signerAddress: normalized.signerAddress ?? session.lastParseInput?.signerAddress,
-      selectedDiscoveryHit:
-        normalized.selectedDiscoveryHit ?? session.lastParseInput?.selectedDiscoveryHit,
-      locale: normalized.locale,
-    });
-    return;
-  }
-
-  if (session.lastParseInput) {
-    if (normalized.selectedDiscoveryHit || normalized.chainId !== undefined) {
-      session.lastParseInput = {
-        ...session.lastParseInput,
-        ...(normalized.selectedDiscoveryHit
-          ? { selectedDiscoveryHit: normalized.selectedDiscoveryHit }
-          : {}),
-        ...(normalized.chainId !== undefined ? { chainId: normalized.chainId } : {}),
-      };
-    }
-    return;
-  }
-
-  if (!raw) return;
-
-  session.lastParseInput = buildParseInputFromAsk({
-    raw,
-    chainId: normalized.chainId,
-    abi: normalized.abi,
-    signerAddress: normalized.signerAddress,
-    selectedDiscoveryHit: normalized.selectedDiscoveryHit,
-    locale: normalized.locale,
-  });
-}
-
 export function runDetectInputAction(
-  session: AskSession,
-  normalized: NormalizedAskInput,
+  runContext: BeforeSignRunContext,
 ): ToolActionResult {
+  const { normalized } = runContext;
   const raw = normalized.raw?.trim();
   if (!raw) {
     return {
@@ -106,7 +65,6 @@ export function runDetectInputAction(
   }
 
   if (normalized.detectedKind !== "unknown") {
-    ensureParseInput(session, normalized);
     return {
       ok: true,
       message: JSON.stringify({
@@ -130,16 +88,6 @@ export function runDetectInputAction(
     };
   }
 
-  session.lastParseInput = buildParseInputFromAsk({
-    raw,
-    chainId: normalized.chainId ?? session.lastParseInput?.chainId,
-    abi: normalized.abi ?? session.lastParseInput?.abi,
-    signerAddress: normalized.signerAddress ?? session.lastParseInput?.signerAddress,
-    selectedDiscoveryHit:
-      normalized.selectedDiscoveryHit ?? session.lastParseInput?.selectedDiscoveryHit,
-    locale: normalized.locale,
-  });
-
   return {
     ok: true,
     message: JSON.stringify({ kind: detected.kind }),
@@ -148,14 +96,12 @@ export function runDetectInputAction(
 }
 
 export async function runBuildViewAction(
-  session: AskSession,
-  normalized: NormalizedAskInput,
-  deps: AiPipelineDeps,
-  emit: (event: AskSseEvent) => void,
+  runContext: BeforeSignRunContext,
 ): Promise<ToolActionResult> {
-  ensureParseInput(session, normalized);
+  const { normalized, deps, emit } = runContext;
+  const parseInput = buildParseInputFromNormalized(normalized);
 
-  if (!session.lastParseInput) {
+  if (!parseInput) {
     return {
       ok: false,
       message:
@@ -165,18 +111,9 @@ export async function runBuildViewAction(
     };
   }
 
-  const needsRebuild = shouldRebuildParse(normalized, session);
-  if (!needsRebuild && session.parseResult) {
-    return {
-      ok: true,
-      message: specToolMessage(session.parseResult),
-      summary: titleFromResult(session.parseResult),
-    };
-  }
-
   try {
-    const result = await assembleParseResult(session.lastParseInput, deps);
-    session.parseResult = result;
+    const result = await assembleParseResult(parseInput, deps);
+    runContext.latestParseResult = result;
     emit({ type: "parse_result", result });
 
     const title = result.view?.title ?? result.summary;
@@ -203,24 +140,21 @@ export async function runBuildViewAction(
 }
 
 export async function runParseCalldataAction(
-  session: AskSession,
-  normalized: NormalizedAskInput,
-  deps: AiPipelineDeps,
-  emit: (event: AskSseEvent) => void,
+  runContext: BeforeSignRunContext,
 ): Promise<ToolActionResult> {
-  if (!session.parseResult) {
+  const { normalized, deps, emit, latestParseResult } = runContext;
+
+  if (!latestParseResult) {
     return {
       ok: false,
       message:
         normalized.locale === "zh"
-          ? "尚无 parseResult。请先 build_view 解析交易。"
-          : "No parseResult yet. Run build_view on a transaction first.",
+          ? "尚无 build_view 结果。请先 build_view 解析交易。"
+          : "No build_view result yet. Run build_view on a transaction first.",
     };
   }
 
-  const { calldata, contractAddress, chainId } = extractCalldataSource(
-    session.parseResult,
-  );
+  const { calldata, contractAddress, chainId } = extractCalldataSource(latestParseResult);
 
   if (!calldata) {
     return {
@@ -232,17 +166,17 @@ export async function runParseCalldataAction(
     };
   }
 
-  session.lastParseInput = buildParseInputFromAsk({
+  const parseInput = buildParseInputFromAsk({
     raw: calldata,
-    chainId: chainId ?? session.lastParseInput?.chainId,
-    abi: session.lastParseInput?.abi,
-    signerAddress: contractAddress ?? session.lastParseInput?.signerAddress,
+    chainId: chainId ?? normalized.chainId,
+    abi: normalized.abi,
+    signerAddress: contractAddress ?? normalized.signerAddress,
     locale: normalized.locale,
   });
 
   try {
-    const result = await assembleParseResult(session.lastParseInput, deps);
-    session.parseResult = result;
+    const result = await assembleParseResult(parseInput, deps);
+    runContext.latestParseResult = result;
     emit({ type: "parse_result", result });
     const title = result.view?.title ?? result.summary;
 

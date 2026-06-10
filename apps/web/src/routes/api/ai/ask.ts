@@ -3,7 +3,7 @@ import { z } from "zod";
 import { encodeSseEvent, iterateAskEvents } from "~/server/ai/run_ask_stream.ts";
 
 const askBodySchema = z.object({
-  sessionId: z.string().optional(),
+  conversationId: z.string().optional(),
   message: z.string().min(1),
   raw: z.string().optional(),
   chainId: z.number().int().positive().optional(),

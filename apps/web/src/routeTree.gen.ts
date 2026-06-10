@@ -9,13 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChatRouteImport } from './routes/_chat'
+import { Route as ChatIndexRouteImport } from './routes/_chat/index'
+import { Route as ApiAiConversationRouteImport } from './routes/api/ai/conversation'
 import { Route as ApiAiContextRouteImport } from './routes/api/ai/context'
 import { Route as ApiAiAskRouteImport } from './routes/api/ai/ask'
+import { Route as ChatCConversationIdRouteImport } from './routes/_chat/c/$conversationId'
 
-const IndexRoute = IndexRouteImport.update({
+const ChatRoute = ChatRouteImport.update({
+  id: '/_chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatIndexRoute = ChatIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => ChatRoute,
+} as any)
+const ApiAiConversationRoute = ApiAiConversationRouteImport.update({
+  id: '/api/ai/conversation',
+  path: '/api/ai/conversation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiContextRoute = ApiAiContextRouteImport.update({
@@ -28,44 +40,88 @@ const ApiAiAskRoute = ApiAiAskRouteImport.update({
   path: '/api/ai/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatCConversationIdRoute = ChatCConversationIdRouteImport.update({
+  id: '/c/$conversationId',
+  path: '/c/$conversationId',
+  getParentRoute: () => ChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof ChatIndexRoute
+  '/c/$conversationId': typeof ChatCConversationIdRoute
   '/api/ai/ask': typeof ApiAiAskRoute
   '/api/ai/context': typeof ApiAiContextRoute
+  '/api/ai/conversation': typeof ApiAiConversationRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof ChatIndexRoute
+  '/c/$conversationId': typeof ChatCConversationIdRoute
   '/api/ai/ask': typeof ApiAiAskRoute
   '/api/ai/context': typeof ApiAiContextRoute
+  '/api/ai/conversation': typeof ApiAiConversationRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_chat': typeof ChatRouteWithChildren
+  '/_chat/': typeof ChatIndexRoute
+  '/_chat/c/$conversationId': typeof ChatCConversationIdRoute
   '/api/ai/ask': typeof ApiAiAskRoute
   '/api/ai/context': typeof ApiAiContextRoute
+  '/api/ai/conversation': typeof ApiAiConversationRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/ai/ask' | '/api/ai/context'
+  fullPaths:
+    | '/'
+    | '/c/$conversationId'
+    | '/api/ai/ask'
+    | '/api/ai/context'
+    | '/api/ai/conversation'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/ai/ask' | '/api/ai/context'
-  id: '__root__' | '/' | '/api/ai/ask' | '/api/ai/context'
+  to:
+    | '/'
+    | '/c/$conversationId'
+    | '/api/ai/ask'
+    | '/api/ai/context'
+    | '/api/ai/conversation'
+  id:
+    | '__root__'
+    | '/_chat'
+    | '/_chat/'
+    | '/_chat/c/$conversationId'
+    | '/api/ai/ask'
+    | '/api/ai/context'
+    | '/api/ai/conversation'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  ChatRoute: typeof ChatRouteWithChildren
   ApiAiAskRoute: typeof ApiAiAskRoute
   ApiAiContextRoute: typeof ApiAiContextRoute
+  ApiAiConversationRoute: typeof ApiAiConversationRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_chat': {
+      id: '/_chat'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_chat/': {
+      id: '/_chat/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof ChatIndexRouteImport
+      parentRoute: typeof ChatRoute
+    }
+    '/api/ai/conversation': {
+      id: '/api/ai/conversation'
+      path: '/api/ai/conversation'
+      fullPath: '/api/ai/conversation'
+      preLoaderRoute: typeof ApiAiConversationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/context': {
@@ -82,13 +138,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiAskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_chat/c/$conversationId': {
+      id: '/_chat/c/$conversationId'
+      path: '/c/$conversationId'
+      fullPath: '/c/$conversationId'
+      preLoaderRoute: typeof ChatCConversationIdRouteImport
+      parentRoute: typeof ChatRoute
+    }
   }
 }
 
+interface ChatRouteChildren {
+  ChatIndexRoute: typeof ChatIndexRoute
+  ChatCConversationIdRoute: typeof ChatCConversationIdRoute
+}
+
+const ChatRouteChildren: ChatRouteChildren = {
+  ChatIndexRoute: ChatIndexRoute,
+  ChatCConversationIdRoute: ChatCConversationIdRoute,
+}
+
+const ChatRouteWithChildren = ChatRoute._addFileChildren(ChatRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  ChatRoute: ChatRouteWithChildren,
   ApiAiAskRoute: ApiAiAskRoute,
   ApiAiContextRoute: ApiAiContextRoute,
+  ApiAiConversationRoute: ApiAiConversationRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

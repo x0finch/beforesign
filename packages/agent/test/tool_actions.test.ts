@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AiPipelineDeps } from "@beforesign/ai-pipeline";
 import { normalizeAskInput } from "../src/normalize_ask_input.ts";
+import type { BeforeSignRunContext } from "../src/run_context.ts";
 import { createEmptySession } from "../src/session_state.ts";
 import { runBuildViewAction, runParseCalldataAction } from "../src/tool_actions.ts";
+import type { AskSseEvent } from "../src/types.ts";
 
 const FIXTURE_TX_HASH =
   "0x945840884f6f041527cb5063e835152e9e349053b07b2c21b2eb52d48933a852";
@@ -64,50 +66,61 @@ function mockDeps(): AiPipelineDeps {
   };
 }
 
+function createRunContext(
+  normalized: ReturnType<typeof normalizeAskInput>,
+  deps: AiPipelineDeps,
+) {
+  const events: AskSseEvent[] = [];
+  const runContext: BeforeSignRunContext = {
+    session: createEmptySession(),
+    deps,
+    locale: normalized.locale,
+    normalized,
+    emit: (event) => {
+      events.push(event);
+    },
+  };
+  return { runContext, events };
+}
+
 describe("runBuildViewAction", () => {
   it("returns transaction view spec only without auto-drilling calldata", async () => {
-    const session = createEmptySession();
-    const normalized = normalizeAskInput({
-      message: FIXTURE_TX_HASH,
-      raw: FIXTURE_TX_HASH,
-      locale: "en",
-    });
-    const events: Array<{ type: string }> = [];
-
-    const result = await runBuildViewAction(session, normalized, mockDeps(), (event) => {
-      events.push(event);
-    });
-
-    expect(result.ok).toBe(true);
-    const payload = JSON.parse(result.message);
-    expect(payload.spec).toBeDefined();
-    expect(payload.spec).toEqual(session.parseResult?.view?.spec);
-    expect(session.parseResult?.kind).toBe("txHash");
-    expect(events.filter((event) => event.type === "parse_result").length).toBe(1);
-  });
-});
-
-describe("runParseCalldataAction", () => {
-  it("decodes calldata after build_view when called separately", async () => {
-    const session = createEmptySession();
     const normalized = normalizeAskInput({
       message: FIXTURE_TX_HASH,
       raw: FIXTURE_TX_HASH,
       locale: "en",
     });
     const deps = mockDeps();
-    const events: Array<{ type: string }> = [];
-    const emit = (event: { type: string }) => {
-      events.push(event);
-    };
+    const { runContext, events } = createRunContext(normalized, deps);
 
-    await runBuildViewAction(session, normalized, deps, emit);
-    const result = await runParseCalldataAction(session, normalized, deps, emit);
+    const result = await runBuildViewAction(runContext);
 
     expect(result.ok).toBe(true);
-    expect(session.parseResult?.kind).toBe("calldata");
+    const payload = JSON.parse(result.message);
+    expect(payload.spec).toBeDefined();
+    expect(payload.spec).toEqual(runContext.latestParseResult?.view?.spec);
+    expect(runContext.latestParseResult?.kind).toBe("txHash");
+    expect(events.filter((event) => event.type === "parse_result").length).toBe(1);
+  });
+});
+
+describe("runParseCalldataAction", () => {
+  it("decodes calldata after build_view when called separately", async () => {
+    const normalized = normalizeAskInput({
+      message: FIXTURE_TX_HASH,
+      raw: FIXTURE_TX_HASH,
+      locale: "en",
+    });
+    const deps = mockDeps();
+    const { runContext, events } = createRunContext(normalized, deps);
+
+    await runBuildViewAction(runContext);
+    const result = await runParseCalldataAction(runContext);
+
+    expect(result.ok).toBe(true);
+    expect(runContext.latestParseResult?.kind).toBe("calldata");
     expect(events.filter((event) => event.type === "parse_result").length).toBe(2);
     const payload = JSON.parse(result.message);
-    expect(payload.spec).toEqual(session.parseResult?.view?.spec);
+    expect(payload.spec).toEqual(runContext.latestParseResult?.view?.spec);
   });
 });

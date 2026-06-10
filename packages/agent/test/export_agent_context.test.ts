@@ -105,30 +105,16 @@ describe("flattenMemoryItems", () => {
   });
 });
 
+const testLlm = { apiKey: "test-key", model: "gpt-4o-mini" };
+
 describe("buildAgentContextExport", () => {
   it("exports conversation with system prompt only", async () => {
-    const session = createEmptySession();
-    session.parseResult = {
-      kind: "txHash",
-      summary: "Ethereum transaction",
-      warnings: [],
-      view: {
-        title: "Transaction",
-        summary: "Ethereum transaction",
-        spec: { root: "root", elements: {} },
-        chainId: 1,
-      },
-    };
+    const session = createEmptySession("conv_test");
+    session.agentMemory = { getItems: async () => [] } as never;
 
-    const normalized = normalizeAskInput({
-      message: "What is this tx?",
-      raw: TX_HASH,
-      locale: "en",
-    });
+    const snapshot = await buildAgentContextExport(session, "en", testLlm);
 
-    const snapshot = await buildAgentContextExport(session, normalized);
-
-    expect(snapshot.sessionId).toBe(session.id);
+    expect(snapshot.conversationId).toBe("conv_test");
     expect(snapshot.locale).toBe("en");
     expect(snapshot.conversation[0]).toEqual({
       role: "system",
@@ -143,14 +129,10 @@ describe("buildAgentContextExport", () => {
   });
 
   it("prepends system before memory conversation", async () => {
-    const session = createEmptySession();
-    const normalized = normalizeAskInput({
-      message: TX_HASH,
-      raw: TX_HASH,
-      locale: "zh",
-    });
+    const session = createEmptySession("conv_zh");
+    session.agentMemory = { getItems: async () => [] } as never;
 
-    const snapshot = await buildAgentContextExport(session, normalized);
+    const snapshot = await buildAgentContextExport(session, "zh", testLlm);
 
     expect(snapshot.conversation[0]?.role).toBe("system");
     expect(snapshot).not.toHaveProperty("turn");
